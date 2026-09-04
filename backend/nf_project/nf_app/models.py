@@ -9,3 +9,14 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.username
+    
+class Workspaces(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workspaces')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_archived = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.name
