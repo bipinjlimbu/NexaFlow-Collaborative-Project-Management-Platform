@@ -61,3 +61,27 @@ def get_tokens_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    errors = {}
+    if request.method == 'POST':
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        if not username:
+            errors['username'] = 'This field is required.'
+        if not password:
+            errors['password'] = 'This field is required.'
+            
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            tokens = get_tokens_for_user(user)
+            return Response({'message': 'Login successful.', 'tokens': tokens}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid username or password.'}, status=status.HTTP_401_UNAUTHORIZED)
