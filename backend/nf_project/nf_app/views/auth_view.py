@@ -15,11 +15,11 @@ def register_view(request):
         email = request.data.get('email')
         password = request.data.get('password')
         confirm_password = request.data.get('confirm_password')
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-        phone_number = request.data.get('phone_number')
-        address = request.data.get('address')
-        profile_picture = request.data.get('profile_picture')
+        first_name = request.data.get('first_name','')
+        last_name = request.data.get('last_name','')
+        phone_number = request.data.get('phone_number','')
+        address = request.data.get('address','')
+        profile_picture = request.data.get('profile_picture','')
         
         if not username:
             errors['username'] = 'This field is required.'
