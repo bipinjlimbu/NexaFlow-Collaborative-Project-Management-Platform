@@ -85,3 +85,15 @@ def login_view(request):
             return Response({'message': 'Login successful.', 'tokens': tokens}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid username or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def logout_view(request):
+    if request.method == 'POST':
+        try:
+            refresh_token = request.data.get('refresh')
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({'message': 'Logout successful.'}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({'error': 'Invalid token or token has already been blacklisted.'}, status=status.HTTP_400_BAD_REQUEST)
