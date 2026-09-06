@@ -5,28 +5,104 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/services/authService";
 
+function FieldError({ error }: { error?: string | string[] }) {
+    if (!error) return null;
+    const message = Array.isArray(error) ? error[0] : error;
+    return <p className="text-xs text-rose-400 mt-1">{message}</p>;
+}
+
 export default function LoginPage() {
     const router = useRouter();
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string | string[]>>({});
+    const [loading, setLoading] = useState(false);
+
+    function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setUsername(e.target.value);
+        if (fieldErrors.username) {
+            setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next.username;
+                return next;
+            });
+        }
+    }
+
+    function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setPassword(e.target.value);
+        if (fieldErrors.password) {
+            setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next.password;
+                return next;
+            });
+        }
+    }
+
+    function parseAndSetErrors(errPayload: any) {
+        console.log("Processing Backend Error Payload:", errPayload);
+
+        // Unpack nested errors if passed as { errors: { ... } } or { data: { ... } }
+        const payload = errPayload?.errors || errPayload?.data || errPayload;
+
+        if (typeof payload === "string") {
+            setError(payload);
+            return;
+        }
+
+        if (typeof payload === "object" && payload !== null) {
+            if (payload.detail) {
+                setError(Array.isArray(payload.detail) ? payload.detail[0] : payload.detail);
+            } else if (payload.error) {
+                setError(Array.isArray(payload.error) ? payload.error[0] : payload.error);
+            } else if (payload.non_field_errors) {
+                setError(Array.isArray(payload.non_field_errors) ? payload.non_field_errors[0] : payload.non_field_errors);
+            } else {
+                // Assigns keys directly (e.g. { username: [...], password: [...] })
+                setFieldErrors(payload);
+            }
+        } else {
+            setError("Login failed. Please try again.");
+        }
+    }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setError("");
+        setError(null);
+        setFieldErrors({});
+        setLoading(true);
 
         try {
             const data = await login(username, password);
+            console.log("Login Response Raw Data:", data);
 
-            localStorage.setItem("access", data.tokens.access);
-            localStorage.setItem("refresh", data.tokens.refresh);
+            // Handle cases where apiFetch resolves 400/401 responses instead of throwing
+            if (data?.errors || data?.detail || data?.error || data?.non_field_errors) {
+                parseAndSetErrors(data);
+                return;
+            }
+
+            const access = data?.tokens?.access || data?.access;
+            const refresh = data?.tokens?.refresh || data?.refresh;
+
+            if (!access) {
+                parseAndSetErrors(data);
+                return;
+            }
+
+            localStorage.setItem("access", access);
+            if (refresh) localStorage.setItem("refresh", refresh);
 
             window.dispatchEvent(new Event("auth-change"));
-
             router.push("/");
-        } catch (error) {
-            setError(error instanceof Error ? error.message : "Login failed");
+        } catch (err: any) {
+            console.log("Login Catch Triggered:", err);
+            parseAndSetErrors(err);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -51,33 +127,40 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                />
-
                 {error && (
                     <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400">
                         {error}
                     </div>
                 )}
 
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={handleUsernameChange}
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <FieldError error={fieldErrors.username} />
+                </div>
+
+                <div>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <FieldError error={fieldErrors.password} />
+                </div>
+
                 <button
                     type="submit"
-                    className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98]"
+                    disabled={loading}
+                    className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Sign In
+                    {loading ? "Signing in..." : "Sign In"}
                 </button>
 
                 <p className="text-center text-xs text-slate-400 pt-2">
