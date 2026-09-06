@@ -42,33 +42,6 @@ export default function LoginPage() {
         }
     }
 
-    function parseAndSetErrors(errPayload: any) {
-        console.log("Processing Backend Error Payload:", errPayload);
-
-        // Unpack nested errors if passed as { errors: { ... } } or { data: { ... } }
-        const payload = errPayload?.errors || errPayload?.data || errPayload;
-
-        if (typeof payload === "string") {
-            setError(payload);
-            return;
-        }
-
-        if (typeof payload === "object" && payload !== null) {
-            if (payload.detail) {
-                setError(Array.isArray(payload.detail) ? payload.detail[0] : payload.detail);
-            } else if (payload.error) {
-                setError(Array.isArray(payload.error) ? payload.error[0] : payload.error);
-            } else if (payload.non_field_errors) {
-                setError(Array.isArray(payload.non_field_errors) ? payload.non_field_errors[0] : payload.non_field_errors);
-            } else {
-                // Assigns keys directly (e.g. { username: [...], password: [...] })
-                setFieldErrors(payload);
-            }
-        } else {
-            setError("Login failed. Please try again.");
-        }
-    }
-
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
@@ -77,30 +50,34 @@ export default function LoginPage() {
 
         try {
             const data = await login(username, password);
-            console.log("Login Response Raw Data:", data);
-
-            // Handle cases where apiFetch resolves 400/401 responses instead of throwing
-            if (data?.errors || data?.detail || data?.error || data?.non_field_errors) {
-                parseAndSetErrors(data);
-                return;
-            }
 
             const access = data?.tokens?.access || data?.access;
             const refresh = data?.tokens?.refresh || data?.refresh;
 
-            if (!access) {
-                parseAndSetErrors(data);
-                return;
-            }
-
-            localStorage.setItem("access", access);
+            if (access) localStorage.setItem("access", access);
             if (refresh) localStorage.setItem("refresh", refresh);
 
             window.dispatchEvent(new Event("auth-change"));
+
             router.push("/");
         } catch (err: any) {
-            console.log("Login Catch Triggered:", err);
-            parseAndSetErrors(err);
+            if (typeof err === "object" && err !== null) {
+                const payload = err.errors || err;
+
+                if (payload.detail) {
+                    setError(typeof payload.detail === "string" ? payload.detail : payload.detail[0]);
+                } else if (payload.error) {
+                    setError(typeof payload.error === "string" ? payload.error : payload.error[0]);
+                } else if (payload.non_field_errors) {
+                    setError(Array.isArray(payload.non_field_errors) ? payload.non_field_errors[0] : payload.non_field_errors);
+                } else {
+                    setFieldErrors(payload);
+                }
+            } else if (typeof err === "string") {
+                setError(err);
+            } else {
+                setError("Login failed. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
