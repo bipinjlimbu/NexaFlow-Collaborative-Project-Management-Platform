@@ -8,39 +8,49 @@ export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const access = localStorage.getItem("access");
-        setIsAuthenticated(!!access);
+        function checkAuth() {
+            const access = localStorage.getItem("access");
+            setIsAuthenticated(!!access);
+        }
+
+        checkAuth();
+
+        window.addEventListener("auth-change", checkAuth);
+
+        return () => {
+            window.removeEventListener("auth-change", checkAuth);
+        };
     }, []);
 
     return (
-        <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/80 px-6 py-4 backdrop-blur-md">
-            <div className="mx-auto flex max-w-7xl items-center justify-between">
-                <Link href="/" className="group flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white shadow-lg shadow-indigo-600/30 transition-transform group-hover:scale-105">
+        <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-6 py-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-3 group">
+                    <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform">
                         N
                     </div>
 
-                    <span className="text-xl font-bold tracking-tight text-white">
+                    <span className="font-bold text-xl tracking-tight text-white">
                         NexaFlow
                     </span>
                 </Link>
 
                 {isAuthenticated ? (
                     <>
-                        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-400 md:flex">
-                            <Link href="/dashboard" className="transition-colors hover:text-white">
+                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+                            <Link href="/dashboard" className="hover:text-white transition-colors">
                                 Dashboard
                             </Link>
 
-                            <Link href="/workspaces" className="transition-colors hover:text-white">
+                            <Link href="/workspaces" className="hover:text-white transition-colors">
                                 Workspaces
                             </Link>
 
-                            <Link href="/projects" className="transition-colors hover:text-white">
+                            <Link href="/projects" className="hover:text-white transition-colors">
                                 Projects
                             </Link>
 
-                            <Link href="/tasks" className="transition-colors hover:text-white">
+                            <Link href="/tasks" className="hover:text-white transition-colors">
                                 Tasks
                             </Link>
                         </nav>
@@ -48,11 +58,11 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             <button
                                 type="button"
-                                className="relative rounded-lg border border-slate-800 bg-slate-900 p-2 text-slate-400 hover:text-white"
+                                className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors relative"
                                 aria-label="Notifications"
                             >
                                 <svg
-                                    className="h-5 w-5"
+                                    className="w-5 h-5"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -65,15 +75,15 @@ export default function Navbar() {
                                     />
                                 </svg>
 
-                                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-500" />
+                                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500" />
                             </button>
 
-                            <div className="hidden items-center gap-3 border-l border-slate-800 pl-2 sm:flex">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-medium text-white">
+                            <div className="flex items-center gap-3 pl-2 border-l border-slate-800">
+                                <div className="h-8 w-8 rounded-full bg-indigo-600 text-white font-medium text-xs flex items-center justify-center">
                                     BP
                                 </div>
 
-                                <div>
+                                <div className="hidden sm:block text-left">
                                     <div className="text-xs font-semibold text-slate-200">
                                         Bipin
                                     </div>
@@ -84,23 +94,21 @@ export default function Navbar() {
                                 </div>
                             </div>
 
-                            <LogoutButton
-                                onLogout={() => setIsAuthenticated(false)}
-                            />
+                            <LogoutButton />
                         </div>
                     </>
                 ) : (
                     <>
-                        <nav className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
-                            <Link href="/#features" className="transition-colors hover:text-white">
+                        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                            <Link href="/#features" className="hover:text-white transition-colors">
                                 Features
                             </Link>
 
-                            <Link href="/#hierarchy" className="transition-colors hover:text-white">
+                            <Link href="/#hierarchy" className="hover:text-white transition-colors">
                                 Structure
                             </Link>
 
-                            <Link href="/#about" className="transition-colors hover:text-white">
+                            <Link href="/#about" className="hover:text-white transition-colors">
                                 About
                             </Link>
                         </nav>
@@ -108,14 +116,14 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/login"
-                                className="text-sm font-medium text-slate-300 hover:text-white"
+                                className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
                             >
                                 Sign In
                             </Link>
 
                             <Link
                                 href="/register"
-                                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-500"
+                                className="text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
                             >
                                 Get Started
                             </Link>
