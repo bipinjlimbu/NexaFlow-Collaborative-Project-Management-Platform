@@ -29,3 +29,12 @@ export async function register(data: {
         body: JSON.stringify(data),
     });
 }
+
+export async function logout(refresh: string) {
+    return apiFetch("/logout/", {
+        method: "POST",
+        body: JSON.stringify({
+            refresh,
+        }),
+    });
+}
