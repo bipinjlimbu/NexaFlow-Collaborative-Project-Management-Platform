@@ -4,13 +4,35 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
 
+type User = {
+    id: number;
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    profile_picture: string | null;
+};
+
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
         function checkAuth() {
             const access = localStorage.getItem("access");
+            const storedUser = localStorage.getItem("user");
+
             setIsAuthenticated(!!access);
+
+            if (storedUser) {
+                try {
+                    setUser(JSON.parse(storedUser));
+                } catch {
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
+            }
         }
 
         checkAuth();
@@ -56,8 +78,8 @@ export default function Navbar() {
                         </nav>
 
                         <div className="flex items-center gap-4">
-                            <button
-                                type="button"
+                            <Link
+                                href="/notifications"
                                 className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors relative"
                                 aria-label="Notifications"
                             >
@@ -76,23 +98,36 @@ export default function Navbar() {
                                 </svg>
 
                                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500" />
-                            </button>
+                            </Link>
 
-                            <div className="flex items-center gap-3 pl-2 border-l border-slate-800">
-                                <div className="h-8 w-8 rounded-full bg-indigo-600 text-white font-medium text-xs flex items-center justify-center">
-                                    BP
-                                </div>
+                            <Link
+                                href="/profile"
+                                className="flex items-center gap-3 pl-2 border-l border-slate-800"
+                            >
+                                {user?.profile_picture ? (
+                                    <img
+                                        src={user.profile_picture}
+                                        alt={user.first_name || user.username}
+                                        className="h-8 w-8 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="h-8 w-8 rounded-full bg-indigo-600 text-white font-medium text-xs flex items-center justify-center">
+                                        {user?.first_name?.[0]?.toUpperCase() ||
+                                            user?.username?.[0]?.toUpperCase() ||
+                                            "U"}
+                                    </div>
+                                )}
 
                                 <div className="hidden sm:block text-left">
                                     <div className="text-xs font-semibold text-slate-200">
-                                        Bipin
+                                        {user?.first_name || user?.username || "User"}
                                     </div>
 
                                     <div className="text-[10px] text-slate-500">
                                         Workspace Owner
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
 
                             <LogoutButton />
                         </div>
