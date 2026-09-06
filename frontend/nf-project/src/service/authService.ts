@@ -22,12 +22,40 @@ export async function register(data: {
     last_name: string;
     phone_number: string;
     address: string;
-    profile_picture: string;
+    profile_picture: File | null;
 }) {
-    return apiFetch("/register/", {
-        method: "POST",
-        body: JSON.stringify(data),
-    });
+    const formData = new FormData();
+
+    formData.append("username", data.username);
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    formData.append("confirm_password", data.confirm_password);
+    formData.append("first_name", data.first_name);
+    formData.append("last_name", data.last_name);
+    formData.append("phone_number", data.phone_number);
+    formData.append("address", data.address);
+
+    if (data.profile_picture) {
+        formData.append("profile_picture", data.profile_picture);
+    }
+
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/register/`,
+        {
+            method: "POST",
+            body: formData,
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result.error || "Registration failed"
+        );
+    }
+
+    return result;
 }
 
 export async function logout(refresh: string) {
