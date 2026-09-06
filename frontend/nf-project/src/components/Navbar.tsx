@@ -16,6 +16,7 @@ type User = {
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState<User | null>(null);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
     useEffect(() => {
         function checkAuth() {
@@ -106,7 +107,7 @@ export default function Navbar() {
                             >
                                 {user?.profile_picture ? (
                                     <img
-                                        src={user.profile_picture}
+                                        src={`${API_URL}${user.profile_picture}`}
                                         alt={user.first_name || user.username}
                                         className="h-8 w-8 rounded-full object-cover"
                                     />
