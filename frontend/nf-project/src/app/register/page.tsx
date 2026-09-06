@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { register } from "@/services/authService";
 
 export default function RegisterPage() {
@@ -52,26 +53,34 @@ export default function RegisterPage() {
     }
 
     return (
-        <main className="flex min-h-screen items-center justify-center px-6 py-12">
+        <main className="min-h-screen bg-slate-950 text-slate-50 flex items-center justify-center px-6 py-12 selection:bg-indigo-500 selection:text-white">
             <form
                 onSubmit={handleSubmit}
-                className="w-full max-w-2xl space-y-5 rounded-xl border border-slate-200 bg-white p-8"
+                className="w-full max-w-2xl space-y-5 rounded-2xl border border-slate-800/80 bg-slate-900/50 p-8 shadow-xl backdrop-blur-sm"
             >
-                <div>
-                    <h1 className="text-2xl font-bold">Create Account</h1>
-                    <p className="mt-2 text-sm text-slate-500">
-                        Create your NexaFlow account
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-md shadow-indigo-600/30">
+                            N
+                        </div>
+                        <span className="font-bold text-lg tracking-tight text-white">
+                            NexaFlow
+                        </span>
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Create Account</h1>
+                    <p className="text-sm text-slate-400">
+                        Create your NexaFlow account to manage your workspace
                     </p>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                     <input
                         name="first_name"
                         type="text"
                         placeholder="First Name"
                         value={formData.first_name}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
 
                     <input
@@ -80,7 +89,7 @@ export default function RegisterPage() {
                         placeholder="Last Name"
                         value={formData.last_name}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                 </div>
 
@@ -90,7 +99,7 @@ export default function RegisterPage() {
                     placeholder="Username"
                     value={formData.username}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
 
                 <input
@@ -99,17 +108,17 @@ export default function RegisterPage() {
                     placeholder="Email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
                     <input
                         name="password"
                         type="password"
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
 
                     <input
@@ -118,7 +127,7 @@ export default function RegisterPage() {
                         placeholder="Confirm Password"
                         value={formData.confirm_password}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                 </div>
 
@@ -128,7 +137,7 @@ export default function RegisterPage() {
                     placeholder="Phone Number"
                     value={formData.phone_number}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
 
                 <input
@@ -137,11 +146,11 @@ export default function RegisterPage() {
                     placeholder="Address"
                     value={formData.address}
                     onChange={handleChange}
-                    className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
 
-                <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                <div className="space-y-2">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
                         Profile Picture
                     </label>
 
@@ -150,22 +159,29 @@ export default function RegisterPage() {
                         type="file"
                         accept="image/*"
                         onChange={handleFileChange}
-                        className="w-full rounded-lg border border-slate-300 px-4 py-3"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-400 hover:file:bg-indigo-600/20 cursor-pointer"
                     />
                 </div>
 
                 {error && (
-                    <p className="text-sm text-red-500">
+                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400">
                         {error}
-                    </p>
+                    </div>
                 )}
 
                 <button
                     type="submit"
-                    className="w-full rounded-lg bg-slate-900 px-4 py-3 font-medium text-white hover:bg-slate-800"
+                    className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98]"
                 >
                     Create Account
                 </button>
+
+                <p className="text-center text-xs text-slate-400 pt-2">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                        Sign in
+                    </Link>
+                </p>
             </form>
         </main>
     );
