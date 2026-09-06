@@ -22,6 +22,8 @@ export default function LoginPage() {
             localStorage.setItem("access", data.tokens.access);
             localStorage.setItem("refresh", data.tokens.refresh);
 
+            window.dispatchEvent(new Event("auth-change"));
+
             router.push("/");
         } catch (error) {
             setError(error instanceof Error ? error.message : "Login failed");
