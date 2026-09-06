@@ -53,9 +53,11 @@ export default function LoginPage() {
 
             const access = data?.tokens?.access || data?.access;
             const refresh = data?.tokens?.refresh || data?.refresh;
+            const user = data?.user;
 
             if (access) localStorage.setItem("access", access);
             if (refresh) localStorage.setItem("refresh", refresh);
+            if (user) localStorage.setItem("user", JSON.stringify(user));
 
             window.dispatchEvent(new Event("auth-change"));
 
