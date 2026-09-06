@@ -50,9 +50,7 @@ export async function register(data: {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result.error || "Registration failed"
-        );
+        throw result;
     }
 
     return result;
