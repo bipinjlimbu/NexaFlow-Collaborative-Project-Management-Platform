@@ -20,3 +20,18 @@ export async function apiFetch(
 
     return data;
 }
+
+export async function authFetch(
+    endpoint: string,
+    options?: RequestInit
+) {
+    const access = localStorage.getItem("access");
+
+    return apiFetch(endpoint, {
+        ...options,
+        headers: {
+            ...options?.headers,
+            Authorization: `Bearer ${access}`,
+        },
+    });
+}
