@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const [isAuthenticated] = useState(false);
+  const [isAuthenticated] = useState(!!localStorage.getItem('access'));
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
