@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from ..models import User
+from ..serializers import UserSerializer
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -82,7 +83,7 @@ def login_view(request):
         
         if user is not None:
             tokens = get_tokens_for_user(user)
-            return Response({'message': 'Login successful.', 'tokens': tokens}, status=status.HTTP_200_OK)
+            return Response({'message': 'Login successful.','user': UserSerializer(user).data, 'tokens': tokens}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid username or password.'}, status=status.HTTP_401_UNAUTHORIZED)
         
