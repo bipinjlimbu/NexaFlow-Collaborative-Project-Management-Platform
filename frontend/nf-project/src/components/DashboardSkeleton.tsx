@@ -8,22 +8,47 @@ export default function DashboardSkeleton() {
                             <div className="h-6 w-36 bg-slate-800 rounded-full"></div>
                             <div className="h-4 w-28 bg-slate-900 rounded-md"></div>
                         </div>
-                        <div className="h-9 w-64 bg-slate-800 rounded-xl"></div>
+                        <div className="h-9 w-72 bg-slate-800 rounded-xl"></div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-32 bg-slate-900 rounded-xl border border-slate-800"></div>
+                        <div className="h-10 w-36 bg-slate-900/60 border border-slate-800 rounded-xl"></div>
                         <div className="h-10 w-36 bg-slate-800 rounded-xl"></div>
                     </div>
                 </section>
 
+                <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <div className="h-3 w-20 bg-slate-800 rounded"></div>
+                                    <div className="h-5 w-28 bg-slate-800 rounded-md"></div>
+                                    <div className="h-3 w-36 bg-slate-900 rounded"></div>
+                                </div>
+                                <div className="h-10 w-10 rounded-xl bg-slate-800/60 border border-slate-800"></div>
+                            </div>
+                            <div className="flex items-center justify-between pt-2">
+                                <div className="h-3 w-16 bg-slate-800 rounded"></div>
+                                <div className="h-3 w-12 bg-slate-900 rounded"></div>
+                            </div>
+                        </div>
+                    ))}
+                </section>
+
                 <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-3">
+                        <div
+                            key={i}
+                            className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-3"
+                        >
                             <div className="h-3 w-28 bg-slate-800 rounded"></div>
                             <div className="flex items-baseline justify-between pt-1">
                                 <div className="h-8 w-12 bg-slate-800 rounded-lg"></div>
-                                <div className="h-5 w-16 bg-slate-800 rounded"></div>
+                                <div className="h-5 w-16 bg-slate-800/60 rounded"></div>
                             </div>
                         </div>
                     ))}
@@ -32,23 +57,33 @@ export default function DashboardSkeleton() {
                 <section className="grid lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2 space-y-5">
                         <div className="flex items-center justify-between">
-                            <div className="h-6 w-36 bg-slate-800 rounded-lg"></div>
-                            <div className="h-4 w-24 bg-slate-900 rounded"></div>
+                            <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-slate-800"></div>
+                                <div className="h-6 w-32 bg-slate-800 rounded-lg"></div>
+                            </div>
+                            <div className="h-4 w-28 bg-slate-900 rounded"></div>
                         </div>
 
                         <div className="space-y-4">
                             {Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
+                                <div
+                                    key={i}
+                                    className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4"
+                                >
                                     <div className="flex items-start justify-between">
                                         <div className="space-y-2">
-                                            <div className="h-3 w-32 bg-slate-800 rounded"></div>
-                                            <div className="h-5 w-48 bg-slate-800 rounded-lg"></div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-3 w-20 bg-slate-800 rounded"></div>
+                                                <div className="h-3 w-12 bg-slate-900 rounded"></div>
+                                            </div>
+                                            <div className="h-5 w-44 bg-slate-800 rounded-lg"></div>
                                         </div>
-                                        <div className="h-6 w-20 bg-slate-800 rounded-lg"></div>
+                                        <div className="h-6 w-20 bg-slate-800/60 rounded-lg"></div>
                                     </div>
+
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
-                                            <div className="h-3 w-12 bg-slate-900 rounded"></div>
+                                            <div className="h-3 w-14 bg-slate-900 rounded"></div>
                                             <div className="h-3 w-8 bg-slate-900 rounded"></div>
                                         </div>
                                         <div className="w-full bg-slate-800 h-2 rounded-full"></div>
@@ -60,11 +95,14 @@ export default function DashboardSkeleton() {
 
                     <div className="space-y-5">
                         <div className="flex items-center justify-between">
-                            <div className="h-6 w-40 bg-slate-800 rounded-lg"></div>
+                            <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-slate-800"></div>
+                                <div className="h-6 w-40 bg-slate-800 rounded-lg"></div>
+                            </div>
                             <div className="h-3 w-20 bg-slate-900 rounded"></div>
                         </div>
 
-                        <div className="p-1 bg-slate-900 rounded-2xl border border-slate-800">
+                        <div className="p-1 bg-slate-900/60 rounded-2xl border border-slate-800">
                             <div className="bg-slate-950 p-5 rounded-[14px] space-y-4">
                                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                                     <div className="flex items-center gap-1.5">
@@ -74,14 +112,30 @@ export default function DashboardSkeleton() {
                                     </div>
                                     <div className="h-3 w-24 bg-slate-900 rounded"></div>
                                 </div>
+
                                 <div className="space-y-4">
-                                    <div className="h-4 w-28 bg-slate-800 rounded"></div>
-                                    <div className="pl-4 border-l border-slate-800 space-y-2">
-                                        <div className="h-3 w-20 bg-slate-800 rounded"></div>
-                                        <div className="h-3 w-36 bg-slate-900 rounded"></div>
-                                        <div className="h-3 w-32 bg-slate-900 rounded"></div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="h-4 w-20 bg-slate-800 rounded"></div>
+                                        <div className="h-4 w-12 bg-slate-900 rounded"></div>
                                     </div>
-                                    <div className="h-4 w-24 bg-slate-800 rounded pt-2"></div>
+
+                                    <div className="pl-4 border-l border-slate-800 space-y-2.5">
+                                        <div className="h-3 w-24 bg-slate-800 rounded"></div>
+                                        <div className="pl-3 space-y-1.5">
+                                            <div className="h-3 w-36 bg-slate-900 rounded"></div>
+                                            <div className="h-3 w-40 bg-slate-900 rounded"></div>
+                                            <div className="h-3 w-32 bg-slate-900 rounded"></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 border-t border-slate-900 flex items-center justify-between">
+                                        <div className="h-4 w-24 bg-slate-800 rounded"></div>
+                                        <div className="h-4 w-12 bg-slate-900 rounded"></div>
+                                    </div>
+
+                                    <div className="pl-4 border-l border-slate-800">
+                                        <div className="h-3 w-36 bg-slate-900 rounded"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -90,21 +144,31 @@ export default function DashboardSkeleton() {
 
                 <section className="space-y-5">
                     <div className="flex items-center justify-between">
-                        <div className="h-6 w-44 bg-slate-800 rounded-lg"></div>
+                        <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-slate-800"></div>
+                            <div className="h-6 w-44 bg-slate-800 rounded-lg"></div>
+                        </div>
                         <div className="h-4 w-20 bg-slate-900 rounded"></div>
                     </div>
 
-                    <div className="p-1 bg-slate-900 rounded-2xl border border-slate-800">
+                    <div className="p-1 bg-slate-900/60 rounded-2xl border border-slate-800">
                         <div className="bg-slate-950 p-4 sm:p-6 rounded-[14px] divide-y divide-slate-800/60">
                             {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div
+                                    key={i}
+                                    className="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                                >
                                     <div className="space-y-2">
-                                        <div className="h-3 w-32 bg-slate-900 rounded"></div>
-                                        <div className="h-4 w-48 bg-slate-800 rounded"></div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-3 w-20 bg-slate-800 rounded"></div>
+                                            <div className="h-3 w-32 bg-slate-900 rounded"></div>
+                                        </div>
+                                        <div className="h-4 w-52 bg-slate-800 rounded"></div>
                                     </div>
+
                                     <div className="flex items-center gap-4">
                                         <div className="h-3 w-16 bg-slate-900 rounded"></div>
-                                        <div className="h-6 w-16 bg-slate-800 rounded-full"></div>
+                                        <div className="h-6 w-20 bg-slate-800/60 rounded-full"></div>
                                     </div>
                                 </div>
                             ))}
