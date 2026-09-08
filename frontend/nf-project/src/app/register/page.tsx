@@ -36,7 +36,7 @@ export default function RegisterPage() {
         const token = localStorage.getItem("access");
         if (token) {
             alert("You are already logged in.");
-            router.replace("/");
+            router.replace("/dashboard");
         } else {
             setIsChecking(false);
         }
