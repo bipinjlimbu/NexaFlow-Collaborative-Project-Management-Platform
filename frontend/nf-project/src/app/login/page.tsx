@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/services/authService";
+import LoginSkeleton from "@/components/LoginSkeleton";
 
 function FieldError({ error }: { error?: string | string[] }) {
     if (!error) return null;
@@ -14,11 +15,22 @@ function FieldError({ error }: { error?: string | string[] }) {
 export default function LoginPage() {
     const router = useRouter();
 
+    const [isChecking, setIsChecking] = useState(true);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string | string[]>>({});
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("access");
+        if (token) {
+            alert("You are already logged in.");
+            router.replace("/");
+        } else {
+            setIsChecking(false);
+        }
+    }, [router]);
 
     function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
         setUsername(e.target.value);
@@ -83,6 +95,10 @@ export default function LoginPage() {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (isChecking) {
+        return <LoginSkeleton />;
     }
 
     return (
