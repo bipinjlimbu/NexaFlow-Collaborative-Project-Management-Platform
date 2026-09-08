@@ -1,427 +1,257 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import WorkspacesSkeleton from "@/components/WorkspacesSkeleton";
 import {
-    Activity,
-    ArrowUpRight,
-    CheckCircle2,
+    ArrowRight,
     FolderKanban,
     MoreHorizontal,
     Plus,
-    Settings,
+    Search,
     Users,
 } from "lucide-react";
 
-const projects = [
+const initialWorkspaces = [
     {
-        name: "NexaFlow Website",
-        description: "Main platform redesign and development",
-        progress: 78,
-        tasks: 23,
-        completed: 18,
-        members: 6,
-    },
-    {
-        name: "Mobile Application",
-        description: "NexaFlow mobile application",
-        progress: 52,
-        tasks: 25,
-        completed: 13,
-        members: 8,
-    },
-    {
-        name: "Marketing Campaign",
-        description: "Product launch and marketing campaign",
-        progress: 34,
-        tasks: 24,
-        completed: 8,
-        members: 5,
-    },
-    {
-        name: "API Infrastructure",
-        description: "Backend API and service infrastructure",
-        progress: 91,
-        tasks: 22,
-        completed: 20,
-        members: 4,
-    },
-];
-
-const members = [
-    {
-        name: "Bipin Sharma",
+        name: "ApexStriker Core",
+        description: "Main workspace for single-vendor B2C e-commerce platform and API.",
+        members: 24,
+        projects: 12,
         role: "Owner",
-        initials: "BS",
+        initials: "AS",
     },
     {
-        name: "Alex Morgan",
-        role: "Project Manager",
-        initials: "AM",
+        name: "Design Team",
+        description: "Design, branding and product experience projects.",
+        members: 8,
+        projects: 5,
+        role: "Member",
+        initials: "DT",
     },
     {
-        name: "Sarah Wilson",
-        role: "Designer",
-        initials: "SW",
-    },
-    {
-        name: "David Kim",
-        role: "Developer",
-        initials: "DK",
-    },
-    {
-        name: "Emma Brown",
-        role: "Developer",
-        initials: "EB",
+        name: "Personal Projects",
+        description: "Personal projects and experiments.",
+        members: 1,
+        projects: 4,
+        role: "Owner",
+        initials: "PP",
     },
 ];
 
-const activities = [
+const recentWorkspaces = [
     {
-        user: "Alex Morgan",
-        action: "created a new project",
-        target: "Mobile Application",
-        time: "10 minutes ago",
+        name: "ApexStriker Core",
+        initials: "AS",
+        lastOpened: "10 minutes ago",
     },
     {
-        user: "Sarah Wilson",
-        action: "completed a task in",
-        target: "NexaFlow Website",
-        time: "32 minutes ago",
-    },
-    {
-        user: "David Kim",
-        action: "joined the workspace",
-        target: "",
-        time: "1 hour ago",
-    },
-    {
-        user: "Emma Brown",
-        action: "updated",
-        target: "API Infrastructure",
-        time: "2 hours ago",
+        name: "Design Team",
+        initials: "DT",
+        lastOpened: "Yesterday",
     },
 ];
 
-export default function WorkspacePage() {
+export default function WorkspacesPage() {
+    const router = useRouter();
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    useEffect(() => {
+        function checkAuth() {
+            const token = localStorage.getItem("access");
+
+            if (!token) {
+                setIsAuthenticated(false);
+                router.replace("/login");
+            } else {
+                setIsAuthenticated(true);
+            }
+        }
+
+        checkAuth();
+
+        window.addEventListener("auth-change", checkAuth);
+
+        return () => {
+            window.removeEventListener("auth-change", checkAuth);
+        };
+    }, [router]);
+
+    if (!isAuthenticated) {
+        return <WorkspacesSkeleton />;
+    }
+
+    const filteredWorkspaces = initialWorkspaces.filter(
+        (ws) =>
+            ws.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ws.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <main className="min-h-screen bg-[#f7f8fa] text-[#17191c]">
-            <div className="mx-auto max-w-[1600px] px-5 py-6 sm:px-8 lg:px-10">
-                {/* Header */}
-                <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+        <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
+            <div className="mx-auto max-w-7xl px-6 py-10">
+                <div className="mb-8 flex flex-col justify-between gap-6 sm:flex-row sm:items-end pb-6 border-b border-slate-800/80">
                     <div>
-                        <div className="mb-2 flex items-center gap-2 text-sm text-[#777b83]">
-                            <span>Workspace</span>
-                            <span>/</span>
-                            <span className="text-[#17191c]">NexaFlow Team</span>
-                        </div>
-
-                        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                            NexaFlow Team
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-wide uppercase mb-3">
+                            ApexStriker Ecosystem
+                        </span>
+                        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                            Workspaces
                         </h1>
-
-                        <p className="mt-1 text-sm text-[#777b83]">
-                            Manage your projects, team members, and workspace activity.
+                        <p className="mt-2 max-w-xl text-sm text-slate-400">
+                            Organize your projects, teams, and work in separate dedicated workspaces.
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        <button className="flex h-10 items-center gap-2 rounded-xl border border-[#dedfe2] bg-white px-4 text-sm font-medium transition hover:bg-[#f1f2f4]">
-                            <Settings size={16} />
-                            Settings
-                        </button>
-
-                        <button className="flex h-10 items-center gap-2 rounded-xl bg-[#17191c] px-4 text-sm font-medium text-white transition hover:bg-[#292c31]">
-                            <Plus size={17} />
-                            New Project
-                        </button>
-                    </div>
+                    <button className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-medium text-white transition-all duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-lg shadow-indigo-600/20">
+                        <Plus size={18} />
+                        Create workspace
+                    </button>
                 </div>
 
-                {/* Workspace Overview */}
-                <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <div className="rounded-2xl border border-[#e7e8eb] bg-white p-5">
-                        <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1f2f4]">
-                            <FolderKanban size={19} />
+                <div className="mb-8 flex items-center rounded-xl border border-slate-800 bg-slate-900/60 px-4 transition-colors focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/50">
+                    <Search size={18} className="text-slate-500" />
+                    <input
+                        type="text"
+                        placeholder="Search workspaces..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-11 w-full bg-transparent px-3 text-sm text-slate-100 outline-none placeholder:text-slate-500"
+                    />
+                </div>
+
+                <section>
+                    <div className="mb-5 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-semibold text-slate-100">Your workspaces</h2>
+                            <p className="mt-0.5 text-sm text-slate-400">
+                                Workspaces you currently belong to.
+                            </p>
                         </div>
-
-                        <p className="text-sm text-[#777b83]">Projects</p>
-                        <p className="mt-1 text-3xl font-semibold">12</p>
-
-                        <p className="mt-2 text-xs text-[#858990]">
-                            8 currently active
-                        </p>
+                        <span className="rounded-lg bg-slate-900 border border-slate-800 px-3 py-1 text-xs font-medium text-slate-400">
+                            {filteredWorkspaces.length} workspaces
+                        </span>
                     </div>
 
-                    <div className="rounded-2xl border border-[#e7e8eb] bg-white p-5">
-                        <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1f2f4]">
-                            <CheckCircle2 size={19} />
-                        </div>
-
-                        <p className="text-sm text-[#777b83]">Tasks</p>
-                        <p className="mt-1 text-3xl font-semibold">148</p>
-
-                        <p className="mt-2 text-xs text-[#858990]">
-                            86 completed
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-[#e7e8eb] bg-white p-5">
-                        <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1f2f4]">
-                            <Users size={19} />
-                        </div>
-
-                        <p className="text-sm text-[#777b83]">Members</p>
-                        <p className="mt-1 text-3xl font-semibold">24</p>
-
-                        <p className="mt-2 text-xs text-[#858990]">
-                            3 joined this month
-                        </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-[#e7e8eb] bg-white p-5">
-                        <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1f2f4]">
-                            <Activity size={19} />
-                        </div>
-
-                        <p className="text-sm text-[#777b83]">Completion Rate</p>
-                        <p className="mt-1 text-3xl font-semibold">68%</p>
-
-                        <p className="mt-2 text-xs text-[#858990]">
-                            +6% from last month
-                        </p>
-                    </div>
-                </section>
-
-                <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
-                    {/* Projects */}
-                    <section className="rounded-2xl border border-[#e7e8eb] bg-white">
-                        <div className="flex items-center justify-between border-b border-[#ececef] px-5 py-5 sm:px-6">
-                            <div>
-                                <h2 className="font-semibold">Projects</h2>
-
-                                <p className="mt-1 text-sm text-[#858990]">
-                                    Projects inside this workspace.
-                                </p>
-                            </div>
-
-                            <button className="flex items-center gap-1 text-sm font-medium text-[#555960] transition hover:text-[#17191c]">
-                                View all
-                                <ArrowUpRight size={15} />
-                            </button>
-                        </div>
-
-                        <div className="divide-y divide-[#ececef]">
-                            {projects.map((project) => (
-                                <div
-                                    key={project.name}
-                                    className="px-5 py-5 sm:px-6"
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex min-w-0 items-start gap-3">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f2f4]">
-                                                <FolderKanban size={18} />
-                                            </div>
-
-                                            <div className="min-w-0">
-                                                <h3 className="text-sm font-semibold">
-                                                    {project.name}
-                                                </h3>
-
-                                                <p className="mt-1 truncate text-xs text-[#858990]">
-                                                    {project.description}
-                                                </p>
-                                            </div>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {filteredWorkspaces.map((workspace) => (
+                            <div
+                                key={workspace.name}
+                                className="group relative flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-slate-700 hover:bg-slate-900/60 hover:shadow-xl hover:shadow-indigo-500/5"
+                            >
+                                <div>
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 text-sm font-semibold">
+                                            {workspace.initials}
                                         </div>
 
-                                        <button className="shrink-0 text-[#92969d] hover:text-[#17191c]">
+                                        <button className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-200">
                                             <MoreHorizontal size={18} />
                                         </button>
                                     </div>
 
-                                    <div className="mt-5 flex items-center justify-between text-xs">
-                                        <span className="text-[#777b83]">
-                                            {project.completed} of {project.tasks} tasks
-                                        </span>
-
-                                        <span className="font-semibold">
-                                            {project.progress}%
-                                        </span>
-                                    </div>
-
-                                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#eceef0]">
-                                        <div
-                                            className="h-full rounded-full bg-[#17191c]"
-                                            style={{
-                                                width: `${project.progress}%`,
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="mt-4 flex items-center justify-between">
-                                        <div className="flex -space-x-2">
-                                            {Array.from({
-                                                length: Math.min(project.members, 5),
-                                            }).map((_, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-[#dedfe2] text-[10px] font-semibold text-[#555960]"
-                                                >
-                                                    {String.fromCharCode(65 + index)}
-                                                </div>
-                                            ))}
+                                    <div className="mt-5">
+                                        <div className="flex items-center gap-2.5">
+                                            <h3 className="font-semibold text-slate-100 group-hover:text-white">
+                                                {workspace.name}
+                                            </h3>
+                                            {workspace.role === "Owner" && (
+                                                <span className="rounded-md bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 text-[10px] font-medium text-indigo-400">
+                                                    Owner
+                                                </span>
+                                            )}
                                         </div>
 
-                                        <span className="text-xs text-[#858990]">
-                                            {project.members} members
-                                        </span>
+                                        <p className="mt-2 min-h-[40px] text-sm leading-relaxed text-slate-400">
+                                            {workspace.description}
+                                        </p>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </section>
 
-                    {/* Members */}
-                    <section className="rounded-2xl border border-[#e7e8eb] bg-white">
-                        <div className="flex items-center justify-between border-b border-[#ececef] px-5 py-5">
-                            <div>
-                                <h2 className="font-semibold">Team Members</h2>
+                                <div>
+                                    <div className="mt-6 grid grid-cols-2 gap-3">
+                                        <div className="rounded-xl bg-slate-950/60 border border-slate-800/60 p-3">
+                                            <div className="flex items-center gap-2 text-slate-400">
+                                                <Users size={14} className="text-indigo-400" />
+                                                <span className="text-xs">Members</span>
+                                            </div>
+                                            <p className="mt-1 text-lg font-semibold text-slate-100">
+                                                {workspace.members}
+                                            </p>
+                                        </div>
 
-                                <p className="mt-1 text-sm text-[#858990]">
-                                    People in this workspace.
-                                </p>
-                            </div>
-
-                            <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e1e2e5] transition hover:bg-[#f5f6f7]">
-                                <Plus size={16} />
-                            </button>
-                        </div>
-
-                        <div className="divide-y divide-[#ececef]">
-                            {members.map((member) => (
-                                <div
-                                    key={member.name}
-                                    className="flex items-center gap-3 px-5 py-4"
-                                >
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8e9eb] text-xs font-semibold">
-                                        {member.initials}
+                                        <div className="rounded-xl bg-slate-950/60 border border-slate-800/60 p-3">
+                                            <div className="flex items-center gap-2 text-slate-400">
+                                                <FolderKanban size={14} className="text-indigo-400" />
+                                                <span className="text-xs">Projects</span>
+                                            </div>
+                                            <p className="mt-1 text-lg font-semibold text-slate-100">
+                                                {workspace.projects}
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-medium">
-                                            {member.name}
-                                        </p>
-
-                                        <p className="mt-0.5 text-xs text-[#858990]">
-                                            {member.role}
-                                        </p>
-                                    </div>
-
-                                    <button className="text-[#92969d] hover:text-[#17191c]">
-                                        <MoreHorizontal size={17} />
+                                    <button className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-indigo-500/50 hover:bg-indigo-600 hover:text-white">
+                                        Open workspace
+                                        <ArrowRight
+                                            size={15}
+                                            className="transition-transform duration-200 group-hover:translate-x-1"
+                                        />
                                     </button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="border-t border-[#ececef] p-4">
-                            <button className="w-full rounded-xl border border-[#e2e3e6] py-2.5 text-sm font-medium transition hover:bg-[#f7f8fa]">
-                                View all members
-                            </button>
-                        </div>
-                    </section>
-                </div>
-
-                {/* Activity */}
-                <section className="mt-6 rounded-2xl border border-[#e7e8eb] bg-white">
-                    <div className="flex items-center justify-between border-b border-[#ececef] px-5 py-5 sm:px-6">
-                        <div>
-                            <h2 className="font-semibold">Workspace Activity</h2>
-
-                            <p className="mt-1 text-sm text-[#858990]">
-                                Recent activity from your team.
-                            </p>
-                        </div>
-
-                        <button className="flex items-center gap-1 text-sm font-medium text-[#555960] hover:text-[#17191c]">
-                            View all
-                            <ArrowUpRight size={15} />
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 divide-y divide-[#ececef] lg:grid-cols-2 lg:divide-x lg:divide-y-0">
-                        {activities.map((activity, index) => (
-                            <div
-                                key={`${activity.user}-${index}`}
-                                className="flex items-center gap-3 px-5 py-4 sm:px-6"
-                            >
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8e9eb] text-xs font-semibold">
-                                    {activity.user
-                                        .split(" ")
-                                        .map((name) => name[0])
-                                        .join("")}
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm">
-                                        <span className="font-medium">
-                                            {activity.user}
-                                        </span>{" "}
-                                        <span className="text-[#777b83]">
-                                            {activity.action}
-                                        </span>{" "}
-                                        {activity.target && (
-                                            <span className="font-medium">
-                                                {activity.target}
-                                            </span>
-                                        )}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-[#9699a0]">
-                                        {activity.time}
-                                    </p>
                                 </div>
                             </div>
                         ))}
+
+                        <button className="group flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-6 text-center transition-all duration-200 hover:border-indigo-500/50 hover:bg-slate-900/40">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 transition-colors duration-200 group-hover:border-indigo-500/40 group-hover:bg-indigo-600/10 group-hover:text-indigo-400">
+                                <Plus size={20} />
+                            </div>
+
+                            <h3 className="mt-4 text-sm font-semibold text-slate-200 group-hover:text-white">
+                                Create a workspace
+                            </h3>
+
+                            <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-slate-400">
+                                Start a new workspace for a team, project, or organization.
+                            </p>
+                        </button>
                     </div>
                 </section>
 
-                {/* Workspace Details */}
-                <section className="mt-6 rounded-2xl border border-[#e7e8eb] bg-white">
-                    <div className="border-b border-[#ececef] px-5 py-5 sm:px-6">
-                        <h2 className="font-semibold">Workspace Details</h2>
-
-                        <p className="mt-1 text-sm text-[#858990]">
-                            Basic information about this workspace.
+                <section className="mt-12">
+                    <div className="mb-4">
+                        <h2 className="text-lg font-semibold text-slate-100">Recently opened</h2>
+                        <p className="mt-0.5 text-sm text-slate-400">
+                            Quickly return to your recent work.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
-                        <div>
-                            <p className="text-xs text-[#858990]">Workspace name</p>
-                            <p className="mt-1 text-sm font-medium">
-                                NexaFlow Team
-                            </p>
-                        </div>
+                    <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-sm divide-y divide-slate-800/60">
+                        {recentWorkspaces.map((workspace) => (
+                            <button
+                                key={workspace.name}
+                                className="group flex w-full items-center gap-4 px-6 py-4 text-left transition-colors duration-200 hover:bg-slate-800/40"
+                            >
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 border border-slate-700/50 text-xs font-semibold text-slate-200 group-hover:border-indigo-500/30 group-hover:text-indigo-400 transition-colors">
+                                    {workspace.initials}
+                                </div>
 
-                        <div>
-                            <p className="text-xs text-[#858990]">Workspace type</p>
-                            <p className="mt-1 text-sm font-medium">
-                                Team Workspace
-                            </p>
-                        </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-slate-200 group-hover:text-white">
+                                        {workspace.name}
+                                    </p>
+                                    <p className="mt-0.5 text-xs text-slate-400">
+                                        Opened {workspace.lastOpened}
+                                    </p>
+                                </div>
 
-                        <div>
-                            <p className="text-xs text-[#858990]">Created</p>
-                            <p className="mt-1 text-sm font-medium">
-                                September 2026
-                            </p>
-                        </div>
-
-                        <div>
-                            <p className="text-xs text-[#858990]">Members</p>
-                            <p className="mt-1 text-sm font-medium">
-                                24 members
-                            </p>
-                        </div>
+                                <ArrowRight
+                                    size={16}
+                                    className="text-slate-500 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-slate-300"
+                                />
+                            </button>
+                        ))}
                     </div>
                 </section>
             </div>
