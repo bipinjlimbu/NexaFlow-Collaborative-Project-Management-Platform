@@ -1,10 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function LandingPage() {
-  const [isAuthenticated] = useState(!!localStorage.getItem('access'));
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    function checkAuth() {
+      setIsAuthenticated(!!localStorage.getItem("access"));
+    }
+
+    checkAuth();
+
+    window.addEventListener("auth-change", checkAuth);
+
+    return () => {
+      window.removeEventListener("auth-change", checkAuth);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
@@ -35,6 +49,7 @@ export default function LandingPage() {
                 Go to Dashboard
                 <span aria-hidden="true">&rarr;</span>
               </Link>
+
               <Link
                 href="/workspaces"
                 className="border border-slate-800 hover:border-slate-700 bg-slate-900/50 text-slate-300 hover:text-white font-medium px-8 py-3.5 rounded-xl transition-all flex items-center justify-center text-base"
@@ -69,6 +84,7 @@ export default function LandingPage() {
                 Get Started Free
                 <span aria-hidden="true">&rarr;</span>
               </Link>
+
               <Link
                 href="/login"
                 className="border border-slate-800 hover:border-slate-700 bg-slate-900/50 text-slate-300 hover:text-white font-medium px-8 py-3.5 rounded-xl transition-all flex items-center justify-center text-base"
@@ -88,6 +104,7 @@ export default function LandingPage() {
                   <div className="h-3 w-3 rounded-full bg-yellow-500/80"></div>
                   <div className="h-3 w-3 rounded-full bg-green-500/80"></div>
                 </div>
+
                 <span className="text-xs font-mono text-slate-500">
                   NexaFlow Workflow Preview
                 </span>
@@ -96,29 +113,43 @@ export default function LandingPage() {
               <div className="space-y-4 font-mono text-sm">
                 <div className="flex items-center gap-2 text-indigo-400 font-bold">
                   <span>Workspace: TechNova</span>
+
                   <span className="text-[10px] bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded font-sans">
                     OWNER
                   </span>
                 </div>
+
                 <div className="pl-6 border-l-2 border-slate-800 space-y-3">
                   <div className="text-slate-300 font-semibold">
                     Project: College Management System
                   </div>
+
                   <div className="pl-6 space-y-2 text-xs font-sans">
                     <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
-                      <span className="text-slate-200">Create Login System</span>
+                      <span className="text-slate-200">
+                        Create Login System
+                      </span>
+
                       <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[11px]">
                         DONE
                       </span>
                     </div>
+
                     <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
-                      <span className="text-slate-200">Create Student Module</span>
+                      <span className="text-slate-200">
+                        Create Student Module
+                      </span>
+
                       <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded text-[11px]">
                         IN PROGRESS
                       </span>
                     </div>
+
                     <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
-                      <span className="text-slate-200">Attendance Module</span>
+                      <span className="text-slate-200">
+                        Attendance Module
+                      </span>
+
                       <span className="bg-slate-800 text-slate-400 px-2 py-0.5 rounded text-[11px]">
                         TODO
                       </span>
@@ -135,7 +166,11 @@ export default function LandingPage() {
             <div className="h-10 w-10 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold mb-4">
               W
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Workspace Hierarchy</h3>
+
+            <h3 className="text-lg font-bold text-white mb-2">
+              Workspace Hierarchy
+            </h3>
+
             <p className="text-sm text-slate-400 leading-relaxed">
               Organize team entities logically with dedicated workspaces, multi-project grouping, and task breakdowns.
             </p>
@@ -145,7 +180,11 @@ export default function LandingPage() {
             <div className="h-10 w-10 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold mb-4">
               R
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Role Permissions</h3>
+
+            <h3 className="text-lg font-bold text-white mb-2">
+              Role Permissions
+            </h3>
+
             <p className="text-sm text-slate-400 leading-relaxed">
               Contextual membership controls per workspace: OWNER, ADMIN, and MEMBER roles with explicit permission boundaries.
             </p>
@@ -155,29 +194,42 @@ export default function LandingPage() {
             <div className="h-10 w-10 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold mb-4">
               P
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Progress Analytics</h3>
+
+            <h3 className="text-lg font-bold text-white mb-2">
+              Progress Analytics
+            </h3>
+
             <p className="text-sm text-slate-400 leading-relaxed">
               Monitor active project completion rates, track deadlines, assign tasks, and maintain productivity metrics.
             </p>
           </div>
         </section>
 
-        <section id="about" className="mt-20 p-8 md:p-12 rounded-3xl bg-slate-900/30 border border-slate-800/80 text-left w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <section
+          id="about"
+          className="mt-20 p-8 md:p-12 rounded-3xl bg-slate-900/30 border border-slate-800/80 text-left w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+        >
           <div className="max-w-xl">
             <h2 className="text-2xl font-bold text-white mb-2">
-              {isAuthenticated ? 'Continue your workflow' : 'Designed for execution'}
+              {isAuthenticated
+                ? "Continue your workflow"
+                : "Designed for execution"}
             </h2>
+
             <p className="text-sm text-slate-400 leading-relaxed">
               {isAuthenticated
-                ? 'Your team workspaces and project milestones are synced and ready.'
-                : 'Whether managing campus development groups, corporate websites, or multi-member software initiatives, NexaFlow keeps team activity centralized and trackable.'}
+                ? "Your team workspaces and project milestones are synced and ready."
+                : "Whether managing campus development groups, corporate websites, or multi-member software initiatives, NexaFlow keeps team activity centralized and trackable."}
             </p>
           </div>
+
           <Link
-            href={isAuthenticated ? '/dashboard' : '/register'}
+            href={isAuthenticated ? "/dashboard" : "/register"}
             className="bg-white hover:bg-slate-100 text-slate-950 font-semibold px-6 py-3 rounded-xl transition-all whitespace-nowrap text-sm"
           >
-            {isAuthenticated ? 'Open Workspace Dashboard' : 'Create Free Workspace'}
+            {isAuthenticated
+              ? "Open Workspace Dashboard"
+              : "Create Free Workspace"}
           </Link>
         </section>
       </main>
