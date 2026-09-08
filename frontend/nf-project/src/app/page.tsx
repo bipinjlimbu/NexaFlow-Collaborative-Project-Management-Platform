@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import LandingSkeleton from "@/components/LandingSkeleton";
 
 export default function LandingPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     function checkAuth() {
@@ -19,6 +20,10 @@ export default function LandingPage() {
       window.removeEventListener("auth-change", checkAuth);
     };
   }, []);
+
+  if (isAuthenticated === null) {
+    return <LandingSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
