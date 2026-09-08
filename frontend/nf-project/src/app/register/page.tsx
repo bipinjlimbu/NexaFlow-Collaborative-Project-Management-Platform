@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { register } from "@/services/authService";
+import RegisterSkeleton from "@/components/RegisterSkeleton";
 
 function FieldError({ error }: { error?: string | string[] }) {
     if (!error) return null;
@@ -14,6 +15,7 @@ function FieldError({ error }: { error?: string | string[] }) {
 export default function RegisterPage() {
     const router = useRouter();
 
+    const [isChecking, setIsChecking] = useState(true);
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -29,6 +31,16 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string | string[]>>({});
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("access");
+        if (token) {
+            alert("You are already logged in.");
+            router.replace("/");
+        } else {
+            setIsChecking(false);
+        }
+    }, [router]);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         setFormData({
@@ -84,6 +96,10 @@ export default function RegisterPage() {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (isChecking) {
+        return <RegisterSkeleton />;
     }
 
     return (
