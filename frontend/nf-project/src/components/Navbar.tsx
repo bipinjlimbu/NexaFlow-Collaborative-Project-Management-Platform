@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
+import NavbarSkeleton from "@/components/NavbarSkeleton";
 
 type User = {
     id: number;
@@ -14,7 +15,7 @@ type User = {
 };
 
 export default function Navbar() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
@@ -44,6 +45,10 @@ export default function Navbar() {
             window.removeEventListener("auth-change", checkAuth);
         };
     }, []);
+
+    if (isAuthenticated === null) {
+        return <NavbarSkeleton />;
+    }
 
     return (
         <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-6 py-4">
