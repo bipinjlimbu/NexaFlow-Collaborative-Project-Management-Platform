@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import NavbarSkeleton from "@/components/NavbarSkeleton";
 
@@ -15,6 +16,7 @@ type User = {
 };
 
 export default function Navbar() {
+    const pathname = usePathname();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
@@ -65,20 +67,36 @@ export default function Navbar() {
 
                 {isAuthenticated ? (
                     <>
-                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
-                            <Link href="/dashboard" className="hover:text-white transition-colors">
+                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+                            <Link
+                                href="/dashboard"
+                                className={`transition-colors ${pathname === "/dashboard" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                    }`}
+                            >
                                 Dashboard
                             </Link>
 
-                            <Link href="/workspaces" className="hover:text-white transition-colors">
+                            <Link
+                                href="/workspaces"
+                                className={`transition-colors ${pathname === "/workspaces" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                    }`}
+                            >
                                 Workspaces
                             </Link>
 
-                            <Link href="/projects" className="hover:text-white transition-colors">
+                            <Link
+                                href="/projects"
+                                className={`transition-colors ${pathname === "/projects" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                    }`}
+                            >
                                 Projects
                             </Link>
 
-                            <Link href="/tasks" className="hover:text-white transition-colors">
+                            <Link
+                                href="/tasks"
+                                className={`transition-colors ${pathname === "/tasks" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                    }`}
+                            >
                                 Tasks
                             </Link>
                         </nav>
@@ -86,7 +104,8 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/notifications"
-                                className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors relative"
+                                className={`p-2 rounded-lg bg-slate-900 border border-slate-800 transition-colors relative ${pathname === "/notifications" ? "text-white border-slate-700" : "text-slate-400 hover:text-white"
+                                    }`}
                                 aria-label="Notifications"
                             >
                                 <svg
@@ -108,7 +127,8 @@ export default function Navbar() {
 
                             <Link
                                 href="/profile"
-                                className="flex items-center gap-3 pl-2 border-l border-slate-800"
+                                className={`flex items-center gap-3 pl-2 border-l border-slate-800 transition-opacity ${pathname === "/profile" ? "opacity-100" : "opacity-90 hover:opacity-100"
+                                    }`}
                             >
                                 {user?.profile_picture ? (
                                     <img
@@ -157,7 +177,8 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/login"
-                                className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
+                                className={`text-sm font-medium transition-colors ${pathname === "/login" ? "text-white" : "text-slate-300 hover:text-white"
+                                    }`}
                             >
                                 Sign In
                             </Link>
