@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import TasksSkeleton from "@/components/TasksSkeleton";
 
 type TaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
 type TaskPriority = "HIGH" | "MEDIUM" | "LOW";
@@ -171,10 +173,29 @@ const priorityDots: Record<TaskPriority, string> = {
 };
 
 export default function TasksPage() {
+    const router = useRouter();
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [priorityFilter, setPriorityFilter] = useState("All");
     const [projectFilter, setProjectFilter] = useState("All");
+
+    useEffect(() => {
+        const checkAuth = () => {
+            const token = localStorage.getItem("access");
+            if (!token) {
+                router.push("/login");
+                setIsAuthenticated(false);
+            } else {
+                setIsAuthenticated(true);
+            }
+        };
+
+        checkAuth();
+        window.addEventListener("auth-change", checkAuth);
+        return () => window.removeEventListener("auth-change", checkAuth);
+    }, [router]);
 
     const projects = [...new Set(tasks.map((task) => task.project))];
 
@@ -216,6 +237,10 @@ export default function TasksPage() {
     const completedCount = tasks.filter(
         (task) => task.status === "DONE"
     ).length;
+
+    if (isAuthenticated === null || !isAuthenticated) {
+        return <TasksSkeleton />;
+    }
 
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50">
@@ -493,8 +518,8 @@ export default function TasksPage() {
                                             <div>
                                                 <p
                                                     className={`text-xs font-medium ${task.dueLabel === "Today"
-                                                            ? "text-rose-400"
-                                                            : "text-slate-300"
+                                                        ? "text-rose-400"
+                                                        : "text-slate-300"
                                                         }`}
                                                 >
                                                     {task.dueLabel}
