@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
     Activity,
@@ -13,8 +12,8 @@ import {
     MoreHorizontal,
     Plus,
     Search,
+    Users,
 } from "lucide-react";
-import { ProjectsSkeleton } from "./ProjectsSkeleton";
 
 type ProjectStatus = "Active" | "Completed" | "In Review" | "Planning";
 type ProjectPriority = "High" | "Medium" | "Low";
@@ -101,24 +100,8 @@ const statusConfig: Record<ProjectStatus, { color: string; bg: string; icon: any
 };
 
 export default function ProjectsPage() {
-    const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                router.push("/login");
-            } else {
-                setIsAuthenticated(true);
-            }
-            setIsLoading(false);
-        };
-        checkAuth();
-    }, [router]);
 
     const filteredProjects = useMemo(() => {
         return projects.filter((project) => {
@@ -130,20 +113,13 @@ export default function ProjectsPage() {
         });
     }, [searchQuery, statusFilter]);
 
-    const recentProjects = projects.slice(0, 2);
-
-    if (isLoading) {
-        return <ProjectsSkeleton />;
-    }
-
-    if (!isAuthenticated) {
-        return null;
-    }
+    const recentProjects = projects.slice(0, 2); // Mocking recent projects
 
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
             <div className="mx-auto max-w-7xl px-6 py-10">
 
+                {/* Header Section */}
                 <div className="mb-8 flex flex-col justify-between gap-6 sm:flex-row sm:items-end pb-6 border-b border-slate-800/80">
                     <div>
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold tracking-wide uppercase mb-3">
@@ -163,6 +139,7 @@ export default function ProjectsPage() {
                     </button>
                 </div>
 
+                {/* Filters Section */}
                 <div className="mb-8 flex flex-col gap-4 sm:flex-row">
                     <div className="flex flex-1 items-center rounded-xl border border-slate-800 bg-slate-900/60 px-4 transition-colors focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/50">
                         <Search size={18} className="text-slate-500" />
@@ -187,6 +164,7 @@ export default function ProjectsPage() {
                     </select>
                 </div>
 
+                {/* Projects Grid */}
                 <section>
                     <div className="mb-5 flex items-center justify-between">
                         <div>
@@ -238,6 +216,7 @@ export default function ProjectsPage() {
                                     </div>
 
                                     <div>
+                                        {/* Stats Grid matching the Workspace UI style */}
                                         <div className="mt-6 grid grid-cols-2 gap-3">
                                             <div className="rounded-xl bg-slate-950/60 border border-slate-800/60 p-3">
                                                 <div className="flex items-center justify-between text-slate-400">
@@ -278,6 +257,7 @@ export default function ProjectsPage() {
                             );
                         })}
 
+                        {/* Create Project Card */}
                         <button className="group flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-6 text-center transition-all duration-200 hover:border-indigo-500/50 hover:bg-slate-900/40">
                             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 transition-colors duration-200 group-hover:border-indigo-500/40 group-hover:bg-indigo-600/10 group-hover:text-indigo-400">
                                 <Plus size={20} />
@@ -292,6 +272,7 @@ export default function ProjectsPage() {
                     </div>
                 </section>
 
+                {/* Recently Updated Section */}
                 <section className="mt-12">
                     <div className="mb-4">
                         <h2 className="text-lg font-semibold text-slate-100">Recently active</h2>
