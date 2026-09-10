@@ -1,11 +1,9 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from django.contrib.auth import authenticate
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 from ..models import Workspaces
-from ..serializers import WorkspacesSerializer
+from ..serializers import WorkspaceSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -13,7 +11,7 @@ def workspaces_view(request):
     if request.method == 'GET':
         try:
             workspaces = Workspaces.objects.filter(user=request.user)
-            serializer = WorkspacesSerializer(workspaces, many=True)
+            serializer = WorkspaceSerializer(workspaces, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Workspaces.DoesNotExist:
             return Response({"error": "Workspaces not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -41,7 +39,19 @@ def workspaces_view(request):
         
         try:
             workspace.save()
-            serializer = WorkspacesSerializer(workspace)
+            serializer = WorkspaceSerializer(workspace)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def workspace_detail_view(request, pk):
+    try:
+        workspace = Workspaces.objects.get(pk=pk, created_by=request.user)
+    except Workspaces.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = WorkspaceSerializer(workspace)
+        return Response(serializer.data, status=status.HTTP_200_OK)
