@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import LogoutButton from "@/components/LogoutButton";
 import NavbarSkeleton from "@/components/NavbarSkeleton";
 
 type User = {
@@ -155,7 +154,6 @@ export default function Navbar() {
                                 </div>
                             </Link>
 
-                            <LogoutButton />
                         </div>
                     </>
                 ) : (
