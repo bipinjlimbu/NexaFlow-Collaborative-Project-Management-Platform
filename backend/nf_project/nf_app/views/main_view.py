@@ -55,3 +55,27 @@ def workspace_detail_view(request, pk):
     if request.method == 'GET':
         serializer = WorkspaceSerializer(workspace)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    errors = {}
+    if request.method == 'PUT':
+        name = request.data.get('name')
+        description = request.data.get('description')
+        
+        if not name:
+            errors['name'] = 'This field is required.'
+        elif Workspaces.objects.filter(name=name, created_by=request.user).exclude(pk=pk).exists():
+            errors['name'] = 'A workspace with this name already exists.'
+            
+        if not description:
+            errors['description'] = 'This field is required.'
+            
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        workspace.name = name
+        workspace.description = description
+        workspace.save()
+        serializer = WorkspaceSerializer(workspace)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
