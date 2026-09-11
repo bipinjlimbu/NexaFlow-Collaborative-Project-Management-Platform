@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ProfileSkeleton from "@/components/ProfileSkeleton";
 
 interface User {
     username?: string;
@@ -17,30 +18,38 @@ interface User {
 export default function ProfilePage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
     useEffect(() => {
+        const access = localStorage.getItem("access");
         const storedUser = localStorage.getItem("user");
 
-        if (!storedUser) {
-            router.push("/login");
+        if (!access || !storedUser) {
+            setIsAuthenticated(false);
+            router.replace("/login");
             return;
         }
 
         try {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+
+            setUser(parsedUser);
+            setIsAuthenticated(true);
         } catch {
             localStorage.removeItem("user");
-            router.push("/login");
+            setIsAuthenticated(false);
+            router.replace("/login");
         }
     }, [router]);
 
-    if (!user) {
-        return (
-            <main className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
-                Loading profile...
-            </main>
-        );
+    if (isAuthenticated === null || !user) {
+        return <ProfileSkeleton />;
+    }
+
+    if (!isAuthenticated) {
+        return <ProfileSkeleton />;
     }
 
     const fullName =
@@ -61,7 +70,10 @@ export default function ProfilePage() {
             <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
                 <div className="mb-8">
                     <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-                        <Link href="/dashboard" className="transition hover:text-slate-300">
+                        <Link
+                            href="/dashboard"
+                            className="cursor-pointer transition hover:text-slate-300"
+                        >
                             Dashboard
                         </Link>
                         <span>/</span>
@@ -73,9 +85,11 @@ export default function ProfilePage() {
                             <p className="mb-2 font-mono text-xs uppercase tracking-[0.2em] text-indigo-400">
                                 Account
                             </p>
+
                             <h1 className="text-3xl font-semibold tracking-tight">
                                 Profile
                             </h1>
+
                             <p className="mt-2 text-sm text-slate-500">
                                 Manage your personal information and account preferences.
                             </p>
@@ -83,7 +97,7 @@ export default function ProfilePage() {
 
                         <Link
                             href="/profile/edit"
-                            className="inline-flex h-10 items-center justify-center rounded-lg bg-indigo-500 px-4 text-sm font-medium text-white transition hover:bg-indigo-400"
+                            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg bg-indigo-500 px-4 text-sm font-medium text-white transition hover:bg-indigo-400"
                         >
                             Edit Profile
                         </Link>
@@ -98,7 +112,7 @@ export default function ProfilePage() {
                             <div className="flex flex-col gap-4 md:flex-row md:items-end">
                                 {user.profile_picture ? (
                                     <img
-                                        src={`${API_URL}${user.profile_picture}`}
+                                        src={`${API_URL}${user.profile_picture} `}
                                         alt={fullName}
                                         className="h-24 w-24 rounded-2xl border-4 border-slate-950 object-cover shadow-xl"
                                     />
@@ -112,6 +126,7 @@ export default function ProfilePage() {
                                     <h2 className="text-2xl font-semibold text-white">
                                         {fullName}
                                     </h2>
+
                                     <p className="mt-1 text-sm text-slate-500">
                                         @{user.username || "user"}
                                     </p>
@@ -129,11 +144,12 @@ export default function ProfilePage() {
                 </section>
 
                 <div className="grid gap-6 lg:grid-cols-3">
-                    <section className="lg:col-span-2 rounded-2xl border border-slate-800/80 bg-slate-900/40">
+                    <section className="rounded-2xl border border-slate-800/80 bg-slate-900/40 lg:col-span-2">
                         <div className="border-b border-slate-800/80 px-6 py-5">
                             <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
                                 Personal Information
                             </p>
+
                             <h2 className="mt-1 text-lg font-semibold">
                                 Account Details
                             </h2>
@@ -144,6 +160,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     First Name
                                 </p>
+
                                 <p className="text-sm text-slate-200">
                                     {user.first_name || "Not provided"}
                                 </p>
@@ -153,6 +170,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Last Name
                                 </p>
+
                                 <p className="text-sm text-slate-200">
                                     {user.last_name || "Not provided"}
                                 </p>
@@ -162,6 +180,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Username
                                 </p>
+
                                 <p className="text-sm text-slate-200">
                                     {user.username || "Not provided"}
                                 </p>
@@ -171,6 +190,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Email
                                 </p>
+
                                 <p className="break-all text-sm text-slate-200">
                                     {user.email || "Not provided"}
                                 </p>
@@ -180,6 +200,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Phone Number
                                 </p>
+
                                 <p className="text-sm text-slate-200">
                                     {user.phone_number || "Not provided"}
                                 </p>
@@ -189,6 +210,7 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Address
                                 </p>
+
                                 <p className="text-sm text-slate-200">
                                     {user.address || "Not provided"}
                                 </p>
@@ -202,6 +224,7 @@ export default function ProfilePage() {
                                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
                                     Account
                                 </p>
+
                                 <h2 className="mt-1 text-lg font-semibold">
                                     Security
                                 </h2>
@@ -210,12 +233,13 @@ export default function ProfilePage() {
                             <div className="divide-y divide-slate-800/80">
                                 <Link
                                     href="/profile/password"
-                                    className="flex items-center justify-between px-6 py-5 transition hover:bg-slate-800/30"
+                                    className="flex cursor-pointer items-center justify-between px-6 py-5 transition hover:bg-slate-800/30"
                                 >
                                     <div>
                                         <p className="text-sm font-medium text-slate-200">
                                             Change Password
                                         </p>
+
                                         <p className="mt-1 text-xs text-slate-500">
                                             Update your account password
                                         </p>
@@ -226,12 +250,13 @@ export default function ProfilePage() {
 
                                 <Link
                                     href="/profile/sessions"
-                                    className="flex items-center justify-between px-6 py-5 transition hover:bg-slate-800/30"
+                                    className="flex cursor-pointer items-center justify-between px-6 py-5 transition hover:bg-slate-800/30"
                                 >
                                     <div>
                                         <p className="text-sm font-medium text-slate-200">
                                             Active Sessions
                                         </p>
+
                                         <p className="mt-1 text-xs text-slate-500">
                                             Review your logged-in devices
                                         </p>
@@ -247,6 +272,7 @@ export default function ProfilePage() {
                                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
                                     Preferences
                                 </p>
+
                                 <h2 className="mt-1 text-lg font-semibold">
                                     Notifications
                                 </h2>
@@ -258,6 +284,7 @@ export default function ProfilePage() {
                                         <p className="text-sm font-medium text-slate-200">
                                             Task Updates
                                         </p>
+
                                         <p className="mt-1 text-xs text-slate-500">
                                             Receive updates about assigned tasks
                                         </p>
@@ -273,6 +300,7 @@ export default function ProfilePage() {
                                         <p className="text-sm font-medium text-slate-200">
                                             Mentions
                                         </p>
+
                                         <p className="mt-1 text-xs text-slate-500">
                                             Get notified when someone mentions you
                                         </p>
@@ -292,6 +320,7 @@ export default function ProfilePage() {
                         <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
                             Workspace
                         </p>
+
                         <h2 className="mt-1 text-lg font-semibold">
                             Your Overview
                         </h2>
@@ -302,7 +331,9 @@ export default function ProfilePage() {
                             <p className="text-xs uppercase tracking-wider text-slate-500">
                                 Workspaces
                             </p>
+
                             <p className="mt-2 text-2xl font-semibold">04</p>
+
                             <p className="mt-1 text-xs text-slate-600">
                                 Active memberships
                             </p>
@@ -312,7 +343,9 @@ export default function ProfilePage() {
                             <p className="text-xs uppercase tracking-wider text-slate-500">
                                 Projects
                             </p>
+
                             <p className="mt-2 text-2xl font-semibold">12</p>
+
                             <p className="mt-1 text-xs text-slate-600">
                                 Across your workspaces
                             </p>
@@ -322,7 +355,9 @@ export default function ProfilePage() {
                             <p className="text-xs uppercase tracking-wider text-slate-500">
                                 Tasks
                             </p>
+
                             <p className="mt-2 text-2xl font-semibold">19</p>
+
                             <p className="mt-1 text-xs text-slate-600">
                                 Currently pending
                             </p>
