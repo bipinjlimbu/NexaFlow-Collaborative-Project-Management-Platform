@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSkeleton from "@/components/ProfileSkeleton";
+import LogoutButton from "@/components/LogoutButton";
+import {
+    deleteProfile,
+    updateProfile,
+} from "@/services/profileService";
+import { Pencil, Trash2, X } from "lucide-react";
 
 interface User {
     username?: string;
@@ -15,10 +21,45 @@ interface User {
     profile_picture?: string;
 }
 
+interface ProfileErrors {
+    username?: string;
+    email?: string;
+    first_name?: string;
+    last_name?: string;
+    phone_number?: string;
+    address?: string;
+    profile_picture?: string;
+    error?: string;
+    detail?: string;
+    message?: string;
+}
+
 export default function ProfilePage() {
     const router = useRouter();
+
     const [user, setUser] = useState<User | null>(null);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
+        null
+    );
+
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const [editErrors, setEditErrors] = useState<ProfileErrors>({});
+    const [deleteError, setDeleteError] = useState("");
+
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [address, setAddress] = useState("");
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
+
+    const [profilePicturePreview, setProfilePicturePreview] = useState("");
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
@@ -65,6 +106,124 @@ export default function ProfilePage() {
         .slice(0, 2)
         .toUpperCase();
 
+    const profileImage = user.profile_picture
+        ? `${API_URL}${user.profile_picture}`
+        : "";
+
+    const openEditForm = () => {
+        setUsername(user.username || "");
+        setEmail(user.email || "");
+        setFirstName(user.first_name || "");
+        setLastName(user.last_name || "");
+        setPhoneNumber(user.phone_number || "");
+        setAddress(user.address || "");
+        setProfilePicture(null);
+        setProfilePicturePreview("");
+        setEditErrors({});
+        setShowEditForm(true);
+    };
+
+    const closeEditForm = () => {
+        if (saving) return;
+
+        setShowEditForm(false);
+        setProfilePicture(null);
+        setProfilePicturePreview("");
+        setEditErrors({});
+    };
+
+    const handleProfilePictureChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0] || null;
+
+        setProfilePicture(file);
+
+        if (file) {
+            setProfilePicturePreview(URL.createObjectURL(file));
+        } else {
+            setProfilePicturePreview("");
+        }
+    };
+
+    const getErrorMessage = (error: ProfileErrors) => {
+        if (error.error) return error.error;
+        if (error.detail) return error.detail;
+        if (error.message) return error.message;
+        return "Failed to update profile.";
+    };
+
+    const handleUpdateProfile = async (
+        e: React.FormEvent<HTMLFormElement>
+    ) => {
+        e.preventDefault();
+
+        setSaving(true);
+        setEditErrors({});
+
+        try {
+            const updatedUser = await updateProfile({
+                username: username.trim(),
+                email: email.trim(),
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                phone_number: phoneNumber.trim(),
+                address: address.trim(),
+                profile_picture: profilePicture,
+            });
+
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUser(updatedUser);
+
+            setShowEditForm(false);
+            setProfilePicture(null);
+            setProfilePicturePreview("");
+            setEditErrors({});
+        } catch (err) {
+            const error =
+                typeof err === "object" && err !== null
+                    ? (err as ProfileErrors)
+                    : {};
+
+            setEditErrors(error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDeleteProfile = async () => {
+        setDeleting(true);
+        setDeleteError("");
+
+        try {
+            await deleteProfile();
+
+            localStorage.removeItem("access");
+            localStorage.removeItem("refresh");
+            localStorage.removeItem("user");
+
+            window.dispatchEvent(new Event("auth-change"));
+
+            router.replace("/login");
+        } catch (err) {
+            if (typeof err === "object" && err !== null) {
+                if ("error" in err) {
+                    setDeleteError(String(err.error));
+                } else if ("detail" in err) {
+                    setDeleteError(String(err.detail));
+                } else if ("message" in err) {
+                    setDeleteError(String(err.message));
+                } else {
+                    setDeleteError("Failed to delete your account.");
+                }
+            } else {
+                setDeleteError("Failed to delete your account.");
+            }
+
+            setDeleting(false);
+        }
+    };
+
     return (
         <main className="min-h-screen bg-slate-950 text-slate-100">
             <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
@@ -95,12 +254,17 @@ export default function ProfilePage() {
                             </p>
                         </div>
 
-                        <Link
-                            href="/profile/edit"
-                            className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg bg-indigo-500 px-4 text-sm font-medium text-white transition hover:bg-indigo-400"
-                        >
-                            Edit Profile
-                        </Link>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <LogoutButton />
+
+                            <button
+                                onClick={openEditForm}
+                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-indigo-500 px-4 text-sm font-medium text-white transition hover:bg-indigo-400"
+                            >
+                                <Pencil size={15} />
+                                Edit Profile
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -112,7 +276,7 @@ export default function ProfilePage() {
                             <div className="flex flex-col gap-4 md:flex-row md:items-end">
                                 {user.profile_picture ? (
                                     <img
-                                        src={`${API_URL}${user.profile_picture} `}
+                                        src={profileImage}
                                         alt={fullName}
                                         className="h-24 w-24 rounded-2xl border-4 border-slate-950 object-cover shadow-xl"
                                     />
@@ -160,7 +324,6 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     First Name
                                 </p>
-
                                 <p className="text-sm text-slate-200">
                                     {user.first_name || "Not provided"}
                                 </p>
@@ -170,7 +333,6 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Last Name
                                 </p>
-
                                 <p className="text-sm text-slate-200">
                                     {user.last_name || "Not provided"}
                                 </p>
@@ -180,7 +342,6 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Username
                                 </p>
-
                                 <p className="text-sm text-slate-200">
                                     {user.username || "Not provided"}
                                 </p>
@@ -190,7 +351,6 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Email
                                 </p>
-
                                 <p className="break-all text-sm text-slate-200">
                                     {user.email || "Not provided"}
                                 </p>
@@ -200,7 +360,6 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Phone Number
                                 </p>
-
                                 <p className="text-sm text-slate-200">
                                     {user.phone_number || "Not provided"}
                                 </p>
@@ -210,7 +369,6 @@ export default function ProfilePage() {
                                 <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
                                     Address
                                 </p>
-
                                 <p className="text-sm text-slate-200">
                                     {user.address || "Not provided"}
                                 </p>
@@ -312,6 +470,36 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </section>
+
+                        <section className="rounded-2xl border border-red-500/20 bg-red-500/[0.03]">
+                            <div className="border-b border-red-500/10 px-6 py-5">
+                                <p className="font-mono text-xs uppercase tracking-[0.18em] text-red-400">
+                                    Danger Zone
+                                </p>
+
+                                <h2 className="mt-1 text-lg font-semibold text-slate-100">
+                                    Delete Account
+                                </h2>
+                            </div>
+
+                            <div className="px-6 py-5">
+                                <p className="text-xs leading-relaxed text-slate-500">
+                                    Permanently delete your account and remove
+                                    your personal account data.
+                                </p>
+
+                                <button
+                                    onClick={() => {
+                                        setDeleteError("");
+                                        setShowDeleteConfirm(true);
+                                    }}
+                                    className="mt-4 inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+                                >
+                                    <Trash2 size={14} />
+                                    Delete account
+                                </button>
+                            </div>
+                        </section>
                     </div>
                 </div>
 
@@ -365,6 +553,301 @@ export default function ProfilePage() {
                     </div>
                 </section>
             </div>
+
+            {showEditForm && (
+                <div className="fixed inset-0 z-50">
+                    <div
+                        className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
+                        onClick={closeEditForm}
+                    />
+
+                    <div className="absolute right-0 top-0 h-full w-full max-w-md border-l border-slate-800 bg-slate-950 shadow-2xl shadow-black/40">
+                        <div className="flex h-full flex-col">
+                            <div className="flex items-center justify-between border-b border-slate-800 px-6 py-5">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-white">
+                                        Edit Profile
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-slate-400">
+                                        Update your personal information.
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={closeEditForm}
+                                    disabled={saving}
+                                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            <form
+                                onSubmit={handleUpdateProfile}
+                                className="flex flex-1 flex-col"
+                            >
+                                <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+                                    {(editErrors.error ||
+                                        editErrors.detail ||
+                                        editErrors.message) && (
+                                            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                                {getErrorMessage(editErrors)}
+                                            </div>
+                                        )}
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Username
+                                        </label>
+
+                                        <input
+                                            value={username}
+                                            onChange={(e) =>
+                                                setUsername(e.target.value)
+                                            }
+                                            disabled={saving}
+                                            className={`h-11 w-full rounded-xl border bg-slate-900/70 px-4 text-sm text-slate-100 outline-none transition focus:ring-1 ${editErrors.username
+                                                    ? "border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/30"
+                                                }`}
+                                        />
+
+                                        {editErrors.username && (
+                                            <p className="mt-2 text-xs text-red-400">
+                                                {editErrors.username}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Email
+                                        </label>
+
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) =>
+                                                setEmail(e.target.value)
+                                            }
+                                            disabled={saving}
+                                            className={`h-11 w-full rounded-xl border bg-slate-900/70 px-4 text-sm text-slate-100 outline-none transition focus:ring-1 ${editErrors.email
+                                                    ? "border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/30"
+                                                }`}
+                                        />
+
+                                        {editErrors.email && (
+                                            <p className="mt-2 text-xs text-red-400">
+                                                {editErrors.email}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="grid gap-5 sm:grid-cols-2">
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-slate-200">
+                                                First Name
+                                            </label>
+
+                                            <input
+                                                value={firstName}
+                                                onChange={(e) =>
+                                                    setFirstName(e.target.value)
+                                                }
+                                                disabled={saving}
+                                                className={`h-11 w-full rounded-xl border bg-slate-900/70 px-4 text-sm text-slate-100 outline-none transition focus:ring-1 ${editErrors.first_name
+                                                        ? "border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30"
+                                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/30"
+                                                    }`}
+                                            />
+
+                                            {editErrors.first_name && (
+                                                <p className="mt-2 text-xs text-red-400">
+                                                    {editErrors.first_name}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-slate-200">
+                                                Last Name
+                                            </label>
+
+                                            <input
+                                                value={lastName}
+                                                onChange={(e) =>
+                                                    setLastName(e.target.value)
+                                                }
+                                                disabled={saving}
+                                                className={`h-11 w-full rounded-xl border bg-slate-900/70 px-4 text-sm text-slate-100 outline-none transition focus:ring-1 ${editErrors.last_name
+                                                        ? "border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30"
+                                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/30"
+                                                    }`}
+                                            />
+
+                                            {editErrors.last_name && (
+                                                <p className="mt-2 text-xs text-red-400">
+                                                    {editErrors.last_name}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Phone Number
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={phoneNumber}
+                                            onChange={(e) =>
+                                                setPhoneNumber(e.target.value)
+                                            }
+                                            disabled={saving}
+                                            className={`h-11 w-full rounded-xl border bg-slate-900/70 px-4 text-sm text-slate-100 outline-none transition focus:ring-1 ${editErrors.phone_number
+                                                    ? "border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/30"
+                                                }`}
+                                        />
+
+                                        {editErrors.phone_number && (
+                                            <p className="mt-2 text-xs text-red-400">
+                                                {editErrors.phone_number}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Address
+                                        </label>
+
+                                        <textarea
+                                            value={address}
+                                            onChange={(e) =>
+                                                setAddress(e.target.value)
+                                            }
+                                            disabled={saving}
+                                            rows={4}
+                                            className={`w-full resize-none rounded-xl border bg-slate-900/70 px-4 py-3 text-sm leading-relaxed text-slate-100 outline-none transition focus:ring-1 ${editErrors.address
+                                                    ? "border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/30"
+                                                }`}
+                                        />
+
+                                        {editErrors.address && (
+                                            <p className="mt-2 text-xs text-red-400">
+                                                {editErrors.address}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Profile Picture
+                                        </label>
+
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleProfilePictureChange}
+                                            disabled={saving}
+                                            className="block w-full cursor-pointer rounded-xl border border-slate-800 bg-slate-900/70 text-sm text-slate-400 file:mr-4 file:cursor-pointer file:border-0 file:border-r file:border-slate-800 file:bg-slate-800 file:px-4 file:py-3 file:text-sm file:font-medium file:text-slate-200 hover:file:bg-slate-700"
+                                        />
+
+                                        {editErrors.profile_picture && (
+                                            <p className="mt-2 text-xs text-red-400">
+                                                {editErrors.profile_picture}
+                                            </p>
+                                        )}
+
+                                        {profilePicturePreview && (
+                                            <div className="mt-4">
+                                                <img
+                                                    src={profilePicturePreview}
+                                                    alt="Profile preview"
+                                                    className="h-20 w-20 rounded-xl border border-slate-800 object-cover"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-5">
+                                    <button
+                                        type="button"
+                                        onClick={closeEditForm}
+                                        disabled={saving}
+                                        className="h-10 cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-4 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="h-10 cursor-pointer rounded-xl bg-indigo-600 px-5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {saving ? "Saving..." : "Save changes"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 px-6 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/50">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-400">
+                            <Trash2 size={20} />
+                        </div>
+
+                        <h2 className="mt-5 text-xl font-semibold text-white">
+                            Delete your account?
+                        </h2>
+
+                        <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                            This action is permanent. Your account and associated
+                            personal information will be deleted.
+                        </p>
+
+                        {deleteError && (
+                            <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                {deleteError}
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    if (!deleting) {
+                                        setShowDeleteConfirm(false);
+                                        setDeleteError("");
+                                    }
+                                }}
+                                disabled={deleting}
+                                className="h-10 cursor-pointer rounded-xl border border-slate-800 bg-slate-950 px-4 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleDeleteProfile}
+                                disabled={deleting}
+                                className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-medium text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <Trash2 size={15} />
+                                {deleting ? "Deleting..." : "Delete account"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
