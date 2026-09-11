@@ -10,7 +10,7 @@ from ..serializers import WorkspaceSerializer
 def workspaces_view(request):
     if request.method == 'GET':
         try:
-            workspaces = Workspaces.objects.filter(user=request.user)
+            workspaces = Workspaces.objects.filter(created_by=request.user)
             serializer = WorkspaceSerializer(workspaces, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Workspaces.DoesNotExist:
