@@ -9,7 +9,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
     
-class Workspaces(models.Model):
+class Workspace(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workspaces')
@@ -20,13 +20,13 @@ class Workspaces(models.Model):
     def __str__(self):
         return self.name
     
-class WorkspaceMembers(models.Model):
+class WorkspaceMember(models.Model):
     class Role(models.TextChoices):
         OWNER = 'owner', 'Owner'
         ADMIN = 'admin', 'Admin'
         MEMBER = 'member', 'Member'
         
-    workspace = models.ForeignKey(Workspaces, on_delete=models.CASCADE, related_name='members')
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='members')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='workspace_memberships')
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.MEMBER)
     joined_at = models.DateTimeField(auto_now_add=True)
@@ -34,7 +34,7 @@ class WorkspaceMembers(models.Model):
     def __str__(self):
         return f"{self.user.username} in {self.workspace.name} as {self.role}"
     
-class Projects(models.Model):
+class Project(models.Model):
     class Status(models.TextChoices):
         PLANNING = 'planning', 'Planning'
         ACTIVE = 'active', 'Active'
@@ -49,7 +49,7 @@ class Projects(models.Model):
         
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    workspace = models.ForeignKey(Workspaces, on_delete=models.CASCADE, related_name='projects')
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='projects')
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PLANNING)
     priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.MEDIUM)
     start_date = models.DateField(null=True, blank=True)
@@ -61,15 +61,15 @@ class Projects(models.Model):
     def __str__(self):
         return self.name
     
-class ProjectMembers(models.Model):
-    project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='members')
+class ProjectMember(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='members')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_memberships')
     joined_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.user.username} in {self.project.name}"
     
-class Tasks(models.Model):
+class Task(models.Model):
     class Status(models.TextChoices):
         BACKLOG = 'backlog', 'Backlog'
         TODO = 'todo', 'To Do'
@@ -85,7 +85,7 @@ class Tasks(models.Model):
         
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='tasks')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     status = models.CharField(max_length=15, choices=Status.choices, default=Status.BACKLOG)
     priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.MEDIUM)
     due_date = models.DateField(null=True, blank=True)
@@ -98,23 +98,23 @@ class Tasks(models.Model):
     def __str__(self):
         return self.title
     
-class Labels(models.Model):
-    workspace = models.ForeignKey(Workspaces, on_delete=models.CASCADE, related_name='labels')
+class Label(models.Model):
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='labels')
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     
     def __str__(self):
         return self.name
     
-class TaskLabels(models.Model):
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name='task_labels')
-    label = models.ForeignKey(Labels, on_delete=models.CASCADE, related_name='label_tasks')
+class TaskLabel(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_labels')
+    label = models.ForeignKey(Label, on_delete=models.CASCADE, related_name='label_tasks')
     
     def __str__(self):
         return f"{self.label.name} for {self.task.title}"
     
-class Comments(models.Model):
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name='comments')
+class Comment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -123,8 +123,8 @@ class Comments(models.Model):
     def __str__(self):
         return f"Comment by {self.user.username} on {self.task.title}"
     
-class attachments(models.Model):
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, related_name='attachments')
+class Attachment(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(upload_to='task_attachments/')
     file_name = models.CharField(max_length=255)
     file_size = models.PositiveIntegerField()
@@ -134,7 +134,7 @@ class attachments(models.Model):
     def __str__(self):
         return f"Attachment for {self.task.title}"
     
-class WorkspaceInvitations(models.Model):
+class WorkspaceInvitation(models.Model):
     class Role(models.TextChoices):
         ADMIN = 'admin', 'Admin'
         MEMBER = 'member', 'Member'
@@ -145,7 +145,7 @@ class WorkspaceInvitations(models.Model):
         DECLINED = 'declined', 'Declined'
         EXPIRED = 'expired', 'Expired'
         
-    workspace = models.ForeignKey(Workspaces, on_delete=models.CASCADE, related_name='invitations')
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='invitations')
     email = models.EmailField()
     invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.MEMBER)
@@ -157,7 +157,7 @@ class WorkspaceInvitations(models.Model):
     def __str__(self):
         return f"Invitation to {self.email} for {self.workspace.name}"
     
-class Notifications(models.Model):
+class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     type = models.CharField(max_length=50)
     title = models.CharField(max_length=255)
@@ -168,13 +168,13 @@ class Notifications(models.Model):
     def __str__(self):
         return f"Notification for {self.user.username}: {self.title}"
     
-class Activities(models.Model):
-    workspace = models.ForeignKey(Workspaces, on_delete=models.CASCADE, related_name='activities')
+class Activity(models.Model):
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='activities')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
     action = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    project = models.ForeignKey(Projects, on_delete=models.CASCADE, null=True, blank=True, related_name='activities')
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, null=True, blank=True, related_name='activities')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True, related_name='activities')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True, related_name='activities')
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

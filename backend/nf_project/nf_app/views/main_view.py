@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Workspaces
+from ..models import Workspace
 from ..serializers import WorkspaceSerializer
 
 @api_view(['GET', 'POST'])
@@ -10,10 +10,10 @@ from ..serializers import WorkspaceSerializer
 def workspaces_view(request):
     if request.method == 'GET':
         try:
-            workspaces = Workspaces.objects.filter(created_by=request.user)
+            workspaces = Workspace.objects.filter(created_by=request.user)
             serializer = WorkspaceSerializer(workspaces, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Workspaces.DoesNotExist:
+        except Workspace.DoesNotExist:
             return Response({"error": "Workspaces not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -26,7 +26,7 @@ def workspaces_view(request):
         
         if not name:
             errors['name'] = 'This field is required.'
-        elif Workspaces.objects.filter(name=name, created_by=created_by).exists():
+        elif Workspace.objects.filter(name=name, created_by=created_by).exists():
             errors['name'] = 'A workspace with this name already exists.'
             
         if not description:
@@ -35,7 +35,7 @@ def workspaces_view(request):
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
-        workspace = Workspaces(name=name, description=description, created_by=created_by)
+        workspace = Workspace(name=name, description=description, created_by=created_by)
         
         try:
             workspace.save()
@@ -48,8 +48,8 @@ def workspaces_view(request):
 @permission_classes([IsAuthenticated])
 def workspace_detail_view(request, pk):
     try:
-        workspace = Workspaces.objects.get(pk=pk, created_by=request.user)
-    except Workspaces.DoesNotExist:
+        workspace = Workspace.objects.get(pk=pk, created_by=request.user)
+    except Workspace.DoesNotExist:
         return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
@@ -63,7 +63,7 @@ def workspace_detail_view(request, pk):
         
         if not name:
             errors['name'] = 'This field is required.'
-        elif Workspaces.objects.filter(name=name, created_by=request.user).exclude(pk=pk).exists():
+        elif Workspace.objects.filter(name=name, created_by=request.user).exclude(pk=pk).exists():
             errors['name'] = 'A workspace with this name already exists.'
             
         if not description:

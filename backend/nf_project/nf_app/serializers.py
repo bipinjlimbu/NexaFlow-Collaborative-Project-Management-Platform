@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Workspaces, WorkspaceMembers, Projects, ProjectMembers, Tasks, Labels, TaskLabels, Comments, attachments, WorkspaceInvitations, Notifications, Activities
+from .models import User, Workspace, WorkspaceMember, Project, ProjectMember, Task, Label, TaskLabel, Comment, Attachment, WorkspaceInvitation, Notification, Activity
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,60 +8,60 @@ class UserSerializer(serializers.ModelSerializer):
         
 class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Workspaces
+        model = Workspace
         fields = '__all__'
         
 class WorkspaceMembersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WorkspaceMembers
+        model = WorkspaceMember
         fields = '__all__'
         
-class ProjectsSerializer(serializers.ModelSerializer):
+class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Projects
+        model = Project
         fields = '__all__'
         
-class ProjectMembersSerializer(serializers.ModelSerializer):
+class ProjectMemberSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProjectMembers
+        model = ProjectMember
         fields = '__all__'
         
-class TasksSerializer(serializers.ModelSerializer):
+class TaskSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tasks
+        model = Task
         fields = '__all__'
         
-class LabelsSerializer(serializers.ModelSerializer):
+class LabelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Labels
+        model = Label
         fields = '__all__'
         
-class TaskLabelsSerializer(serializers.ModelSerializer):
+class TaskLabelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TaskLabels
+        model = TaskLabel
         fields = '__all__'
         
-class CommentsSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = Comment
         fields = '__all__'
         
-class AttachmentsSerializer(serializers.ModelSerializer):
+class AttachmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = attachments
+        model = Attachment
         fields = '__all__'
         
-class WorkspaceInvitationsSerializer(serializers.ModelSerializer):
+class WorkspaceInvitationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WorkspaceInvitations
+        model = WorkspaceInvitation
         fields = '__all__'
         
-class NotificationsSerializer(serializers.ModelSerializer):
+class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Notifications
+        model = Notification
         fields = '__all__'
         
-class ActivitiesSerializer(serializers.ModelSerializer):
+class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Activities
+        model = Activity
         fields = '__all__'
