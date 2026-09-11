@@ -26,6 +26,11 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    
+    def get_user(self, obj):
+        return UserSerializer(obj.user).data
+    
     class Meta:
         model = WorkspaceMember
         fields = '__all__'
