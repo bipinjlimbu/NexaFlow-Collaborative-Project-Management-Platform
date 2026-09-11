@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Workspace
-from ..serializers import WorkspaceSerializer, WorkspaceMemberSerializer
+from ..models import Workspace, WorkspaceMember
+from ..serializers import WorkspaceSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -36,9 +36,11 @@ def workspaces_view(request):
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
         workspace = Workspace(name=name, description=description, created_by=created_by)
+        workspace_member = WorkspaceMember(workspace=workspace, user=created_by, role=WorkspaceMember.Role.OWNER)
         
         try:
             workspace.save()
+            workspace_member.save()
             serializer = WorkspaceSerializer(workspace)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
