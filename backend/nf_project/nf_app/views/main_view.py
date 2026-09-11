@@ -78,4 +78,6 @@ def workspace_detail_view(request, pk):
         serializer = WorkspaceSerializer(workspace)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    
+    if request.method == 'DELETE':
+        workspace.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
