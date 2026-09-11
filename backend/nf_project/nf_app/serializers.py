@@ -7,6 +7,20 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class WorkspaceSerializer(serializers.ModelSerializer):
+    members = serializers.SerializerMethodField()
+    members_count = serializers.SerializerMethodField()
+    projects_count = serializers.SerializerMethodField()
+    
+    def get_members(self, obj):
+        members = WorkspaceMember.objects.filter(workspace=obj)
+        return WorkspaceMemberSerializer(members, many=True).data
+    
+    def get_members_count(self, obj):
+        return WorkspaceMember.objects.filter(workspace=obj).count()
+    
+    def get_projects_count(self, obj):
+        return Project.objects.filter(workspace=obj).count()
+
     class Meta:
         model = Workspace
         fields = '__all__'
