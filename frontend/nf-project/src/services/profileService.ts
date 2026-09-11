@@ -60,3 +60,9 @@ export async function updateProfile(
 
     return result;
 }
+
+export async function deleteProfile() {
+    return authFetch("/profile/", {
+        method: "DELETE",
+    });
+}
