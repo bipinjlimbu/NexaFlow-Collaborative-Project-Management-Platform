@@ -164,7 +164,7 @@ export default function WorkspacesPage() {
     };
 
     const openWorkspace = (id: number) => {
-        router.push(`/ workspaces / ${id} `);
+        router.push(`/workspaces/${id}`);
     };
 
     return (
