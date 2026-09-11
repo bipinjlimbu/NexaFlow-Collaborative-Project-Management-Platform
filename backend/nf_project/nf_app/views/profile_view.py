@@ -47,3 +47,7 @@ def profile_view(request):
         user.save()
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    if request.method == 'DELETE':
+        user.delete()
+        return Response({"message": "User deleted successfully."}, status=status.HTTP_200_OK)
