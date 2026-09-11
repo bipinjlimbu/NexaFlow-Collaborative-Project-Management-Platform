@@ -42,11 +42,11 @@ export async function updateProfile(
     const access = localStorage.getItem("access");
 
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL} /profile/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/profile/`,
         {
             method: "PUT",
             headers: {
-                Authorization: `Bearer ${access} `,
+                Authorization: `Bearer ${access}`,
             },
             body: formData,
         }
