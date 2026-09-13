@@ -1,97 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
+    deleteWorkspace,
+    getUsers,
     getWorkspace,
     updateWorkspace,
-    deleteWorkspace,
     WorkspaceDetail,
+    WorkspaceUser,
 } from "@/services/workspaceService";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
-
-function formatDate(date: string) {
-    return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-    }).format(new Date(date));
-}
-
-function formatShortDate(date: string) {
-    return new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    }).format(new Date(date));
-}
-
-function getFullName(
-    firstName: string,
-    lastName: string,
-    username: string
-) {
-    const name = `${firstName} ${lastName}`.trim();
-    return name || username;
-}
 
 export default function WorkspaceDetailPage() {
     const params = useParams();
     const router = useRouter();
 
-    const [workspace, setWorkspace] =
-        useState<WorkspaceDetail | null>(null);
+    const workspaceId = Number(params.id);
 
+    const [workspace, setWorkspace] = useState<WorkspaceDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showEditPanel, setShowEditPanel] = useState(false);
+    const [showInvitePanel, setShowInvitePanel] = useState(false);
 
-    const [editName, setEditName] = useState("");
-    const [editDescription, setEditDescription] = useState("");
-    const [editArchived, setEditArchived] = useState(false);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [isArchived, setIsArchived] = useState(false);
 
     const [saving, setSaving] = useState(false);
-    const [deleting, setDeleting] = useState(false);
+    const [saveError, setSaveError] = useState("");
 
-    const [editError, setEditError] = useState("");
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState("");
 
-    const [fieldErrors, setFieldErrors] = useState<{
-        name?: string | string[];
-        description?: string | string[];
-        is_archived?: string | string[];
-        error?: string;
-        detail?: string;
-    }>({});
+    const [users, setUsers] = useState<WorkspaceUser[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [usersError, setUsersError] = useState("");
+    const [userSearch, setUserSearch] = useState("");
 
     useEffect(() => {
         const access = localStorage.getItem("access");
 
         if (!access) {
-            router.replace("/login");
+            router.push("/login");
             return;
         }
 
-        const loadWorkspace = async () => {
+        async function loadWorkspace() {
             try {
-                setLoading(true);
-                setError("");
+                const data = await getWorkspace(workspaceId);
 
-                const id = Number(params.id);
-
-                if (!id) {
-                    setError("Invalid workspace.");
-                    return;
-                }
-
-                const data = await getWorkspace(id);
                 setWorkspace(data);
+                setName(data.name);
+                setDescription(data.description || "");
+                setIsArchived(data.is_archived);
             } catch (err: any) {
                 setError(
                     err?.detail ||
@@ -101,32 +66,19 @@ export default function WorkspaceDetailPage() {
             } finally {
                 setLoading(false);
             }
-        };
+        }
 
         loadWorkspace();
-    }, [params.id, router]);
+    }, [router, workspaceId]);
 
-    const openEditPanel = () => {
-        if (!workspace) {
-            return;
-        }
+    const handleOpenEdit = () => {
+        if (!workspace) return;
 
-        setEditName(workspace.name);
-        setEditDescription(workspace.description || "");
-        setEditArchived(workspace.is_archived);
-        setEditError("");
-        setFieldErrors({});
+        setName(workspace.name);
+        setDescription(workspace.description || "");
+        setIsArchived(workspace.is_archived);
+        setSaveError("");
         setShowEditPanel(true);
-    };
-
-    const closeEditPanel = () => {
-        if (saving) {
-            return;
-        }
-
-        setShowEditPanel(false);
-        setEditError("");
-        setFieldErrors({});
     };
 
     const handleUpdateWorkspace = async (
@@ -134,36 +86,22 @@ export default function WorkspaceDetailPage() {
     ) => {
         event.preventDefault();
 
-        if (!workspace) {
-            return;
-        }
+        if (!workspace) return;
 
         setSaving(true);
-        setEditError("");
-        setFieldErrors({});
+        setSaveError("");
 
         try {
-            const updatedWorkspace = await updateWorkspace(
-                workspace.id,
-                {
-                    name: editName.trim(),
-                    description: editDescription.trim(),
-                    is_archived: editArchived,
-                }
-            );
-
-            setWorkspace(updatedWorkspace);
-            setShowEditPanel(false);
-        } catch (err: any) {
-            setFieldErrors({
-                name: err?.name,
-                description: err?.description,
-                is_archived: err?.is_archived,
-                error: err?.error,
-                detail: err?.detail,
+            const updated = await updateWorkspace(workspace.id, {
+                name,
+                description,
+                is_archived: isArchived,
             });
 
-            setEditError(
+            setWorkspace(updated);
+            setShowEditPanel(false);
+        } catch (err: any) {
+            setSaveError(
                 err?.detail ||
                 err?.error ||
                 "Unable to update workspace."
@@ -174,9 +112,7 @@ export default function WorkspaceDetailPage() {
     };
 
     const handleDeleteWorkspace = async () => {
-        if (!workspace || deleting) {
-            return;
-        }
+        if (!workspace) return;
 
         setDeleting(true);
         setDeleteError("");
@@ -194,6 +130,73 @@ export default function WorkspaceDetailPage() {
         }
     };
 
+    const handleOpenInvitePanel = async () => {
+        setShowInvitePanel(true);
+        setUserSearch("");
+        setUsersError("");
+
+        if (users.length > 0) return;
+
+        setLoadingUsers(true);
+
+        try {
+            const data = await getUsers();
+            setUsers(data);
+        } catch (err: any) {
+            setUsersError(
+                err?.detail ||
+                err?.error ||
+                "Unable to load users."
+            );
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
+    const existingMemberIds = useMemo(() => {
+        if (!workspace) return new Set<number>();
+
+        return new Set(
+            workspace.members.map((member) => member.user.id)
+        );
+    }, [workspace]);
+
+    const filteredUsers = useMemo(() => {
+        const search = userSearch.trim().toLowerCase();
+
+        return users
+            .filter((user) => !existingMemberIds.has(user.id))
+            .filter((user) => {
+                if (!search) return true;
+
+                const fullName =
+                    `${user.first_name} ${user.last_name}`.trim();
+
+                return (
+                    user.username.toLowerCase().includes(search) ||
+                    user.email.toLowerCase().includes(search) ||
+                    fullName.toLowerCase().includes(search)
+                );
+            });
+    }, [users, userSearch, existingMemberIds]);
+
+    const getUserName = (user: WorkspaceUser) => {
+        const fullName =
+            `${user.first_name} ${user.last_name}`.trim();
+
+        return fullName || user.username;
+    };
+
+    const getProfileImage = (profilePicture: string | null) => {
+        if (!profilePicture) return null;
+
+        if (profilePicture.startsWith("http")) {
+            return profilePicture;
+        }
+
+        return `${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${profilePicture}`;
+    };
+
     if (loading) {
         return <WorkspaceDetailSkeleton />;
     }
@@ -201,49 +204,24 @@ export default function WorkspaceDetailPage() {
     if (error || !workspace) {
         return (
             <div className="min-h-screen bg-slate-950 text-white">
-                <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
-                    <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/50 p-8 text-center">
-                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-400">
-                            !
-                        </div>
-
-                        <h1 className="mt-5 text-lg font-semibold">
-                            Workspace unavailable
-                        </h1>
-
-                        <p className="mt-2 text-sm text-slate-400">
-                            {error ||
-                                "The workspace could not be found."}
+                <div className="mx-auto max-w-7xl px-6 py-12">
+                    <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
+                        <p className="text-sm text-red-400">
+                            {error || "Workspace not found."}
                         </p>
-
-                        <button
-                            onClick={() => router.push("/workspaces")}
-                            className="mt-6 cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
-                        >
-                            Back to workspaces
-                        </button>
                     </div>
                 </div>
             </div>
         );
     }
 
-    const owner =
-        workspace.members.find(
-            (member) => member.role === "owner"
-        ) || workspace.members[0];
-
-    const ownerName = owner
-        ? getFullName(
-            owner.user.first_name,
-            owner.user.last_name,
-            owner.user.username
-        )
-        : "Unknown";
+    const owner = workspace.members.find(
+        (member) => member.role === "owner"
+    );
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
-            <main className="mx-auto max-w-7xl px-6 py-8">
+            <div className="mx-auto max-w-7xl px-6 py-8">
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() => router.push("/workspaces")}
@@ -254,8 +232,8 @@ export default function WorkspaceDetailPage() {
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={openEditPanel}
-                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-600 hover:text-white"
+                            onClick={handleOpenEdit}
+                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-indigo-500/50 hover:bg-slate-800"
                         >
                             Edit workspace
                         </button>
@@ -265,56 +243,44 @@ export default function WorkspaceDetailPage() {
                                 setDeleteError("");
                                 setShowDeleteModal(true);
                             }}
-                            className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/15"
+                            className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10"
                         >
                             Delete
                         </button>
                     </div>
                 </div>
 
-                <section className="mt-8 border-b border-slate-800/80 pb-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
-                                Workspace
-                            </p>
-
-                            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-semibold tracking-tight">
                                 {workspace.name}
                             </h1>
 
-                            <p className="mt-2 max-w-2xl text-sm text-slate-400">
-                                {workspace.description ||
-                                    "No workspace description provided."}
-                            </p>
-                        </div>
-
-                        <div
-                            className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${workspace.is_archived
-                                ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
-                                : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                                }`}
-                        >
                             <span
-                                className={`h-1.5 w-1.5 rounded-full ${workspace.is_archived
-                                    ? "bg-amber-400"
-                                    : "bg-emerald-400"
+                                className={`rounded-full px-3 py-1 text-xs font-medium ${workspace.is_archived
+                                        ? "bg-amber-500/10 text-amber-400"
+                                        : "bg-emerald-500/10 text-emerald-400"
                                     }`}
-                            />
-
-                            {workspace.is_archived
-                                ? "Archived"
-                                : "Active"}
+                            >
+                                {workspace.is_archived
+                                    ? "Archived"
+                                    : "Active"}
+                            </span>
                         </div>
-                    </div>
-                </section>
 
-                <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                            {workspace.description ||
+                                "No workspace description provided."}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Members
                         </p>
-
                         <p className="mt-3 text-2xl font-semibold">
                             {workspace.members_count}
                         </p>
@@ -324,7 +290,6 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Projects
                         </p>
-
                         <p className="mt-3 text-2xl font-semibold">
                             {workspace.projects_count}
                         </p>
@@ -334,9 +299,8 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Created by
                         </p>
-
-                        <p className="mt-3 truncate text-base font-semibold">
-                            {ownerName}
+                        <p className="mt-3 truncate text-sm font-medium text-slate-200">
+                            {owner?.user.username || "Unknown"}
                         </p>
                     </div>
 
@@ -344,358 +308,243 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Your role
                         </p>
-
-                        <p className="mt-3 text-base font-semibold capitalize">
+                        <p className="mt-3 text-sm font-medium capitalize text-indigo-400">
                             {owner?.role || "Member"}
                         </p>
                     </div>
-                </section>
+                </div>
 
                 <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                    <section className="rounded-xl border border-slate-800/80 bg-slate-900/40 lg:col-span-2">
-                        <div className="border-b border-slate-800/80 px-6 py-5">
-                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
-                                Workspace information
-                            </p>
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-6 lg:col-span-2">
+                        <h2 className="text-lg font-semibold">
+                            Workspace information
+                        </h2>
 
-                            <h2 className="mt-1 text-lg font-semibold">
-                                Details
-                            </h2>
-                        </div>
-
-                        <div className="divide-y divide-slate-800/70">
-                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
-                                <p className="text-sm text-slate-500">
-                                    Workspace name
-                                </p>
-
-                                <p className="text-sm font-medium text-slate-200 sm:col-span-2">
-                                    {workspace.name}
-                                </p>
+                        <div className="mt-6 divide-y divide-slate-800/80">
+                            <div className="flex items-center justify-between gap-6 py-4">
+                                <span className="text-sm text-slate-500">
+                                    Workspace ID
+                                </span>
+                                <span className="font-mono text-sm text-slate-300">
+                                    #{workspace.id}
+                                </span>
                             </div>
 
-                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
-                                <p className="text-sm text-slate-500">
-                                    Description
-                                </p>
-
-                                <p className="text-sm text-slate-300 sm:col-span-2">
-                                    {workspace.description ||
-                                        "No description provided."}
-                                </p>
+                            <div className="flex items-center justify-between gap-6 py-4">
+                                <span className="text-sm text-slate-500">
+                                    Created
+                                </span>
+                                <span className="text-sm text-slate-300">
+                                    {new Date(
+                                        workspace.created_at
+                                    ).toLocaleDateString()}
+                                </span>
                             </div>
 
-                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
-                                <p className="text-sm text-slate-500">
+                            <div className="flex items-center justify-between gap-6 py-4">
+                                <span className="text-sm text-slate-500">
+                                    Last updated
+                                </span>
+                                <span className="text-sm text-slate-300">
+                                    {new Date(
+                                        workspace.updated_at
+                                    ).toLocaleDateString()}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-6 py-4">
+                                <span className="text-sm text-slate-500">
                                     Status
-                                </p>
-
-                                <p
-                                    className={`text-sm font-medium sm:col-span-2 ${workspace.is_archived
-                                        ? "text-amber-400"
-                                        : "text-emerald-400"
-                                        }`}
-                                >
+                                </span>
+                                <span className="text-sm capitalize text-slate-300">
                                     {workspace.is_archived
                                         ? "Archived"
                                         : "Active"}
-                                </p>
-                            </div>
-
-                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
-                                <p className="text-sm text-slate-500">
-                                    Created
-                                </p>
-
-                                <p className="text-sm text-slate-300 sm:col-span-2">
-                                    {formatDate(workspace.created_at)}
-                                </p>
-                            </div>
-
-                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
-                                <p className="text-sm text-slate-500">
-                                    Last updated
-                                </p>
-
-                                <p className="text-sm text-slate-300 sm:col-span-2">
-                                    {formatDate(workspace.updated_at)}
-                                </p>
+                                </span>
                             </div>
                         </div>
-                    </section>
+                    </div>
 
-                    <section className="rounded-xl border border-slate-800/80 bg-slate-900/40">
-                        <div className="border-b border-slate-800/80 px-6 py-5">
-                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
-                                Owner
-                            </p>
-
-                            <h2 className="mt-1 text-lg font-semibold">
-                                Workspace owner
-                            </h2>
-                        </div>
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-6">
+                        <h2 className="text-lg font-semibold">
+                            Owner
+                        </h2>
 
                         {owner ? (
-                            <div className="p-6">
-                                <div className="flex items-center gap-4">
-                                    {owner.user.profile_picture ? (
-                                        <img
-                                            src={`${API_URL}${owner.user.profile_picture}`}
-                                            alt={ownerName}
-                                            className="h-12 w-12 rounded-lg object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
-                                            {ownerName
-                                                .charAt(0)
-                                                .toUpperCase()}
-                                        </div>
-                                    )}
-
-                                    <div className="min-w-0">
-                                        <p className="truncate font-semibold text-slate-100">
-                                            {ownerName}
-                                        </p>
-
-                                        <p className="truncate text-sm text-slate-500">
-                                            @{owner.user.username}
-                                        </p>
+                            <div className="mt-6 flex items-center gap-4">
+                                {getProfileImage(
+                                    owner.user.profile_picture
+                                ) ? (
+                                    <img
+                                        src={
+                                            getProfileImage(
+                                                owner.user.profile_picture
+                                            ) || ""
+                                        }
+                                        alt={getUserName(owner.user)}
+                                        className="h-12 w-12 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                        {getUserName(
+                                            owner.user
+                                        )
+                                            .charAt(0)
+                                            .toUpperCase()}
                                     </div>
-                                </div>
+                                )}
 
-                                <div className="mt-6 space-y-4">
-                                    <div>
-                                        <p className="text-xs uppercase tracking-wider text-slate-600">
-                                            Email
-                                        </p>
-
-                                        <p className="mt-1 break-all text-sm text-slate-300">
-                                            {owner.user.email || "—"}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs uppercase tracking-wider text-slate-600">
-                                            Phone
-                                        </p>
-
-                                        <p className="mt-1 text-sm text-slate-300">
-                                            {owner.user.phone_number || "—"}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs uppercase tracking-wider text-slate-600">
-                                            Address
-                                        </p>
-
-                                        <p className="mt-1 text-sm text-slate-300">
-                                            {owner.user.address || "—"}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs uppercase tracking-wider text-slate-600">
-                                            Joined
-                                        </p>
-
-                                        <p className="mt-1 text-sm text-slate-300">
-                                            {formatShortDate(
-                                                owner.joined_at
-                                            )}
-                                        </p>
-                                    </div>
+                                <div className="min-w-0">
+                                    <p className="truncate font-medium text-slate-200">
+                                        {getUserName(owner.user)}
+                                    </p>
+                                    <p className="mt-1 truncate text-sm text-slate-500">
+                                        @{owner.user.username}
+                                    </p>
+                                    <p className="mt-1 truncate text-xs text-slate-600">
+                                        {owner.user.email}
+                                    </p>
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-6 text-sm text-slate-500">
-                                No owner information available.
-                            </div>
+                            <p className="mt-6 text-sm text-slate-500">
+                                Owner information unavailable.
+                            </p>
                         )}
-                    </section>
+                    </div>
                 </div>
 
-                <section className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
-                    <div className="flex flex-col gap-4 border-b border-slate-800/80 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
+                    <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-5">
                         <div>
-                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
-                                Team
-                            </p>
-
-                            <h2 className="mt-1 text-lg font-semibold">
+                            <h2 className="text-lg font-semibold">
                                 Members
                             </h2>
+                            <p className="mt-1 text-sm text-slate-500">
+                                People who currently have access to this workspace.
+                            </p>
                         </div>
 
                         <button
-                            onClick={() =>
-                                router.push(
-                                    `/workspaces/${workspace.id}/members/invite`
-                                )
-                            }
-                            className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+                            onClick={handleOpenInvitePanel}
+                            className="cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
                         >
                             Invite member
                         </button>
                     </div>
 
-                    {workspace.members.length > 0 ? (
-                        <div className="divide-y divide-slate-800/70">
-                            {workspace.members.map((member) => {
-                                const name = getFullName(
-                                    member.user.first_name,
-                                    member.user.last_name,
-                                    member.user.username
-                                );
-
-                                return (
-                                    <div
-                                        key={member.id}
-                                        className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
-                                    >
-                                        <div className="flex min-w-0 items-center gap-4">
-                                            {member.user.profile_picture ? (
-                                                <img
-                                                    src={`${API_URL}${member.user.profile_picture}`}
-                                                    alt={name}
-                                                    className="h-10 w-10 rounded-lg object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-sm font-semibold text-slate-300">
-                                                    {name
-                                                        .charAt(0)
-                                                        .toUpperCase()}
-                                                </div>
-                                            )}
-
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="truncate text-sm font-medium text-slate-200">
-                                                        {name}
-                                                    </p>
-
-                                                    {member.user.is_active && (
-                                                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                                                    )}
-                                                </div>
-
-                                                <p className="mt-1 truncate text-xs text-slate-500">
-                                                    @{member.user.username}
-                                                </p>
+                    <div className="divide-y divide-slate-800/80">
+                        {workspace.members.length > 0 ? (
+                            workspace.members.map((member) => (
+                                <div
+                                    key={member.id}
+                                    className="flex items-center justify-between gap-4 px-6 py-5"
+                                >
+                                    <div className="flex min-w-0 items-center gap-4">
+                                        {getProfileImage(
+                                            member.user.profile_picture
+                                        ) ? (
+                                            <img
+                                                src={
+                                                    getProfileImage(
+                                                        member.user
+                                                            .profile_picture
+                                                    ) || ""
+                                                }
+                                                alt={getUserName(
+                                                    member.user
+                                                )}
+                                                className="h-11 w-11 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-slate-300">
+                                                {getUserName(
+                                                    member.user
+                                                )
+                                                    .charAt(0)
+                                                    .toUpperCase()}
                                             </div>
-                                        </div>
+                                        )}
 
-                                        <div className="flex items-center gap-6 sm:justify-end">
-                                            <div className="hidden text-right sm:block">
-                                                <p className="text-xs text-slate-600">
-                                                    Joined
-                                                </p>
-
-                                                <p className="mt-1 text-xs text-slate-400">
-                                                    {formatShortDate(
-                                                        member.joined_at
-                                                    )}
-                                                </p>
-                                            </div>
-
-                                            <span
-                                                className={`rounded-md border px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
-                                                    ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
-                                                    : member.role === "admin"
-                                                        ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
-                                                        : "border-slate-700 bg-slate-800/50 text-slate-400"
-                                                    }`}
-                                            >
-                                                {member.role}
-                                            </span>
+                                        <div className="min-w-0">
+                                            <p className="truncate font-medium text-slate-200">
+                                                {getUserName(
+                                                    member.user
+                                                )}
+                                            </p>
+                                            <p className="truncate text-sm text-slate-500">
+                                                @{member.user.username}
+                                            </p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="px-6 py-12 text-center">
-                            <p className="text-sm text-slate-400">
-                                No members found.
-                            </p>
-                        </div>
-                    )}
-                </section>
 
-                <section className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
-                    <div className="flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
-                                Projects
-                            </p>
+                                    <span
+                                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium capitalize ${member.role === "owner"
+                                                ? "bg-indigo-500/10 text-indigo-400"
+                                                : member.role === "admin"
+                                                    ? "bg-amber-500/10 text-amber-400"
+                                                    : "bg-slate-800 text-slate-400"
+                                            }`}
+                                    >
+                                        {member.role}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="px-6 py-10 text-center">
+                                <p className="text-sm text-slate-500">
+                                    No members found.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-                            <h2 className="mt-1 text-lg font-semibold">
-                                Workspace projects
-                            </h2>
-
-                            <p className="mt-1 text-sm text-slate-500">
-                                Projects created inside this workspace.
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={() =>
-                                router.push(
-                                    `/workspaces/${workspace.id}/projects/new`
-                                )
-                            }
-                            className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
-                        >
-                            Create project
-                        </button>
+                <div className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
+                    <div className="border-b border-slate-800/80 px-6 py-5">
+                        <h2 className="text-lg font-semibold">
+                            Projects
+                        </h2>
+                        <p className="mt-1 text-sm text-slate-500">
+                            Projects belonging to this workspace.
+                        </p>
                     </div>
 
-                    {workspace.projects_count === 0 ? (
-                        <div className="border-t border-slate-800/70 px-6 py-12 text-center">
-                            <p className="text-sm font-medium text-slate-300">
-                                No projects yet
-                            </p>
-
-                            <p className="mt-1 text-sm text-slate-500">
-                                Create your first project to start organizing
-                                work.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="border-t border-slate-800/70 px-6 py-8">
-                            <p className="text-sm text-slate-400">
-                                {workspace.projects_count} projects available
-                                in this workspace.
-                            </p>
-                        </div>
-                    )}
-                </section>
-            </main>
+                    <div className="px-6 py-10 text-center">
+                        <p className="text-sm text-slate-500">
+                            {workspace.projects_count === 0
+                                ? "No projects in this workspace yet."
+                                : `${workspace.projects_count} project${workspace.projects_count === 1
+                                    ? ""
+                                    : "s"
+                                } in this workspace.`}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             {showEditPanel && (
                 <div className="fixed inset-0 z-50">
-                    <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={closeEditPanel}
+                    <button
+                        onClick={() => setShowEditPanel(false)}
+                        className="absolute inset-0 h-full w-full cursor-pointer bg-black/60 backdrop-blur-sm"
+                        aria-label="Close edit panel"
                     />
 
-                    <div className="absolute right-0 top-0 flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-slate-950 shadow-2xl">
-                        <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-5">
+                    <div className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
-                                    Workspace
-                                </p>
-
-                                <h2 className="mt-1 text-lg font-semibold">
+                                <h2 className="text-xl font-semibold">
                                     Edit workspace
                                 </h2>
+                                <p className="mt-1 text-sm text-slate-500">
+                                    Update workspace details.
+                                </p>
                             </div>
 
                             <button
-                                type="button"
-                                onClick={closeEditPanel}
-                                disabled={saving}
-                                className="cursor-pointer text-2xl leading-none text-slate-500 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                onClick={() => setShowEditPanel(false)}
+                                className="cursor-pointer text-2xl text-slate-500 transition hover:text-white"
                             >
                                 ×
                             </button>
@@ -703,178 +552,231 @@ export default function WorkspaceDetailPage() {
 
                         <form
                             onSubmit={handleUpdateWorkspace}
-                            className="flex flex-1 flex-col"
+                            className="mt-8 space-y-6"
                         >
-                            <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
-                                {editError && (
-                                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                                        {editError}
-                                    </div>
-                                )}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-300">
+                                    Name
+                                </label>
 
+                                <input
+                                    value={name}
+                                    onChange={(event) =>
+                                        setName(event.target.value)
+                                    }
+                                    className="w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
+                                    placeholder="Workspace name"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-300">
+                                    Description
+                                </label>
+
+                                <textarea
+                                    value={description}
+                                    onChange={(event) =>
+                                        setDescription(event.target.value)
+                                    }
+                                    rows={5}
+                                    className="w-full resize-none rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
+                                    placeholder="Workspace description"
+                                />
+                            </div>
+
+                            <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-4">
                                 <div>
-                                    <label
-                                        htmlFor="workspace-name"
-                                        className="text-sm font-medium text-slate-300"
-                                    >
-                                        Workspace name
-                                    </label>
-
-                                    <input
-                                        id="workspace-name"
-                                        type="text"
-                                        value={editName}
-                                        onChange={(event) =>
-                                            setEditName(event.target.value)
-                                        }
-                                        required
-                                        disabled={saving}
-                                        className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                        placeholder="Enter workspace name"
-                                    />
-
-                                    {fieldErrors.name && (
-                                        <p className="mt-2 text-xs text-red-400">
-                                            {Array.isArray(fieldErrors.name)
-                                                ? fieldErrors.name.join(" ")
-                                                : fieldErrors.name}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label
-                                        htmlFor="workspace-description"
-                                        className="text-sm font-medium text-slate-300"
-                                    >
-                                        Description
-                                    </label>
-
-                                    <textarea
-                                        id="workspace-description"
-                                        value={editDescription}
-                                        onChange={(event) =>
-                                            setEditDescription(
-                                                event.target.value
-                                            )
-                                        }
-                                        disabled={saving}
-                                        rows={6}
-                                        className="mt-2 w-full resize-none rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                        placeholder="Describe what this workspace is used for"
-                                    />
-
-                                    {fieldErrors.description && (
-                                        <p className="mt-2 text-xs text-red-400">
-                                            {Array.isArray(
-                                                fieldErrors.description
-                                            )
-                                                ? fieldErrors.description.join(
-                                                    " "
-                                                )
-                                                : fieldErrors.description}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <p className="text-sm font-medium text-slate-200">
-                                                Archive workspace
-                                            </p>
-
-                                            <p className="mt-1 text-xs leading-5 text-slate-500">
-                                                Archived workspaces can be kept
-                                                for historical reference
-                                                without being treated as
-                                                active.
-                                            </p>
-                                        </div>
-
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setEditArchived(
-                                                    !editArchived
-                                                )
-                                            }
-                                            disabled={saving}
-                                            className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition ${editArchived
-                                                ? "bg-amber-500"
-                                                : "bg-slate-700"
-                                                } disabled:cursor-not-allowed disabled:opacity-50`}
-                                        >
-                                            <span
-                                                className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${editArchived
-                                                    ? "left-6"
-                                                    : "left-1"
-                                                    }`}
-                                            />
-                                        </button>
-                                    </div>
-
-                                    <p
-                                        className={`mt-4 text-xs font-medium ${editArchived
-                                            ? "text-amber-400"
-                                            : "text-emerald-400"
-                                            }`}
-                                    >
-                                        {editArchived
-                                            ? "Workspace will be archived"
-                                            : "Workspace is active"}
+                                    <p className="text-sm font-medium text-slate-200">
+                                        Archived
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Archive this workspace when it is no longer active.
                                     </p>
                                 </div>
-                            </div>
 
-                            <div className="flex items-center justify-end gap-3 border-t border-slate-800/80 px-6 py-5">
-                                <button
-                                    type="button"
-                                    onClick={closeEditPanel}
-                                    disabled={saving}
-                                    className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Cancel
-                                </button>
-
-                                <button
-                                    type="submit"
-                                    disabled={
-                                        saving || !editName.trim()
+                                <input
+                                    type="checkbox"
+                                    checked={isArchived}
+                                    onChange={(event) =>
+                                        setIsArchived(
+                                            event.target.checked
+                                        )
                                     }
-                                    className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    {saving
-                                        ? "Saving..."
-                                        : "Save changes"}
-                                </button>
-                            </div>
+                                    className="h-4 w-4 cursor-pointer accent-indigo-500"
+                                />
+                            </label>
+
+                            {saveError && (
+                                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+                                    {saveError}
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="w-full cursor-pointer rounded-lg bg-indigo-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {saving
+                                    ? "Saving..."
+                                    : "Save changes"}
+                            </button>
                         </form>
                     </div>
                 </div>
             )}
 
-            {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-400">
-                            !
+            {showInvitePanel && (
+                <div className="fixed inset-0 z-50">
+                    <button
+                        onClick={() => setShowInvitePanel(false)}
+                        className="absolute inset-0 h-full w-full cursor-pointer bg-black/60 backdrop-blur-sm"
+                        aria-label="Close invite panel"
+                    />
+
+                    <div className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold">
+                                    Invite member
+                                </h2>
+                                <p className="mt-1 text-sm text-slate-500">
+                                    Search users and choose who to invite.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() =>
+                                    setShowInvitePanel(false)
+                                }
+                                className="cursor-pointer text-2xl text-slate-500 transition hover:text-white"
+                            >
+                                ×
+                            </button>
                         </div>
 
-                        <h2 className="mt-5 text-lg font-semibold text-white">
+                        <div className="mt-6">
+                            <div className="relative">
+                                <input
+                                    value={userSearch}
+                                    onChange={(event) =>
+                                        setUserSearch(
+                                            event.target.value
+                                        )
+                                    }
+                                    placeholder="Search by name, username or email..."
+                                    className="w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
+                                />
+                            </div>
+                        </div>
+
+                        {usersError && (
+                            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+                                {usersError}
+                            </div>
+                        )}
+
+                        <div className="mt-6">
+                            {loadingUsers ? (
+                                <div className="space-y-3">
+                                    {[1, 2, 3, 4].map((item) => (
+                                        <div
+                                            key={item}
+                                            className="h-20 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40"
+                                        />
+                                    ))}
+                                </div>
+                            ) : filteredUsers.length > 0 ? (
+                                <div className="space-y-3">
+                                    {filteredUsers.map((user) => (
+                                        <div
+                                            key={user.id}
+                                            className="flex items-center justify-between gap-4 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 transition hover:border-slate-700"
+                                        >
+                                            <div className="flex min-w-0 items-center gap-3">
+                                                {getProfileImage(
+                                                    user.profile_picture
+                                                ) ? (
+                                                    <img
+                                                        src={
+                                                            getProfileImage(
+                                                                user.profile_picture
+                                                            ) || ""
+                                                        }
+                                                        alt={getUserName(
+                                                            user
+                                                        )}
+                                                        className="h-11 w-11 shrink-0 rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                                        {getUserName(
+                                                            user
+                                                        )
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+                                                    </div>
+                                                )}
+
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-medium text-slate-200">
+                                                        {getUserName(
+                                                            user
+                                                        )}
+                                                    </p>
+
+                                                    <p className="truncate text-xs text-slate-500">
+                                                        @{user.username}
+                                                    </p>
+
+                                                    <p className="truncate text-xs text-slate-600">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                className="shrink-0 cursor-pointer rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs font-medium text-indigo-400 transition hover:bg-indigo-500/20"
+                                            >
+                                                Invite
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 px-6 py-10 text-center">
+                                    <p className="text-sm text-slate-500">
+                                        {userSearch.trim()
+                                            ? "No users match your search."
+                                            : "No users available to invite."}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-2xl">
+                        <h2 className="text-xl font-semibold">
                             Delete workspace?
                         </h2>
 
-                        <p className="mt-2 text-sm leading-6 text-slate-400">
-                            This action will permanently delete{" "}
+                        <p className="mt-3 text-sm leading-6 text-slate-400">
+                            This will permanently delete{" "}
                             <span className="font-medium text-slate-200">
                                 {workspace.name}
                             </span>{" "}
-                            and its associated data. This cannot be undone.
+                            and its associated data. This action cannot be
+                            undone.
                         </p>
 
                         {deleteError && (
-                            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
                                 {deleteError}
                             </div>
                         )}
@@ -885,7 +787,7 @@ export default function WorkspaceDetailPage() {
                                     setShowDeleteModal(false)
                                 }
                                 disabled={deleting}
-                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Cancel
                             </button>
@@ -893,7 +795,7 @@ export default function WorkspaceDetailPage() {
                             <button
                                 onClick={handleDeleteWorkspace}
                                 disabled={deleting}
-                                className="cursor-pointer rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="cursor-pointer rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {deleting
                                     ? "Deleting..."
