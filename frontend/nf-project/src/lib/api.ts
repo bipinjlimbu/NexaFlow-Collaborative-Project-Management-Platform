@@ -15,7 +15,10 @@ export async function apiFetch(
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw data;
+        throw {
+            ...data,
+            status: response.status,
+        };
     }
 
     return data;
@@ -27,11 +30,32 @@ export async function authFetch(
 ) {
     const access = localStorage.getItem("access");
 
-    return apiFetch(endpoint, {
-        ...options,
-        headers: {
-            ...options?.headers,
-            Authorization: `Bearer ${access}`,
-        },
-    });
+    if (!access) {
+        localStorage.removeItem("refresh");
+        localStorage.removeItem("user");
+        window.dispatchEvent(new Event("auth-change"));
+        window.location.href = "/login";
+        throw new Error("Authentication required");
+    }
+
+    try {
+        return await apiFetch(endpoint, {
+            ...options,
+            headers: {
+                ...options?.headers,
+                Authorization: `Bearer ${access}`,
+            },
+        });
+    } catch (error: any) {
+        if (error?.status === 401) {
+            localStorage.removeItem("access");
+            localStorage.removeItem("refresh");
+            localStorage.removeItem("user");
+
+            window.dispatchEvent(new Event("auth-change"));
+            window.location.href = "/login";
+        }
+
+        throw error;
+    }
 }
