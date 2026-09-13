@@ -130,7 +130,6 @@ export default function WorkspacesPage() {
         setCreateError("");
     };
 
-    console.log("Workspace", workspaces);
     if (isAuthenticated === null || loading) {
         return <WorkspacesSkeleton />;
     }
