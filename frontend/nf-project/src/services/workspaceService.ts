@@ -98,3 +98,9 @@ export async function updateWorkspace(
         body: JSON.stringify(data),
     });
 }
+
+export async function deleteWorkspace(id: number) {
+    return authFetch(`/workspaces/${id}/`, {
+        method: "DELETE",
+    });
+}
