@@ -1,9 +1,10 @@
+from django.core.mail import message
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Workspace, WorkspaceMember, User, WorkspaceInvitation
-from ..serializers import WorkspaceSerializer, UserSerializer
+from ..models import Workspace, WorkspaceMember, User, WorkspaceInvitation, Notification
+from ..serializers import WorkspaceSerializer, UserSerializer, NotificationSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -119,5 +120,7 @@ def send_workspace_invitation(request, workspace_id):
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
         invitation = WorkspaceInvitation(workspace=workspace, invited_user=invited_user, invited_by=request.user, role=role)
+        notification = Notification(user=invited_user, type="INVITATION", title="Workspace Invitation", message=f"You have been invited to join the workspace '{workspace.name}'.")
         invitation.save()
+        notification.save()
         return Response({"message": "Invitation sent successfully."}, status=status.HTTP_201_CREATED)
