@@ -6,6 +6,7 @@ import {
     deleteWorkspace,
     getUsers,
     getWorkspace,
+    sendWorkspaceInvitation,
     updateWorkspace,
     WorkspaceDetail,
     WorkspaceUser,
@@ -24,6 +25,7 @@ export default function WorkspaceDetailPage() {
 
     const [showEditPanel, setShowEditPanel] = useState(false);
     const [showInvitePanel, setShowInvitePanel] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -32,7 +34,6 @@ export default function WorkspaceDetailPage() {
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState("");
 
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState("");
 
@@ -41,16 +42,24 @@ export default function WorkspaceDetailPage() {
     const [usersError, setUsersError] = useState("");
     const [userSearch, setUserSearch] = useState("");
 
+    const [invitingUserId, setInvitingUserId] = useState<number | null>(null);
+    const [invitedUserIds, setInvitedUserIds] = useState<number[]>([]);
+    const [inviteRole, setInviteRole] = useState<"admin" | "member">("member");
+    const [inviteError, setInviteError] = useState("");
+
     useEffect(() => {
         const access = localStorage.getItem("access");
 
         if (!access) {
-            router.push("/login");
+            router.replace("/login");
             return;
         }
 
         async function loadWorkspace() {
             try {
+                setLoading(true);
+                setError("");
+
                 const data = await getWorkspace(workspaceId);
 
                 setWorkspace(data);
@@ -68,11 +77,50 @@ export default function WorkspaceDetailPage() {
             }
         }
 
-        loadWorkspace();
-    }, [router, workspaceId]);
+        if (workspaceId) {
+            loadWorkspace();
+        }
+    }, [workspaceId, router]);
 
-    const handleOpenEdit = () => {
-        if (!workspace) return;
+    const existingMemberIds = useMemo(() => {
+        if (!workspace) {
+            return new Set<number>();
+        }
+
+        return new Set(
+            workspace.members.map((member) => member.user.id)
+        );
+    }, [workspace]);
+
+    const filteredUsers = useMemo(() => {
+        const search = userSearch.trim().toLowerCase();
+
+        return users
+            .filter((user) => !existingMemberIds.has(user.id))
+            .filter((user) => {
+                if (!search) {
+                    return true;
+                }
+
+                const fullName =
+                    `${user.first_name} ${user.last_name}`.trim();
+
+                return (
+                    user.username.toLowerCase().includes(search) ||
+                    user.email.toLowerCase().includes(search) ||
+                    fullName.toLowerCase().includes(search)
+                );
+            });
+    }, [users, userSearch, existingMemberIds]);
+
+    const owner = workspace?.members.find(
+        (member) => member.role === "owner"
+    );
+
+    const handleOpenEditPanel = () => {
+        if (!workspace) {
+            return;
+        }
 
         setName(workspace.name);
         setDescription(workspace.description || "");
@@ -81,12 +129,10 @@ export default function WorkspaceDetailPage() {
         setShowEditPanel(true);
     };
 
-    const handleUpdateWorkspace = async (
-        event: React.FormEvent<HTMLFormElement>
-    ) => {
-        event.preventDefault();
-
-        if (!workspace) return;
+    const handleUpdateWorkspace = async () => {
+        if (!workspace) {
+            return;
+        }
 
         setSaving(true);
         setSaveError("");
@@ -101,18 +147,26 @@ export default function WorkspaceDetailPage() {
             setWorkspace(updated);
             setShowEditPanel(false);
         } catch (err: any) {
-            setSaveError(
-                err?.detail ||
-                err?.error ||
-                "Unable to update workspace."
-            );
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setSaveError(
+                    messages || "Unable to update workspace."
+                );
+            } else {
+                setSaveError("Unable to update workspace.");
+            }
         } finally {
             setSaving(false);
         }
     };
 
     const handleDeleteWorkspace = async () => {
-        if (!workspace) return;
+        if (!workspace) {
+            return;
+        }
 
         setDeleting(true);
         setDeleteError("");
@@ -121,11 +175,18 @@ export default function WorkspaceDetailPage() {
             await deleteWorkspace(workspace.id);
             router.push("/workspaces");
         } catch (err: any) {
-            setDeleteError(
-                err?.detail ||
-                err?.error ||
-                "Unable to delete workspace."
-            );
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setDeleteError(
+                    messages || "Unable to delete workspace."
+                );
+            } else {
+                setDeleteError("Unable to delete workspace.");
+            }
+        } finally {
             setDeleting(false);
         }
     };
@@ -134,8 +195,11 @@ export default function WorkspaceDetailPage() {
         setShowInvitePanel(true);
         setUserSearch("");
         setUsersError("");
+        setInviteError("");
 
-        if (users.length > 0) return;
+        if (users.length > 0) {
+            return;
+        }
 
         setLoadingUsers(true);
 
@@ -143,81 +207,94 @@ export default function WorkspaceDetailPage() {
             const data = await getUsers();
             setUsers(data);
         } catch (err: any) {
-            setUsersError(
-                err?.detail ||
-                err?.error ||
-                "Unable to load users."
-            );
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setUsersError(
+                    messages || "Unable to load users."
+                );
+            } else {
+                setUsersError("Unable to load users.");
+            }
         } finally {
             setLoadingUsers(false);
         }
     };
 
-    const existingMemberIds = useMemo(() => {
-        if (!workspace) return new Set<number>();
-
-        return new Set(
-            workspace.members.map((member) => member.user.id)
-        );
-    }, [workspace]);
-
-    const filteredUsers = useMemo(() => {
-        const search = userSearch.trim().toLowerCase();
-
-        return users
-            .filter((user) => !existingMemberIds.has(user.id))
-            .filter((user) => {
-                if (!search) return true;
-
-                const fullName =
-                    `${user.first_name} ${user.last_name}`.trim();
-
-                return (
-                    user.username.toLowerCase().includes(search) ||
-                    user.email.toLowerCase().includes(search) ||
-                    fullName.toLowerCase().includes(search)
-                );
-            });
-    }, [users, userSearch, existingMemberIds]);
-
-    const getUserName = (user: WorkspaceUser) => {
-        const fullName =
-            `${user.first_name} ${user.last_name}`.trim();
-
-        return fullName || user.username;
-    };
-
-    const getProfileImage = (profilePicture: string | null) => {
-        if (!profilePicture) return null;
-
-        if (profilePicture.startsWith("http")) {
-            return profilePicture;
+    const handleInviteUser = async (userId: number) => {
+        if (!workspace) {
+            return;
         }
 
-        return `${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${profilePicture}`;
+        setInvitingUserId(userId);
+        setInviteError("");
+
+        try {
+            await sendWorkspaceInvitation(
+                workspace.id,
+                userId,
+                inviteRole
+            );
+
+            setInvitedUserIds((previous) => [
+                ...previous,
+                userId,
+            ]);
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setInviteError(
+                    messages || "Unable to send invitation."
+                );
+            } else {
+                setInviteError("Unable to send invitation.");
+            }
+        } finally {
+            setInvitingUserId(null);
+        }
     };
 
     if (loading) {
         return <WorkspaceDetailSkeleton />;
     }
 
-    if (error || !workspace) {
+    if (error) {
         return (
             <div className="min-h-screen bg-slate-950 text-white">
-                <div className="mx-auto max-w-7xl px-6 py-12">
-                    <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
-                        <p className="text-sm text-red-400">
-                            {error || "Workspace not found."}
+                <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
+                    <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-slate-900/60 p-8 text-center">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+                            !
+                        </div>
+
+                        <h1 className="mt-5 text-xl font-semibold">
+                            Unable to load workspace
+                        </h1>
+
+                        <p className="mt-2 text-sm text-slate-400">
+                            {error}
                         </p>
+
+                        <button
+                            onClick={() => router.push("/workspaces")}
+                            className="mt-6 cursor-pointer rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-400"
+                        >
+                            Back to Workspaces
+                        </button>
                     </div>
                 </div>
             </div>
         );
     }
 
-    const owner = workspace.members.find(
-        (member) => member.role === "owner"
-    );
+    if (!workspace) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
@@ -232,8 +309,8 @@ export default function WorkspaceDetailPage() {
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={handleOpenEdit}
-                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-indigo-500/50 hover:bg-slate-800"
+                            onClick={handleOpenEditPanel}
+                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-800"
                         >
                             Edit workspace
                         </button>
@@ -243,24 +320,24 @@ export default function WorkspaceDetailPage() {
                                 setDeleteError("");
                                 setShowDeleteModal(true);
                             }}
-                            className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10"
+                            className="cursor-pointer rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20"
                         >
                             Delete
                         </button>
                     </div>
                 </div>
 
-                <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="mt-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-semibold tracking-tight">
+                            <h1 className="text-3xl font-bold tracking-tight">
                                 {workspace.name}
                             </h1>
 
                             <span
-                                className={`rounded-full px-3 py-1 text-xs font-medium ${workspace.is_archived
-                                        ? "bg-amber-500/10 text-amber-400"
-                                        : "bg-emerald-500/10 text-emerald-400"
+                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${workspace.is_archived
+                                    ? "bg-amber-500/10 text-amber-400"
+                                    : "bg-emerald-500/10 text-emerald-400"
                                     }`}
                             >
                                 {workspace.is_archived
@@ -269,7 +346,7 @@ export default function WorkspaceDetailPage() {
                             </span>
                         </div>
 
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
                             {workspace.description ||
                                 "No workspace description provided."}
                         </p>
@@ -278,37 +355,41 @@ export default function WorkspaceDetailPage() {
 
                 <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
                             Members
                         </p>
+
                         <p className="mt-3 text-2xl font-semibold">
                             {workspace.members_count}
                         </p>
                     </div>
 
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
                             Projects
                         </p>
+
                         <p className="mt-3 text-2xl font-semibold">
                             {workspace.projects_count}
                         </p>
                     </div>
 
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
                             Created by
                         </p>
-                        <p className="mt-3 truncate text-sm font-medium text-slate-200">
+
+                        <p className="mt-3 truncate text-sm font-semibold text-slate-200">
                             {owner?.user.username || "Unknown"}
                         </p>
                     </div>
 
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
                             Your role
                         </p>
-                        <p className="mt-3 text-sm font-medium capitalize text-indigo-400">
+
+                        <p className="mt-3 text-sm font-semibold capitalize text-indigo-400">
                             {owner?.role || "Member"}
                         </p>
                     </div>
@@ -316,15 +397,24 @@ export default function WorkspaceDetailPage() {
 
                 <div className="mt-6 grid gap-6 lg:grid-cols-3">
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-6 lg:col-span-2">
-                        <h2 className="text-lg font-semibold">
-                            Workspace information
-                        </h2>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg font-semibold">
+                                    Workspace information
+                                </h2>
+
+                                <p className="mt-1 text-sm text-slate-500">
+                                    Basic details and workspace status.
+                                </p>
+                            </div>
+                        </div>
 
                         <div className="mt-6 divide-y divide-slate-800/80">
                             <div className="flex items-center justify-between gap-6 py-4">
                                 <span className="text-sm text-slate-500">
                                     Workspace ID
                                 </span>
+
                                 <span className="font-mono text-sm text-slate-300">
                                     #{workspace.id}
                                 </span>
@@ -334,6 +424,7 @@ export default function WorkspaceDetailPage() {
                                 <span className="text-sm text-slate-500">
                                     Created
                                 </span>
+
                                 <span className="text-sm text-slate-300">
                                     {new Date(
                                         workspace.created_at
@@ -345,6 +436,7 @@ export default function WorkspaceDetailPage() {
                                 <span className="text-sm text-slate-500">
                                     Last updated
                                 </span>
+
                                 <span className="text-sm text-slate-300">
                                     {new Date(
                                         workspace.updated_at
@@ -356,6 +448,7 @@ export default function WorkspaceDetailPage() {
                                 <span className="text-sm text-slate-500">
                                     Status
                                 </span>
+
                                 <span className="text-sm capitalize text-slate-300">
                                     {workspace.is_archived
                                         ? "Archived"
@@ -367,43 +460,70 @@ export default function WorkspaceDetailPage() {
 
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-6">
                         <h2 className="text-lg font-semibold">
-                            Owner
+                            Workspace owner
                         </h2>
 
                         {owner ? (
-                            <div className="mt-6 flex items-center gap-4">
-                                {getProfileImage(
-                                    owner.user.profile_picture
-                                ) ? (
-                                    <img
-                                        src={
-                                            getProfileImage(
-                                                owner.user.profile_picture
-                                            ) || ""
-                                        }
-                                        alt={getUserName(owner.user)}
-                                        className="h-12 w-12 rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-semibold text-indigo-400">
-                                        {getUserName(
-                                            owner.user
-                                        )
-                                            .charAt(0)
-                                            .toUpperCase()}
-                                    </div>
-                                )}
+                            <div className="mt-6">
+                                <div className="flex items-center gap-4">
+                                    {owner.user.profile_picture ? (
+                                        <img
+                                            src={
+                                                owner.user.profile_picture.startsWith(
+                                                    "http"
+                                                )
+                                                    ? owner.user
+                                                        .profile_picture
+                                                    : `${process.env.NEXT_PUBLIC_API_URL?.replace(
+                                                        "/api",
+                                                        ""
+                                                    )}${owner.user.profile_picture}`
+                                            }
+                                            alt={owner.user.username}
+                                            className="h-12 w-12 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                            {owner.user.username
+                                                .charAt(0)
+                                                .toUpperCase()}
+                                        </div>
+                                    )}
 
-                                <div className="min-w-0">
-                                    <p className="truncate font-medium text-slate-200">
-                                        {getUserName(owner.user)}
-                                    </p>
-                                    <p className="mt-1 truncate text-sm text-slate-500">
-                                        @{owner.user.username}
-                                    </p>
-                                    <p className="mt-1 truncate text-xs text-slate-600">
-                                        {owner.user.email}
-                                    </p>
+                                    <div className="min-w-0">
+                                        <p className="truncate font-medium text-white">
+                                            {owner.user.first_name ||
+                                                owner.user.username}
+                                        </p>
+
+                                        <p className="truncate text-sm text-slate-500">
+                                            @{owner.user.username}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6 space-y-3">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-slate-600">
+                                            Email
+                                        </p>
+
+                                        <p className="mt-1 break-all text-sm text-slate-300">
+                                            {owner.user.email}
+                                        </p>
+                                    </div>
+
+                                    {owner.user.phone_number && (
+                                        <div>
+                                            <p className="text-xs uppercase tracking-wider text-slate-600">
+                                                Phone
+                                            </p>
+
+                                            <p className="mt-1 text-sm text-slate-300">
+                                                {owner.user.phone_number}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -420,8 +540,9 @@ export default function WorkspaceDetailPage() {
                             <h2 className="text-lg font-semibold">
                                 Members
                             </h2>
+
                             <p className="mt-1 text-sm text-slate-500">
-                                People who currently have access to this workspace.
+                                People who belong to this workspace.
                             </p>
                         </div>
 
@@ -438,52 +559,57 @@ export default function WorkspaceDetailPage() {
                             workspace.members.map((member) => (
                                 <div
                                     key={member.id}
-                                    className="flex items-center justify-between gap-4 px-6 py-5"
+                                    className="flex items-center justify-between gap-4 px-6 py-4"
                                 >
                                     <div className="flex min-w-0 items-center gap-4">
-                                        {getProfileImage(
-                                            member.user.profile_picture
-                                        ) ? (
+                                        {member.user.profile_picture ? (
                                             <img
                                                 src={
-                                                    getProfileImage(
-                                                        member.user
+                                                    member.user.profile_picture.startsWith(
+                                                        "http"
+                                                    )
+                                                        ? member.user
                                                             .profile_picture
-                                                    ) || ""
+                                                        : `${process.env.NEXT_PUBLIC_API_URL?.replace(
+                                                            "/api",
+                                                            ""
+                                                        )}${member.user.profile_picture}`
                                                 }
-                                                alt={getUserName(
-                                                    member.user
-                                                )}
-                                                className="h-11 w-11 rounded-full object-cover"
+                                                alt={
+                                                    member.user.username
+                                                }
+                                                className="h-10 w-10 rounded-full object-cover"
                                             />
                                         ) : (
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-slate-300">
-                                                {getUserName(
-                                                    member.user
-                                                )
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-slate-300">
+                                                {member.user.username
                                                     .charAt(0)
                                                     .toUpperCase()}
                                             </div>
                                         )}
 
                                         <div className="min-w-0">
-                                            <p className="truncate font-medium text-slate-200">
-                                                {getUserName(
-                                                    member.user
-                                                )}
+                                            <p className="truncate text-sm font-medium text-white">
+                                                {member.user.first_name ||
+                                                    member.user.username}
+                                                {member.user.last_name
+                                                    ? ` ${member.user.last_name}`
+                                                    : ""}
                                             </p>
-                                            <p className="truncate text-sm text-slate-500">
-                                                @{member.user.username}
+
+                                            <p className="truncate text-xs text-slate-500">
+                                                @{member.user.username} ·{" "}
+                                                {member.user.email}
                                             </p>
                                         </div>
                                     </div>
 
                                     <span
-                                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium capitalize ${member.role === "owner"
-                                                ? "bg-indigo-500/10 text-indigo-400"
-                                                : member.role === "admin"
-                                                    ? "bg-amber-500/10 text-amber-400"
-                                                    : "bg-slate-800 text-slate-400"
+                                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
+                                            ? "bg-indigo-500/10 text-indigo-400"
+                                            : member.role === "admin"
+                                                ? "bg-amber-500/10 text-amber-400"
+                                                : "bg-slate-800 text-slate-400"
                                             }`}
                                     >
                                         {member.role}
@@ -491,10 +617,8 @@ export default function WorkspaceDetailPage() {
                                 </div>
                             ))
                         ) : (
-                            <div className="px-6 py-10 text-center">
-                                <p className="text-sm text-slate-500">
-                                    No members found.
-                                </p>
+                            <div className="px-6 py-12 text-center text-sm text-slate-500">
+                                No members found.
                             </div>
                         )}
                     </div>
@@ -505,57 +629,57 @@ export default function WorkspaceDetailPage() {
                         <h2 className="text-lg font-semibold">
                             Projects
                         </h2>
+
                         <p className="mt-1 text-sm text-slate-500">
-                            Projects belonging to this workspace.
+                            Projects associated with this workspace.
                         </p>
                     </div>
 
-                    <div className="px-6 py-10 text-center">
-                        <p className="text-sm text-slate-500">
-                            {workspace.projects_count === 0
-                                ? "No projects in this workspace yet."
-                                : `${workspace.projects_count} project${workspace.projects_count === 1
-                                    ? ""
-                                    : "s"
-                                } in this workspace.`}
-                        </p>
+                    <div className="px-6 py-12 text-center">
+                        {workspace.projects_count > 0 ? (
+                            <p className="text-sm text-slate-400">
+                                {workspace.projects_count} project
+                                {workspace.projects_count !== 1
+                                    ? "s"
+                                    : ""}{" "}
+                                in this workspace.
+                            </p>
+                        ) : (
+                            <p className="text-sm text-slate-500">
+                                No projects in this workspace yet.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
 
             {showEditPanel && (
-                <div className="fixed inset-0 z-50">
-                    <button
-                        onClick={() => setShowEditPanel(false)}
-                        className="absolute inset-0 h-full w-full cursor-pointer bg-black/60 backdrop-blur-sm"
-                        aria-label="Close edit panel"
-                    />
-
-                    <div className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
+                <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+                    <div className="h-full w-full max-w-md overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-xl font-semibold">
                                     Edit workspace
                                 </h2>
+
                                 <p className="mt-1 text-sm text-slate-500">
-                                    Update workspace details.
+                                    Update workspace information.
                                 </p>
                             </div>
 
                             <button
-                                onClick={() => setShowEditPanel(false)}
-                                className="cursor-pointer text-2xl text-slate-500 transition hover:text-white"
+                                onClick={() =>
+                                    setShowEditPanel(false)
+                                }
+                                className="cursor-pointer text-xl text-slate-500 transition hover:text-white"
                             >
                                 ×
                             </button>
                         </div>
 
-                        <form
-                            onSubmit={handleUpdateWorkspace}
-                            className="mt-8 space-y-6"
-                        >
+                        <div className="mt-8 space-y-5">
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-slate-300">
+                                <label className="text-sm font-medium text-slate-300">
                                     Name
                                 </label>
 
@@ -564,34 +688,36 @@ export default function WorkspaceDetailPage() {
                                     onChange={(event) =>
                                         setName(event.target.value)
                                     }
-                                    className="w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
-                                    placeholder="Workspace name"
+                                    className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500"
                                 />
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-slate-300">
+                                <label className="text-sm font-medium text-slate-300">
                                     Description
                                 </label>
 
                                 <textarea
                                     value={description}
                                     onChange={(event) =>
-                                        setDescription(event.target.value)
+                                        setDescription(
+                                            event.target.value
+                                        )
                                     }
                                     rows={5}
-                                    className="w-full resize-none rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
-                                    placeholder="Workspace description"
+                                    className="mt-2 w-full resize-none rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500"
                                 />
                             </div>
 
-                            <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+                            <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-800 bg-slate-900/60 p-4">
                                 <div>
                                     <p className="text-sm font-medium text-slate-200">
-                                        Archived
+                                        Archive workspace
                                     </p>
+
                                     <p className="mt-1 text-xs text-slate-500">
-                                        Archive this workspace when it is no longer active.
+                                        Archived workspaces are no longer
+                                        active.
                                     </p>
                                 </div>
 
@@ -608,13 +734,13 @@ export default function WorkspaceDetailPage() {
                             </label>
 
                             {saveError && (
-                                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+                                <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                                     {saveError}
                                 </div>
                             )}
 
                             <button
-                                type="submit"
+                                onClick={handleUpdateWorkspace}
                                 disabled={saving}
                                 className="w-full cursor-pointer rounded-lg bg-indigo-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
                             >
@@ -622,42 +748,38 @@ export default function WorkspaceDetailPage() {
                                     ? "Saving..."
                                     : "Save changes"}
                             </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             )}
 
             {showInvitePanel && (
-                <div className="fixed inset-0 z-50">
-                    <button
-                        onClick={() => setShowInvitePanel(false)}
-                        className="absolute inset-0 h-full w-full cursor-pointer bg-black/60 backdrop-blur-sm"
-                        aria-label="Close invite panel"
-                    />
+                <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+                    <div className="flex h-full w-full max-w-md flex-col border-l border-slate-800 bg-slate-950 shadow-2xl">
+                        <div className="border-b border-slate-800 px-6 py-5">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-xl font-semibold">
+                                        Invite member
+                                    </h2>
 
-                    <div className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-semibold">
-                                    Invite member
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-500">
-                                    Search users and choose who to invite.
-                                </p>
+                                    <p className="mt-1 text-sm text-slate-500">
+                                        Select a user to invite to this
+                                        workspace.
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() =>
+                                        setShowInvitePanel(false)
+                                    }
+                                    className="cursor-pointer text-xl text-slate-500 transition hover:text-white"
+                                >
+                                    ×
+                                </button>
                             </div>
 
-                            <button
-                                onClick={() =>
-                                    setShowInvitePanel(false)
-                                }
-                                className="cursor-pointer text-2xl text-slate-500 transition hover:text-white"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <div className="mt-6">
-                            <div className="relative">
+                            <div className="mt-5">
                                 <input
                                     value={userSearch}
                                     onChange={(event) =>
@@ -665,91 +787,148 @@ export default function WorkspaceDetailPage() {
                                             event.target.value
                                         )
                                     }
-                                    placeholder="Search by name, username or email..."
+                                    placeholder="Search username, name or email..."
                                     className="w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
                                 />
                             </div>
+
+                            <div className="mt-3">
+                                <label className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                                    Role
+                                </label>
+
+                                <select
+                                    value={inviteRole}
+                                    onChange={(event) =>
+                                        setInviteRole(
+                                            event.target.value as
+                                            | "admin"
+                                            | "member"
+                                        )
+                                    }
+                                    className="mt-2 w-full cursor-pointer rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-indigo-500"
+                                >
+                                    <option value="member">
+                                        Member
+                                    </option>
+
+                                    <option value="admin">
+                                        Admin
+                                    </option>
+                                </select>
+                            </div>
                         </div>
 
-                        {usersError && (
-                            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
-                                {usersError}
-                            </div>
-                        )}
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                            {inviteError && (
+                                <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                    {inviteError}
+                                </div>
+                            )}
 
-                        <div className="mt-6">
+                            {usersError && (
+                                <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                    {usersError}
+                                </div>
+                            )}
+
                             {loadingUsers ? (
                                 <div className="space-y-3">
                                     {[1, 2, 3, 4].map((item) => (
                                         <div
                                             key={item}
-                                            className="h-20 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40"
+                                            className="h-16 animate-pulse rounded-lg bg-slate-900"
                                         />
                                     ))}
                                 </div>
                             ) : filteredUsers.length > 0 ? (
                                 <div className="space-y-3">
-                                    {filteredUsers.map((user) => (
-                                        <div
-                                            key={user.id}
-                                            className="flex items-center justify-between gap-4 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 transition hover:border-slate-700"
-                                        >
-                                            <div className="flex min-w-0 items-center gap-3">
-                                                {getProfileImage(
-                                                    user.profile_picture
-                                                ) ? (
-                                                    <img
-                                                        src={
-                                                            getProfileImage(
-                                                                user.profile_picture
-                                                            ) || ""
-                                                        }
-                                                        alt={getUserName(
-                                                            user
-                                                        )}
-                                                        className="h-11 w-11 shrink-0 rounded-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-semibold text-indigo-400">
-                                                        {getUserName(
-                                                            user
-                                                        )
-                                                            .charAt(0)
-                                                            .toUpperCase()}
-                                                    </div>
-                                                )}
+                                    {filteredUsers.map((user) => {
+                                        const invited =
+                                            invitedUserIds.includes(
+                                                user.id
+                                            );
 
-                                                <div className="min-w-0">
-                                                    <p className="truncate text-sm font-medium text-slate-200">
-                                                        {getUserName(
-                                                            user
-                                                        )}
-                                                    </p>
+                                        const fullName =
+                                            `${user.first_name} ${user.last_name}`.trim();
 
-                                                    <p className="truncate text-xs text-slate-500">
-                                                        @{user.username}
-                                                    </p>
-
-                                                    <p className="truncate text-xs text-slate-600">
-                                                        {user.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                className="shrink-0 cursor-pointer rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs font-medium text-indigo-400 transition hover:bg-indigo-500/20"
+                                        return (
+                                            <div
+                                                key={user.id}
+                                                className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3"
                                             >
-                                                Invite
-                                            </button>
-                                        </div>
-                                    ))}
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    {user.profile_picture ? (
+                                                        <img
+                                                            src={
+                                                                user.profile_picture.startsWith(
+                                                                    "http"
+                                                                )
+                                                                    ? user.profile_picture
+                                                                    : `${process.env.NEXT_PUBLIC_API_URL?.replace(
+                                                                        "/api",
+                                                                        ""
+                                                                    )}${user.profile_picture}`
+                                                            }
+                                                            alt={
+                                                                user.username
+                                                            }
+                                                            className="h-10 w-10 shrink-0 rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                                            {user.username
+                                                                .charAt(
+                                                                    0
+                                                                )
+                                                                .toUpperCase()}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-medium text-white">
+                                                            {fullName ||
+                                                                user.username}
+                                                        </p>
+
+                                                        <p className="truncate text-xs text-slate-500">
+                                                            @{user.username}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    onClick={() =>
+                                                        handleInviteUser(
+                                                            user.id
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        invited ||
+                                                        invitingUserId ===
+                                                        user.id
+                                                    }
+                                                    className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition ${invited
+                                                        ? "cursor-default bg-emerald-500/10 text-emerald-400"
+                                                        : "cursor-pointer bg-indigo-500 text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        }`}
+                                                >
+                                                    {invitingUserId ===
+                                                        user.id
+                                                        ? "Sending..."
+                                                        : invited
+                                                            ? "Invited"
+                                                            : "Invite"}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : (
-                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 px-6 py-10 text-center">
-                                    <p className="text-sm text-slate-500">
-                                        {userSearch.trim()
-                                            ? "No users match your search."
+                                <div className="rounded-xl border border-slate-800 bg-slate-900/40 px-5 py-10 text-center">
+                                    <p className="text-sm text-slate-400">
+                                        {userSearch
+                                            ? "No matching users found."
                                             : "No users available to invite."}
                                     </p>
                                 </div>
@@ -760,23 +939,26 @@ export default function WorkspaceDetailPage() {
             )}
 
             {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-2xl">
-                        <h2 className="text-xl font-semibold">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+                            !
+                        </div>
+
+                        <h2 className="mt-5 text-xl font-semibold">
                             Delete workspace?
                         </h2>
 
-                        <p className="mt-3 text-sm leading-6 text-slate-400">
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
                             This will permanently delete{" "}
                             <span className="font-medium text-slate-200">
                                 {workspace.name}
-                            </span>{" "}
-                            and its associated data. This action cannot be
-                            undone.
+                            </span>
+                            . This action cannot be undone.
                         </p>
 
                         {deleteError && (
-                            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+                            <div className="mt-5 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                                 {deleteError}
                             </div>
                         )}
@@ -787,7 +969,7 @@ export default function WorkspaceDetailPage() {
                                     setShowDeleteModal(false)
                                 }
                                 disabled={deleting}
-                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Cancel
                             </button>
@@ -795,7 +977,7 @@ export default function WorkspaceDetailPage() {
                             <button
                                 onClick={handleDeleteWorkspace}
                                 disabled={deleting}
-                                className="cursor-pointer rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="cursor-pointer rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {deleting
                                     ? "Deleting..."
