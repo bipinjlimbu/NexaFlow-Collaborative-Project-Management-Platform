@@ -6,6 +6,7 @@ import {
     getWorkspace,
     WorkspaceDetail,
 } from "@/services/workspaceService";
+import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
@@ -34,33 +35,6 @@ function getFullName(
 ) {
     const name = `${firstName} ${lastName}`.trim();
     return name || username;
-}
-
-function WorkspaceSkeleton() {
-    return (
-        <div className="min-h-screen bg-slate-950 text-white">
-            <div className="mx-auto max-w-7xl px-6 py-8">
-                <div className="h-4 w-32 animate-pulse rounded bg-slate-800" />
-
-                <div className="mt-8 h-8 w-72 animate-pulse rounded bg-slate-800" />
-                <div className="mt-3 h-4 w-96 animate-pulse rounded bg-slate-800" />
-
-                <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    {[1, 2, 3, 4].map((item) => (
-                        <div
-                            key={item}
-                            className="h-28 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40"
-                        />
-                    ))}
-                </div>
-
-                <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                    <div className="h-80 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40 lg:col-span-2" />
-                    <div className="h-80 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40" />
-                </div>
-            </div>
-        </div>
-    );
 }
 
 export default function WorkspaceDetailPage() {
@@ -110,7 +84,7 @@ export default function WorkspaceDetailPage() {
     }, [params.id, router]);
 
     if (loading) {
-        return <WorkspaceSkeleton />;
+        return <WorkspaceDetailSkeleton />;
     }
 
     if (error || !workspace) {
@@ -212,6 +186,7 @@ export default function WorkspaceDetailPage() {
                                     : "bg-emerald-400"
                                     }`}
                             />
+
                             {workspace.is_archived
                                 ? "Archived"
                                 : "Active"}
@@ -224,6 +199,7 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Members
                         </p>
+
                         <p className="mt-3 text-2xl font-semibold">
                             {workspace.members_count}
                         </p>
@@ -233,6 +209,7 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Projects
                         </p>
+
                         <p className="mt-3 text-2xl font-semibold">
                             {workspace.projects_count}
                         </p>
@@ -242,6 +219,7 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Created by
                         </p>
+
                         <p className="mt-3 truncate text-base font-semibold">
                             {ownerName}
                         </p>
@@ -251,6 +229,7 @@ export default function WorkspaceDetailPage() {
                         <p className="text-xs uppercase tracking-wider text-slate-500">
                             Your role
                         </p>
+
                         <p className="mt-3 text-base font-semibold capitalize">
                             {owner?.role || "Member"}
                         </p>
