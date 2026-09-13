@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     getWorkspace,
+    updateWorkspace,
     WorkspaceDetail,
 } from "@/services/workspaceService";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
@@ -43,9 +44,26 @@ export default function WorkspaceDetailPage() {
 
     const [workspace, setWorkspace] =
         useState<WorkspaceDetail | null>(null);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditPanel, setShowEditPanel] = useState(false);
+
+    const [editName, setEditName] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [editArchived, setEditArchived] = useState(false);
+
+    const [saving, setSaving] = useState(false);
+    const [editError, setEditError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<{
+        name?: string;
+        description?: string;
+        is_archived?: string;
+        error?: string;
+        detail?: string;
+    }>({});
 
     useEffect(() => {
         const access = localStorage.getItem("access");
@@ -82,6 +100,73 @@ export default function WorkspaceDetailPage() {
 
         loadWorkspace();
     }, [params.id, router]);
+
+    const openEditPanel = () => {
+        if (!workspace) {
+            return;
+        }
+
+        setEditName(workspace.name);
+        setEditDescription(workspace.description || "");
+        setEditArchived(workspace.is_archived);
+        setEditError("");
+        setFieldErrors({});
+        setShowEditPanel(true);
+    };
+
+    const closeEditPanel = () => {
+        if (saving) {
+            return;
+        }
+
+        setShowEditPanel(false);
+        setEditError("");
+        setFieldErrors({});
+    };
+
+    const handleUpdateWorkspace = async (
+        event: React.FormEvent<HTMLFormElement>
+    ) => {
+        event.preventDefault();
+
+        if (!workspace) {
+            return;
+        }
+
+        setSaving(true);
+        setEditError("");
+        setFieldErrors({});
+
+        try {
+            const updatedWorkspace = await updateWorkspace(
+                workspace.id,
+                {
+                    name: editName.trim(),
+                    description: editDescription.trim(),
+                    is_archived: editArchived,
+                }
+            );
+
+            setWorkspace(updatedWorkspace);
+            setShowEditPanel(false);
+        } catch (err: any) {
+            setFieldErrors({
+                name: err?.name,
+                description: err?.description,
+                is_archived: err?.is_archived,
+                error: err?.error,
+                detail: err?.detail,
+            });
+
+            setEditError(
+                err?.detail ||
+                err?.error ||
+                "Unable to update workspace."
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (loading) {
         return <WorkspaceDetailSkeleton />;
@@ -143,6 +228,7 @@ export default function WorkspaceDetailPage() {
 
                     <div className="flex items-center gap-3">
                         <button
+                            onClick={openEditPanel}
                             className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-600 hover:text-white"
                         >
                             Edit workspace
@@ -365,8 +451,7 @@ export default function WorkspaceDetailPage() {
                                         </p>
 
                                         <p className="mt-1 text-sm text-slate-300">
-                                            {owner.user.phone_number ||
-                                                "—"}
+                                            {owner.user.phone_number || "—"}
                                         </p>
                                     </div>
 
@@ -460,10 +545,9 @@ export default function WorkspaceDetailPage() {
                                                         {name}
                                                     </p>
 
-                                                    {member.user
-                                                        .is_active && (
-                                                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                                                        )}
+                                                    {member.user.is_active && (
+                                                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                                                    )}
                                                 </div>
 
                                                 <p className="mt-1 truncate text-xs text-slate-500">
@@ -486,11 +570,9 @@ export default function WorkspaceDetailPage() {
                                             </div>
 
                                             <span
-                                                className={`rounded-md border px-2.5 py-1 text-xs font-medium capitalize ${member.role ===
-                                                    "owner"
+                                                className={`rounded-md border px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
                                                     ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
-                                                    : member.role ===
-                                                        "admin"
+                                                    : member.role === "admin"
                                                         ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
                                                         : "border-slate-700 bg-slate-800/50 text-slate-400"
                                                     }`}
@@ -560,6 +642,188 @@ export default function WorkspaceDetailPage() {
                     )}
                 </section>
             </main>
+
+            {showEditPanel && (
+                <div className="fixed inset-0 z-50">
+                    <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        onClick={closeEditPanel}
+                    />
+
+                    <div className="absolute right-0 top-0 flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-slate-950 shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-5">
+                            <div>
+                                <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
+                                    Workspace
+                                </p>
+
+                                <h2 className="mt-1 text-lg font-semibold">
+                                    Edit workspace
+                                </h2>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={closeEditPanel}
+                                disabled={saving}
+                                className="cursor-pointer text-2xl leading-none text-slate-500 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <form
+                            onSubmit={handleUpdateWorkspace}
+                            className="flex flex-1 flex-col"
+                        >
+                            <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+                                {editError && (
+                                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                        {editError}
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label
+                                        htmlFor="workspace-name"
+                                        className="text-sm font-medium text-slate-300"
+                                    >
+                                        Workspace name
+                                    </label>
+
+                                    <input
+                                        id="workspace-name"
+                                        type="text"
+                                        value={editName}
+                                        onChange={(event) =>
+                                            setEditName(event.target.value)
+                                        }
+                                        required
+                                        disabled={saving}
+                                        className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter workspace name"
+                                    />
+
+                                    {fieldErrors.name && (
+                                        <p className="mt-2 text-xs text-red-400">
+                                            {Array.isArray(fieldErrors.name)
+                                                ? fieldErrors.name.join(" ")
+                                                : fieldErrors.name}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label
+                                        htmlFor="workspace-description"
+                                        className="text-sm font-medium text-slate-300"
+                                    >
+                                        Description
+                                    </label>
+
+                                    <textarea
+                                        id="workspace-description"
+                                        value={editDescription}
+                                        onChange={(event) =>
+                                            setEditDescription(
+                                                event.target.value
+                                            )
+                                        }
+                                        disabled={saving}
+                                        rows={6}
+                                        className="mt-2 w-full resize-none rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Describe what this workspace is used for"
+                                    />
+
+                                    {fieldErrors.description && (
+                                        <p className="mt-2 text-xs text-red-400">
+                                            {Array.isArray(
+                                                fieldErrors.description
+                                            )
+                                                ? fieldErrors.description.join(
+                                                    " "
+                                                )
+                                                : fieldErrors.description}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-200">
+                                                Archive workspace
+                                            </p>
+
+                                            <p className="mt-1 text-xs leading-5 text-slate-500">
+                                                Archived workspaces can be kept
+                                                for historical reference
+                                                without being treated as
+                                                active.
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setEditArchived(
+                                                    !editArchived
+                                                )
+                                            }
+                                            disabled={saving}
+                                            className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition ${editArchived
+                                                ? "bg-amber-500"
+                                                : "bg-slate-700"
+                                                } disabled:cursor-not-allowed disabled:opacity-50`}
+                                        >
+                                            <span
+                                                className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${editArchived
+                                                    ? "left-6"
+                                                    : "left-1"
+                                                    }`}
+                                            />
+                                        </button>
+                                    </div>
+
+                                    <p
+                                        className={`mt-4 text-xs font-medium ${editArchived
+                                            ? "text-amber-400"
+                                            : "text-emerald-400"
+                                            }`}
+                                    >
+                                        {editArchived
+                                            ? "Workspace will be archived"
+                                            : "Workspace is active"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 border-t border-slate-800/80 px-6 py-5">
+                                <button
+                                    type="button"
+                                    onClick={closeEditPanel}
+                                    disabled={saving}
+                                    className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        saving || !editName.trim()
+                                    }
+                                    className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {saving
+                                        ? "Saving..."
+                                        : "Save changes"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
