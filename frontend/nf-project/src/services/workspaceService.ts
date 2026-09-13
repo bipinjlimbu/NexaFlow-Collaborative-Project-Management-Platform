@@ -60,6 +60,12 @@ export interface CreateWorkspaceData {
     description: string;
 }
 
+export interface UpdateWorkspaceData {
+    name: string;
+    description: string;
+    is_archived: boolean;
+}
+
 export async function getWorkspaces(): Promise<Workspace[]> {
     const data = await authFetch("/workspaces/");
 
@@ -81,4 +87,14 @@ export async function getWorkspace(
     id: number
 ): Promise<WorkspaceDetail> {
     return authFetch(`/workspaces/${id}/`);
+}
+
+export async function updateWorkspace(
+    id: number,
+    data: UpdateWorkspaceData
+): Promise<WorkspaceDetail> {
+    return authFetch(`/workspaces/${id}/`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
 }
