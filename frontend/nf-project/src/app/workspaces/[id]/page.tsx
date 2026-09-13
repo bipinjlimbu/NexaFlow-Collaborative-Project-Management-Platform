@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     getWorkspace,
     updateWorkspace,
+    deleteWorkspace,
     WorkspaceDetail,
 } from "@/services/workspaceService";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
@@ -56,11 +57,15 @@ export default function WorkspaceDetailPage() {
     const [editArchived, setEditArchived] = useState(false);
 
     const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
     const [editError, setEditError] = useState("");
+    const [deleteError, setDeleteError] = useState("");
+
     const [fieldErrors, setFieldErrors] = useState<{
-        name?: string;
-        description?: string;
-        is_archived?: string;
+        name?: string | string[];
+        description?: string | string[];
+        is_archived?: string | string[];
         error?: string;
         detail?: string;
     }>({});
@@ -168,6 +173,27 @@ export default function WorkspaceDetailPage() {
         }
     };
 
+    const handleDeleteWorkspace = async () => {
+        if (!workspace || deleting) {
+            return;
+        }
+
+        setDeleting(true);
+        setDeleteError("");
+
+        try {
+            await deleteWorkspace(workspace.id);
+            router.push("/workspaces");
+        } catch (err: any) {
+            setDeleteError(
+                err?.detail ||
+                err?.error ||
+                "Unable to delete workspace."
+            );
+            setDeleting(false);
+        }
+    };
+
     if (loading) {
         return <WorkspaceDetailSkeleton />;
     }
@@ -235,7 +261,10 @@ export default function WorkspaceDetailPage() {
                         </button>
 
                         <button
-                            onClick={() => setShowDeleteModal(true)}
+                            onClick={() => {
+                                setDeleteError("");
+                                setShowDeleteModal(true);
+                            }}
                             className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/15"
                         >
                             Delete
@@ -844,23 +873,31 @@ export default function WorkspaceDetailPage() {
                             and its associated data. This cannot be undone.
                         </p>
 
+                        {deleteError && (
+                            <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                                {deleteError}
+                            </div>
+                        )}
+
                         <div className="mt-6 flex justify-end gap-3">
                             <button
                                 onClick={() =>
                                     setShowDeleteModal(false)
                                 }
-                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 hover:text-white"
+                                disabled={deleting}
+                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Cancel
                             </button>
 
                             <button
-                                onClick={() =>
-                                    setShowDeleteModal(false)
-                                }
-                                className="cursor-pointer rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-500"
+                                onClick={handleDeleteWorkspace}
+                                disabled={deleting}
+                                className="cursor-pointer rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Delete workspace
+                                {deleting
+                                    ? "Deleting..."
+                                    : "Delete workspace"}
                             </button>
                         </div>
                     </div>
