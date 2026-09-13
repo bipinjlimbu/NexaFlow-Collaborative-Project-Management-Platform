@@ -112,3 +112,17 @@ export async function getUsers(): Promise<WorkspaceUser[]> {
         ? data
         : data.results || data.users || [];
 }
+
+export async function sendWorkspaceInvitation(
+    workspaceId: number,
+    userId: number,
+    role: "admin" | "member"
+) {
+    return authFetch(`/workspaces/${workspaceId}/invite/`, {
+        method: "POST",
+        body: JSON.stringify({
+            user_id: userId,
+            role,
+        }),
+    });
+}
