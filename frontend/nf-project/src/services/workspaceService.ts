@@ -8,6 +8,18 @@ export interface WorkspaceMember {
     joined_at: string;
 }
 
+export interface WorkspaceUser {
+    id: number;
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    address: string;
+    profile_picture: string | null;
+    is_active: boolean;
+}
+
 export interface Workspace {
     id: number;
     name: string;
@@ -20,18 +32,6 @@ export interface Workspace {
     members_count: number;
     projects_count: number;
     role?: "owner" | "admin" | "member";
-}
-
-export interface WorkspaceUser {
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    address: string;
-    profile_picture: string | null;
-    is_active: boolean;
 }
 
 export interface WorkspaceDetailMember {
@@ -103,4 +103,12 @@ export async function deleteWorkspace(id: number) {
     return authFetch(`/workspaces/${id}/`, {
         method: "DELETE",
     });
+}
+
+export async function getUsers(): Promise<WorkspaceUser[]> {
+    const data = await authFetch("/users/");
+
+    return Array.isArray(data)
+        ? data
+        : data.results || data.users || [];
 }
