@@ -559,11 +559,11 @@ export default function WorkspaceDetailPage() {
 
                                                 <span
                                                     className={`rounded - md border px - 2 py - 0.5 text - [10px] font - medium ${member.role === "owner"
-                                                            ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
-                                                            : member.role ===
-                                                                "admin"
-                                                                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                                                                : "border-slate-700 bg-slate-800/60 text-slate-400"
+                                                        ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
+                                                        : member.role ===
+                                                            "admin"
+                                                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                                            : "border-slate-700 bg-slate-800/60 text-slate-400"
                                                         } `}
                                                 >
                                                     {member.role
@@ -600,8 +600,8 @@ export default function WorkspaceDetailPage() {
 
                                         <span
                                             className={`h - 2 w - 2 rounded - full ${member.user.is_active
-                                                    ? "bg-emerald-400"
-                                                    : "bg-slate-600"
+                                                ? "bg-emerald-400"
+                                                : "bg-slate-600"
                                                 } `}
                                         />
                                     </div>
