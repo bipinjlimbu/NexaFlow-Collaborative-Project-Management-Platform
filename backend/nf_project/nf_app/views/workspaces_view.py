@@ -62,7 +62,8 @@ def workspace_detail_view(request, pk):
     if request.method == 'PUT':
         name = request.data.get('name')
         description = request.data.get('description')
-        
+        is_archived = request.data.get('is_archived') == True
+
         if not name:
             errors['name'] = 'This field is required.'
         elif Workspace.objects.filter(name=name, created_by=request.user).exclude(pk=pk).exists():
@@ -76,6 +77,7 @@ def workspace_detail_view(request, pk):
         
         workspace.name = name
         workspace.description = description
+        workspace.is_archived = is_archived
         workspace.save()
         serializer = WorkspaceSerializer(workspace)
         return Response(serializer.data, status=status.HTTP_200_OK)
