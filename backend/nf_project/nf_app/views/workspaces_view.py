@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Workspace, WorkspaceMember
-from ..serializers import WorkspaceSerializer
+from ..models import Workspace, WorkspaceMember, User
+from ..serializers import WorkspaceSerializer, UserSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -85,3 +85,13 @@ def workspace_detail_view(request, pk):
     if request.method == 'DELETE':
         workspace.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_users_list(request):
+    try:
+        users = User.objects.exclude(pk=request.user.pk).order_by('username')
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
