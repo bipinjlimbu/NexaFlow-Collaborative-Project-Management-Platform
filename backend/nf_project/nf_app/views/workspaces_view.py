@@ -95,3 +95,29 @@ def get_users_list(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_workspace_invitation(request, workspace_id):
+    try:
+        workspace = Workspace.objects.get(pk=workspace_id, created_by=request.user)
+    except Workspace.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    errors = {}
+    if request.method == 'POST':
+        role = request.data.get('role')
+        user_id = request.data.get('user_id')
+        invited_user = User.objects.filter(pk=user_id).first()
+                    
+        if not role:
+            errors['role'] = 'This field is required.'
+        elif role not in [WorkspaceInvitation.Role.ADMIN, WorkspaceInvitation.Role.MEMBER]:
+            errors['role'] = 'Invalid role. Must be either "admin" or "member".'
+            
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        invitation = WorkspaceInvitation(workspace=workspace, invited_user=invited_user, invited_by=request.user, role=role)
+        invitation.save()
+        return Response({"message": "Invitation sent successfully."}, status=status.HTTP_201_CREATED)
