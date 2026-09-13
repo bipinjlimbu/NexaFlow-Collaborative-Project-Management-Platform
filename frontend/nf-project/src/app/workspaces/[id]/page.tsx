@@ -1,486 +1,416 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import WorkspacesSkeleton from "@/components/WorkspacesSkeleton";
 import {
     getWorkspace,
-    type Workspace,
+    WorkspaceDetail,
 } from "@/services/workspaceService";
-import {
-    ArrowLeft,
-    CalendarDays,
-    FolderKanban,
-    Mail,
-    MapPin,
-    MoreHorizontal,
-    Pencil,
-    Phone,
-    ShieldCheck,
-    Users,
-} from "lucide-react";
 
-interface WorkspaceUser {
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    address: string;
-    profile_picture: string | null;
-    is_active: boolean;
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
+
+function formatDate(date: string) {
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+    }).format(new Date(date));
 }
 
-interface WorkspaceDetailMember {
-    id: number;
-    joined_at: string;
-    role: "owner" | "admin" | "member";
-    user: WorkspaceUser;
-    workspace: number;
+function formatShortDate(date: string) {
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).format(new Date(date));
 }
 
-interface WorkspaceDetail extends Omit<Workspace, "members"> {
-    members: WorkspaceDetailMember[];
+function getFullName(
+    firstName: string,
+    lastName: string,
+    username: string
+) {
+    const name = `${firstName} ${lastName}`.trim();
+    return name || username;
+}
+
+function WorkspaceSkeleton() {
+    return (
+        <div className="min-h-screen bg-slate-950 text-white">
+            <div className="mx-auto max-w-7xl px-6 py-8">
+                <div className="h-4 w-32 animate-pulse rounded bg-slate-800" />
+
+                <div className="mt-8 h-8 w-72 animate-pulse rounded bg-slate-800" />
+                <div className="mt-3 h-4 w-96 animate-pulse rounded bg-slate-800" />
+
+                <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    {[1, 2, 3, 4].map((item) => (
+                        <div
+                            key={item}
+                            className="h-28 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40"
+                        />
+                    ))}
+                </div>
+
+                <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                    <div className="h-80 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40 lg:col-span-2" />
+                    <div className="h-80 animate-pulse rounded-xl border border-slate-800/80 bg-slate-900/40" />
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default function WorkspaceDetailPage() {
-    const router = useRouter();
     const params = useParams();
+    const router = useRouter();
 
-    const [workspace, setWorkspace] = useState<WorkspaceDetail | null>(null);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
-        null
-    );
+    const [workspace, setWorkspace] =
+        useState<WorkspaceDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
-    const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
-
-    const workspaceId = Number(params.id);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
-        async function loadWorkspace() {
-            const token = localStorage.getItem("access");
+        const access = localStorage.getItem("access");
 
-            if (!token) {
-                setIsAuthenticated(false);
-                router.replace("/login");
-                return;
-            }
+        if (!access) {
+            router.replace("/login");
+            return;
+        }
 
-            setIsAuthenticated(true);
-
-            if (!workspaceId || Number.isNaN(workspaceId)) {
-                setError("Invalid workspace.");
-                setLoading(false);
-                return;
-            }
-
+        const loadWorkspace = async () => {
             try {
-                const data = await getWorkspace(workspaceId);
-                setWorkspace(data as WorkspaceDetail);
+                setLoading(true);
                 setError("");
-            } catch (err) {
-                if (
-                    typeof err === "object" &&
-                    err !== null &&
-                    "detail" in err
-                ) {
-                    setError(String(err.detail));
-                } else if (
-                    typeof err === "object" &&
-                    err !== null &&
-                    "message" in err
-                ) {
-                    setError(String(err.message));
-                } else {
-                    setError("Failed to load workspace.");
+
+                const id = Number(params.id);
+
+                if (!id) {
+                    setError("Invalid workspace.");
+                    return;
                 }
+
+                const data = await getWorkspace(id);
+                setWorkspace(data);
+            } catch (err: any) {
+                setError(
+                    err?.detail ||
+                    err?.error ||
+                    "Unable to load workspace."
+                );
             } finally {
                 setLoading(false);
             }
-        }
+        };
 
         loadWorkspace();
+    }, [params.id, router]);
 
-        function handleAuthChange() {
-            const token = localStorage.getItem("access");
-
-            if (!token) {
-                setIsAuthenticated(false);
-                router.replace("/login");
-            }
-        }
-
-        window.addEventListener("auth-change", handleAuthChange);
-
-        return () => {
-            window.removeEventListener("auth-change", handleAuthChange);
-        };
-    }, [router, workspaceId]);
-
-    if (isAuthenticated === null || loading) {
-        return <WorkspacesSkeleton />;
-    }
-
-    if (!isAuthenticated) {
-        return <WorkspacesSkeleton />;
+    if (loading) {
+        return <WorkspaceSkeleton />;
     }
 
     if (error || !workspace) {
         return (
-            <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 text-slate-100">
-                <div className="w-full max-w-md text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400">
-                        <FolderKanban size={24} />
+            <div className="min-h-screen bg-slate-950 text-white">
+                <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6">
+                    <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/50 p-8 text-center">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-400">
+                            !
+                        </div>
+
+                        <h1 className="mt-5 text-lg font-semibold">
+                            Workspace unavailable
+                        </h1>
+
+                        <p className="mt-2 text-sm text-slate-400">
+                            {error ||
+                                "The workspace could not be found."}
+                        </p>
+
+                        <button
+                            onClick={() => router.push("/workspaces")}
+                            className="mt-6 cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+                        >
+                            Back to workspaces
+                        </button>
                     </div>
-
-                    <p className="mt-6 font-mono text-xs uppercase tracking-[0.2em] text-red-400">
-                        Workspace Error
-                    </p>
-
-                    <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-                        Unable to load workspace
-                    </h1>
-
-                    <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                        {error || "The workspace could not be found."}
-                    </p>
-
-                    <button
-                        onClick={() => router.push("/workspaces")}
-                        className="mt-6 inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white transition hover:bg-indigo-500"
-                    >
-                        <ArrowLeft size={15} />
-                        Back to workspaces
-                    </button>
                 </div>
-            </main>
+            </div>
         );
     }
 
     const owner =
-        workspace.members.find((member) => member.role === "owner") ||
-        workspace.members[0];
+        workspace.members.find(
+            (member) => member.role === "owner"
+        ) || workspace.members[0];
 
-    const ownerUser = owner?.user;
-
-    const fullName = ownerUser
-        ? [ownerUser.first_name, ownerUser.last_name]
-            .filter(Boolean)
-            .join(" ") || ownerUser.username
-        : "Unknown user";
-
-    const initials = fullName
-        .split(" ")
-        .filter(Boolean)
-        .map((name) => name[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase();
-
-    const profileImage = ownerUser?.profile_picture
-        ? `${API_URL}${ownerUser.profile_picture} `
-        : "";
-
-    const formatDate = (date: string) => {
-        return new Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        }).format(new Date(date));
-    };
-
-    const formatDateTime = (date: string) => {
-        return new Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-        }).format(new Date(date));
-    };
+    const ownerName = owner
+        ? getFullName(
+            owner.user.first_name,
+            owner.user.last_name,
+            owner.user.username
+        )
+        : "Unknown";
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
-            <div className="mx-auto max-w-7xl px-6 py-10">
-                <div className="mb-8">
-                    <Link
-                        href="/workspaces"
-                        className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-500 transition hover:text-slate-200"
+        <div className="min-h-screen bg-slate-950 text-white">
+            <main className="mx-auto max-w-7xl px-6 py-8">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => router.push("/workspaces")}
+                        className="cursor-pointer text-sm text-slate-400 transition hover:text-white"
                     >
-                        <ArrowLeft size={15} />
-                        Back to workspaces
-                    </Link>
+                        ← Workspaces
+                    </button>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-600 hover:text-white"
+                        >
+                            Edit workspace
+                        </button>
+
+                        <button
+                            onClick={() => setShowDeleteModal(true)}
+                            className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/15"
+                        >
+                            Delete
+                        </button>
+                    </div>
                 </div>
 
-                <section className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40">
-                    <div className="h-32 bg-gradient-to-r from-indigo-500/20 via-slate-900 to-sky-500/10" />
+                <section className="mt-8 border-b border-slate-800/80 pb-8">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
+                                Workspace
+                            </p>
 
-                    <div className="px-6 pb-6 lg:px-8">
-                        <div className="-mt-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                            <div className="flex items-end gap-4">
-                                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-4 border-slate-950 bg-indigo-600/20 text-xl font-semibold text-indigo-400 shadow-xl">
-                                    {workspace.name
-                                        .trim()
-                                        .split(/\s+/)
-                                        .slice(0, 2)
-                                        .map((word) => word[0])
-                                        .join("")
-                                        .toUpperCase()}
-                                </div>
+                            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                                {workspace.name}
+                            </h1>
 
-                                <div className="pb-1">
-                                    <div className="flex flex-wrap items-center gap-3">
-                                        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                                            {workspace.name}
-                                        </h1>
+                            <p className="mt-2 max-w-2xl text-sm text-slate-400">
+                                {workspace.description ||
+                                    "No workspace description provided."}
+                            </p>
+                        </div>
 
-                                        {workspace.is_archived ? (
-                                            <span className="rounded-md border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-400">
-                                                Archived
-                                            </span>
-                                        ) : (
-                                            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
-                                                Active
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-                                        {workspace.description ||
-                                            "No description provided."}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <button
-                                    className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-4 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white"
-                                >
-                                    <MoreHorizontal size={16} />
-                                    More
-                                </button>
-
-                                <button
-                                    className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white transition hover:bg-indigo-500"
-                                >
-                                    <Pencil size={15} />
-                                    Edit workspace
-                                </button>
-                            </div>
+                        <div
+                            className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${workspace.is_archived
+                                ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
+                                : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                }`}
+                        >
+                            <span
+                                className={`h-1.5 w-1.5 rounded-full ${workspace.is_archived
+                                    ? "bg-amber-400"
+                                    : "bg-emerald-400"
+                                    }`}
+                            />
+                            {workspace.is_archived
+                                ? "Archived"
+                                : "Active"}
                         </div>
                     </div>
                 </section>
 
+                <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                            Members
+                        </p>
+                        <p className="mt-3 text-2xl font-semibold">
+                            {workspace.members_count}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                            Projects
+                        </p>
+                        <p className="mt-3 text-2xl font-semibold">
+                            {workspace.projects_count}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                            Created by
+                        </p>
+                        <p className="mt-3 truncate text-base font-semibold">
+                            {ownerName}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                        <p className="text-xs uppercase tracking-wider text-slate-500">
+                            Your role
+                        </p>
+                        <p className="mt-3 text-base font-semibold capitalize">
+                            {owner?.role || "Member"}
+                        </p>
+                    </div>
+                </section>
+
                 <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                    <section className="rounded-2xl border border-slate-800/80 bg-slate-900/40 lg:col-span-2">
+                    <section className="rounded-xl border border-slate-800/80 bg-slate-900/40 lg:col-span-2">
                         <div className="border-b border-slate-800/80 px-6 py-5">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
-                                        Workspace
-                                    </p>
+                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
+                                Workspace information
+                            </p>
 
-                                    <h2 className="mt-1 text-lg font-semibold text-slate-100">
-                                        Overview
-                                    </h2>
-                                </div>
-
-                                <span className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs font-medium text-slate-400">
-                                    ID #{workspace.id}
-                                </span>
-                            </div>
+                            <h2 className="mt-1 text-lg font-semibold">
+                                Details
+                            </h2>
                         </div>
 
-                        <div className="grid gap-px bg-slate-800/60 sm:grid-cols-2">
-                            <div className="bg-slate-900/60 p-6">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <Users size={15} className="text-indigo-400" />
-                                    <span className="text-xs uppercase tracking-wider">
-                                        Members
-                                    </span>
-                                </div>
-
-                                <p className="mt-3 text-2xl font-semibold text-white">
-                                    {workspace.members_count}
+                        <div className="divide-y divide-slate-800/70">
+                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
+                                <p className="text-sm text-slate-500">
+                                    Workspace name
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-500">
-                                    Current workspace members
+                                <p className="text-sm font-medium text-slate-200 sm:col-span-2">
+                                    {workspace.name}
                                 </p>
                             </div>
 
-                            <div className="bg-slate-900/60 p-6">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <FolderKanban
-                                        size={15}
-                                        className="text-indigo-400"
-                                    />
-                                    <span className="text-xs uppercase tracking-wider">
-                                        Projects
-                                    </span>
-                                </div>
-
-                                <p className="mt-3 text-2xl font-semibold text-white">
-                                    {workspace.projects_count}
+                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
+                                <p className="text-sm text-slate-500">
+                                    Description
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-500">
-                                    Projects in this workspace
+                                <p className="text-sm text-slate-300 sm:col-span-2">
+                                    {workspace.description ||
+                                        "No description provided."}
                                 </p>
                             </div>
 
-                            <div className="bg-slate-900/60 p-6">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <CalendarDays
-                                        size={15}
-                                        className="text-indigo-400"
-                                    />
-                                    <span className="text-xs uppercase tracking-wider">
-                                        Created
-                                    </span>
-                                </div>
+                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
+                                <p className="text-sm text-slate-500">
+                                    Status
+                                </p>
 
-                                <p className="mt-3 text-sm font-medium text-slate-200">
+                                <p
+                                    className={`text-sm font-medium sm:col-span-2 ${workspace.is_archived
+                                        ? "text-amber-400"
+                                        : "text-emerald-400"
+                                        }`}
+                                >
+                                    {workspace.is_archived
+                                        ? "Archived"
+                                        : "Active"}
+                                </p>
+                            </div>
+
+                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
+                                <p className="text-sm text-slate-500">
+                                    Created
+                                </p>
+
+                                <p className="text-sm text-slate-300 sm:col-span-2">
                                     {formatDate(workspace.created_at)}
                                 </p>
-
-                                <p className="mt-1 text-xs text-slate-500">
-                                    {formatDateTime(workspace.created_at)}
-                                </p>
                             </div>
 
-                            <div className="bg-slate-900/60 p-6">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                    <CalendarDays
-                                        size={15}
-                                        className="text-indigo-400"
-                                    />
-                                    <span className="text-xs uppercase tracking-wider">
-                                        Last Updated
-                                    </span>
-                                </div>
-
-                                <p className="mt-3 text-sm font-medium text-slate-200">
-                                    {formatDate(workspace.updated_at)}
+                            <div className="grid gap-2 px-6 py-5 sm:grid-cols-3">
+                                <p className="text-sm text-slate-500">
+                                    Last updated
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-500">
-                                    {formatDateTime(workspace.updated_at)}
+                                <p className="text-sm text-slate-300 sm:col-span-2">
+                                    {formatDate(workspace.updated_at)}
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    <section className="rounded-2xl border border-slate-800/80 bg-slate-900/40">
+                    <section className="rounded-xl border border-slate-800/80 bg-slate-900/40">
                         <div className="border-b border-slate-800/80 px-6 py-5">
-                            <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
-                                Workspace Owner
+                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
+                                Owner
                             </p>
 
-                            <h2 className="mt-1 text-lg font-semibold text-slate-100">
-                                Owner
+                            <h2 className="mt-1 text-lg font-semibold">
+                                Workspace owner
                             </h2>
                         </div>
 
-                        {ownerUser ? (
+                        {owner ? (
                             <div className="p-6">
                                 <div className="flex items-center gap-4">
-                                    {profileImage ? (
+                                    {owner.user.profile_picture ? (
                                         <img
-                                            src={profileImage}
-                                            alt={fullName}
-                                            className="h-14 w-14 rounded-xl border border-slate-800 object-cover"
+                                            src={`${API_URL}${owner.user.profile_picture}`}
+                                            alt={ownerName}
+                                            className="h-12 w-12 rounded-lg object-cover"
                                         />
                                     ) : (
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
-                                            {initials}
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-indigo-500/20 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                            {ownerName
+                                                .charAt(0)
+                                                .toUpperCase()}
                                         </div>
                                     )}
 
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-white">
-                                            {fullName}
+                                        <p className="truncate font-semibold text-slate-100">
+                                            {ownerName}
                                         </p>
 
-                                        <p className="mt-1 truncate text-xs text-slate-500">
-                                            @{ownerUser.username}
+                                        <p className="truncate text-sm text-slate-500">
+                                            @{owner.user.username}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="mt-6 space-y-4">
-                                    <div className="flex items-start gap-3">
-                                        <Mail
-                                            size={15}
-                                            className="mt-0.5 shrink-0 text-slate-500"
-                                        />
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-slate-600">
+                                            Email
+                                        </p>
 
-                                        <div className="min-w-0">
-                                            <p className="text-[10px] uppercase tracking-wider text-slate-600">
-                                                Email
-                                            </p>
-
-                                            <p className="mt-1 break-all text-xs text-slate-300">
-                                                {ownerUser.email}
-                                            </p>
-                                        </div>
+                                        <p className="mt-1 break-all text-sm text-slate-300">
+                                            {owner.user.email || "—"}
+                                        </p>
                                     </div>
 
-                                    <div className="flex items-start gap-3">
-                                        <Phone
-                                            size={15}
-                                            className="mt-0.5 shrink-0 text-slate-500"
-                                        />
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-slate-600">
+                                            Phone
+                                        </p>
 
-                                        <div>
-                                            <p className="text-[10px] uppercase tracking-wider text-slate-600">
-                                                Phone
-                                            </p>
-
-                                            <p className="mt-1 text-xs text-slate-300">
-                                                {ownerUser.phone_number ||
-                                                    "Not provided"}
-                                            </p>
-                                        </div>
+                                        <p className="mt-1 text-sm text-slate-300">
+                                            {owner.user.phone_number ||
+                                                "—"}
+                                        </p>
                                     </div>
 
-                                    <div className="flex items-start gap-3">
-                                        <MapPin
-                                            size={15}
-                                            className="mt-0.5 shrink-0 text-slate-500"
-                                        />
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-slate-600">
+                                            Address
+                                        </p>
 
-                                        <div>
-                                            <p className="text-[10px] uppercase tracking-wider text-slate-600">
-                                                Address
-                                            </p>
-
-                                            <p className="mt-1 text-xs text-slate-300">
-                                                {ownerUser.address ||
-                                                    "Not provided"}
-                                            </p>
-                                        </div>
+                                        <p className="mt-1 text-sm text-slate-300">
+                                            {owner.user.address || "—"}
+                                        </p>
                                     </div>
 
-                                    <div className="flex items-start gap-3">
-                                        <CalendarDays
-                                            size={15}
-                                            className="mt-0.5 shrink-0 text-slate-500"
-                                        />
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-slate-600">
+                                            Joined
+                                        </p>
 
-                                        <div>
-                                            <p className="text-[10px] uppercase tracking-wider text-slate-600">
-                                                Joined Workspace
-                                            </p>
-
-                                            <p className="mt-1 text-xs text-slate-300">
-                                                {formatDate(owner.joined_at)}
-                                            </p>
-                                        </div>
+                                        <p className="mt-1 text-sm text-slate-300">
+                                            {formatShortDate(
+                                                owner.joined_at
+                                            )}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -492,172 +422,207 @@ export default function WorkspaceDetailPage() {
                     </section>
                 </div>
 
-                <section className="mt-6 rounded-2xl border border-slate-800/80 bg-slate-900/40">
-                    <div className="flex flex-col justify-between gap-4 border-b border-slate-800/80 px-6 py-5 sm:flex-row sm:items-center">
+                <section className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
+                    <div className="flex flex-col gap-4 border-b border-slate-800/80 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
+                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
                                 Team
                             </p>
 
-                            <h2 className="mt-1 text-lg font-semibold text-slate-100">
+                            <h2 className="mt-1 text-lg font-semibold">
                                 Members
                             </h2>
-
-                            <p className="mt-1 text-sm text-slate-500">
-                                People who currently belong to this workspace.
-                            </p>
                         </div>
 
-                        <button className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3 text-xs font-medium text-slate-300 transition hover:border-indigo-500/40 hover:bg-indigo-500/10 hover:text-indigo-400">
-                            <Users size={14} />
+                        <button
+                            onClick={() =>
+                                router.push(
+                                    `/workspaces/${workspace.id}/members/invite`
+                                )
+                            }
+                            className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+                        >
                             Invite member
                         </button>
                     </div>
 
-                    <div className="divide-y divide-slate-800/70">
-                        {workspace.members.map((member) => {
-                            const memberName =
-                                [member.user.first_name, member.user.last_name]
-                                    .filter(Boolean)
-                                    .join(" ") || member.user.username;
+                    {workspace.members.length > 0 ? (
+                        <div className="divide-y divide-slate-800/70">
+                            {workspace.members.map((member) => {
+                                const name = getFullName(
+                                    member.user.first_name,
+                                    member.user.last_name,
+                                    member.user.username
+                                );
 
-                            const memberInitials = memberName
-                                .split(" ")
-                                .filter(Boolean)
-                                .map((name) => name[0])
-                                .join("")
-                                .slice(0, 2)
-                                .toUpperCase();
+                                return (
+                                    <div
+                                        key={member.id}
+                                        className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                        <div className="flex min-w-0 items-center gap-4">
+                                            {member.user.profile_picture ? (
+                                                <img
+                                                    src={`${API_URL}${member.user.profile_picture}`}
+                                                    alt={name}
+                                                    className="h-10 w-10 rounded-lg object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-sm font-semibold text-slate-300">
+                                                    {name
+                                                        .charAt(0)
+                                                        .toUpperCase()}
+                                                </div>
+                                            )}
 
-                            const memberImage = member.user.profile_picture
-                                ? `${API_URL}${member.user.profile_picture} `
-                                : "";
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="truncate text-sm font-medium text-slate-200">
+                                                        {name}
+                                                    </p>
 
-                            return (
-                                <div
-                                    key={member.id}
-                                    className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
-                                >
-                                    <div className="flex min-w-0 items-center gap-4">
-                                        {memberImage ? (
-                                            <img
-                                                src={memberImage}
-                                                alt={memberName}
-                                                className="h-11 w-11 rounded-xl border border-slate-800 object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
-                                                {memberInitials}
+                                                    {member.user
+                                                        .is_active && (
+                                                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                                                        )}
+                                                </div>
+
+                                                <p className="mt-1 truncate text-xs text-slate-500">
+                                                    @{member.user.username}
+                                                </p>
                                             </div>
-                                        )}
+                                        </div>
 
-                                        <div className="min-w-0">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <p className="truncate text-sm font-medium text-slate-200">
-                                                    {memberName}
+                                        <div className="flex items-center gap-6 sm:justify-end">
+                                            <div className="hidden text-right sm:block">
+                                                <p className="text-xs text-slate-600">
+                                                    Joined
                                                 </p>
 
-                                                <span
-                                                    className={`rounded - md border px - 2 py - 0.5 text - [10px] font - medium ${member.role === "owner"
-                                                        ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
-                                                        : member.role ===
-                                                            "admin"
-                                                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                                                            : "border-slate-700 bg-slate-800/60 text-slate-400"
-                                                        } `}
-                                                >
-                                                    {member.role
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                        member.role.slice(1)}
-                                                </span>
-
-                                                {member.role === "owner" && (
-                                                    <ShieldCheck
-                                                        size={14}
-                                                        className="text-indigo-400"
-                                                    />
-                                                )}
+                                                <p className="mt-1 text-xs text-slate-400">
+                                                    {formatShortDate(
+                                                        member.joined_at
+                                                    )}
+                                                </p>
                                             </div>
 
-                                            <p className="mt-1 truncate text-xs text-slate-500">
-                                                @{member.user.username} ·{" "}
-                                                {member.user.email}
-                                            </p>
+                                            <span
+                                                className={`rounded-md border px-2.5 py-1 text-xs font-medium capitalize ${member.role ===
+                                                    "owner"
+                                                    ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
+                                                    : member.role ===
+                                                        "admin"
+                                                        ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
+                                                        : "border-slate-700 bg-slate-800/50 text-slate-400"
+                                                    }`}
+                                            >
+                                                {member.role}
+                                            </span>
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center gap-5 sm:shrink-0">
-                                        <div className="text-left sm:text-right">
-                                            <p className="text-[10px] uppercase tracking-wider text-slate-600">
-                                                Joined
-                                            </p>
-
-                                            <p className="mt-1 text-xs text-slate-400">
-                                                {formatDate(member.joined_at)}
-                                            </p>
-                                        </div>
-
-                                        <span
-                                            className={`h - 2 w - 2 rounded - full ${member.user.is_active
-                                                ? "bg-emerald-400"
-                                                : "bg-slate-600"
-                                                } `}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </section>
-
-                <section className="mt-6 rounded-2xl border border-slate-800/80 bg-slate-900/40">
-                    <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-5">
-                        <div>
-                            <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">
-                                Projects
-                            </p>
-
-                            <h2 className="mt-1 text-lg font-semibold text-slate-100">
-                                Workspace Projects
-                            </h2>
-                        </div>
-
-                        <span className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs font-medium text-slate-400">
-                            {workspace.projects_count} projects
-                        </span>
-                    </div>
-
-                    {workspace.projects_count === 0 ? (
-                        <div className="px-6 py-14 text-center">
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500">
-                                <FolderKanban size={20} />
-                            </div>
-
-                            <h3 className="mt-4 text-sm font-semibold text-slate-200">
-                                No projects yet
-                            </h3>
-
-                            <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-slate-500">
-                                Create a project inside this workspace to start
-                                organizing your work.
-                            </p>
-
-                            <button className="mt-5 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white transition hover:bg-indigo-500">
-                                <FolderKanban size={15} />
-                                Create project
-                            </button>
+                                );
+                            })}
                         </div>
                     ) : (
-                        <div className="p-6">
+                        <div className="px-6 py-12 text-center">
                             <p className="text-sm text-slate-400">
-                                {workspace.projects_count} projects belong to
-                                this workspace.
+                                No members found.
                             </p>
                         </div>
                     )}
                 </section>
-            </div>
-        </main>
+
+                <section className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
+                    <div className="flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p className="font-mono text-xs uppercase tracking-widest text-indigo-400">
+                                Projects
+                            </p>
+
+                            <h2 className="mt-1 text-lg font-semibold">
+                                Workspace projects
+                            </h2>
+
+                            <p className="mt-1 text-sm text-slate-500">
+                                Projects created inside this workspace.
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() =>
+                                router.push(
+                                    `/workspaces/${workspace.id}/projects/new`
+                                )
+                            }
+                            className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+                        >
+                            Create project
+                        </button>
+                    </div>
+
+                    {workspace.projects_count === 0 ? (
+                        <div className="border-t border-slate-800/70 px-6 py-12 text-center">
+                            <p className="text-sm font-medium text-slate-300">
+                                No projects yet
+                            </p>
+
+                            <p className="mt-1 text-sm text-slate-500">
+                                Create your first project to start organizing
+                                work.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="border-t border-slate-800/70 px-6 py-8">
+                            <p className="text-sm text-slate-400">
+                                {workspace.projects_count} projects available
+                                in this workspace.
+                            </p>
+                        </div>
+                    )}
+                </section>
+            </main>
+
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 text-red-400">
+                            !
+                        </div>
+
+                        <h2 className="mt-5 text-lg font-semibold text-white">
+                            Delete workspace?
+                        </h2>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                            This action will permanently delete{" "}
+                            <span className="font-medium text-slate-200">
+                                {workspace.name}
+                            </span>{" "}
+                            and its associated data. This cannot be undone.
+                        </p>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                onClick={() =>
+                                    setShowDeleteModal(false)
+                                }
+                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-700 hover:text-white"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    setShowDeleteModal(false)
+                                }
+                                className="cursor-pointer rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-500"
+                            >
+                                Delete workspace
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
