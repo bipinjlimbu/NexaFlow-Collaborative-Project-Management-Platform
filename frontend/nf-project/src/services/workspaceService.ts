@@ -22,6 +22,39 @@ export interface Workspace {
     role?: "owner" | "admin" | "member";
 }
 
+export interface WorkspaceUser {
+    id: number;
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    address: string;
+    profile_picture: string | null;
+    is_active: boolean;
+}
+
+export interface WorkspaceDetailMember {
+    id: number;
+    joined_at: string;
+    role: "owner" | "admin" | "member";
+    user: WorkspaceUser;
+    workspace: number;
+}
+
+export interface WorkspaceDetail {
+    id: number;
+    name: string;
+    description: string | null;
+    created_by: number;
+    created_at: string;
+    updated_at: string;
+    is_archived: boolean;
+    members: WorkspaceDetailMember[];
+    members_count: number;
+    projects_count: number;
+}
+
 export interface CreateWorkspaceData {
     name: string;
     description: string;
@@ -42,4 +75,10 @@ export async function createWorkspace(
         method: "POST",
         body: JSON.stringify(data),
     });
+}
+
+export async function getWorkspace(
+    id: number
+): Promise<WorkspaceDetail> {
+    return authFetch(`/workspaces/${id}/`);
 }
