@@ -146,10 +146,9 @@ class WorkspaceInvitation(models.Model):
         EXPIRED = 'expired', 'Expired'
         
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='invitations')
-    email = models.EmailField()
+    invited_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_invitations', null=True, blank=True)
     invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.MEMBER)
-    token = models.CharField(max_length=255, unique=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
