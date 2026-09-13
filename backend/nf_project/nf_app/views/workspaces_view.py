@@ -1,10 +1,10 @@
-from django.core.mail import message
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Workspace, WorkspaceMember, User, WorkspaceInvitation, Notification
-from ..serializers import WorkspaceSerializer, UserSerializer, NotificationSerializer
+from ..serializers import WorkspaceSerializer, UserSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -116,10 +116,13 @@ def send_workspace_invitation(request, workspace_id):
         elif role not in [WorkspaceInvitation.Role.ADMIN, WorkspaceInvitation.Role.MEMBER]:
             errors['role'] = 'Invalid role. Must be either "admin" or "member".'
             
+        if WorkspaceInvitation.objects.filter(workspace=workspace, invited_user=invited_user, status=WorkspaceInvitation.Status.PENDING).exists():
+            errors['invitation'] = 'An invitation has already been sent to this user for this workspace.'
+            
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
-        invitation = WorkspaceInvitation(workspace=workspace, invited_user=invited_user, invited_by=request.user, role=role)
+        invitation = WorkspaceInvitation(workspace=workspace, invited_user=invited_user, invited_by=request.user, role=role, expires_at=timezone.now() + timezone.timedelta(days=7))
         notification = Notification(user=invited_user, type="INVITATION", title="Workspace Invitation", message=f"You have been invited to join the workspace '{workspace.name}'.")
         invitation.save()
         notification.save()
