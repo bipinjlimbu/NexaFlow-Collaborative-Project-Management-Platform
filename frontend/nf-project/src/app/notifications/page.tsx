@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+    deleteNotification,
     getNotifications,
     markNotificationAsRead,
     Notification,
@@ -83,6 +84,7 @@ export default function NotificationsPage() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [deletingId, setDeletingId] = useState<number | null>(null);
 
     useEffect(() => {
         const access = localStorage.getItem("access");
@@ -161,6 +163,41 @@ export default function NotificationsPage() {
         }
     };
 
+    const handleDeleteNotification = async (
+        id: number
+    ) => {
+        try {
+            setDeletingId(id);
+
+            await deleteNotification(id);
+
+            setNotifications((currentNotifications) =>
+                currentNotifications.filter(
+                    (notification) =>
+                        notification.id !== id
+                )
+            );
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter(
+                        (message) =>
+                            typeof message === "string"
+                    )
+                    .join(" ");
+
+                setError(
+                    messages ||
+                    "Unable to delete notification."
+                );
+            } else {
+                setError("Unable to delete notification.");
+            }
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     if (loading) {
         return <NotificationsSkeleton />;
     }
@@ -222,6 +259,9 @@ export default function NotificationsPage() {
                                 getNotificationRoute(
                                     notification.type
                                 );
+
+                            const isDeleting =
+                                deletingId === notification.id;
 
                             return (
                                 <div
@@ -302,14 +342,33 @@ export default function NotificationsPage() {
                                                     }
                                                 </span>
 
-                                                {route && (
-                                                    <span className="flex items-center gap-1 text-xs font-medium text-slate-600 transition-all duration-200 group-hover:text-indigo-400">
-                                                        Open
-                                                        <span className="transition-transform duration-200 group-hover:translate-x-1">
-                                                            →
+                                                <div className="flex items-center gap-4">
+                                                    {route && (
+                                                        <span className="flex items-center gap-1 text-xs font-medium text-slate-600 transition-all duration-200 group-hover:text-indigo-400">
+                                                            Open
+                                                            <span className="transition-transform duration-200 group-hover:translate-x-1">
+                                                                →
+                                                            </span>
                                                         </span>
-                                                    </span>
-                                                )}
+                                                    )}
+
+                                                    <button
+                                                        type="button"
+                                                        disabled={isDeleting}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+
+                                                            handleDeleteNotification(
+                                                                notification.id
+                                                            );
+                                                        }}
+                                                        className="cursor-pointer text-xs font-medium text-slate-600 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {isDeleting
+                                                            ? "Deleting..."
+                                                            : "Delete"}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
