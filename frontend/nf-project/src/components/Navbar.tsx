@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NavbarSkeleton from "@/components/NavbarSkeleton";
+import { getNotifications } from "@/services/notificationService";
 
 type User = {
     id: number;
@@ -18,7 +19,10 @@ export default function Navbar() {
     const pathname = usePathname();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [user, setUser] = useState<User | null>(null);
-    const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
+    const [hasNotifications, setHasNotifications] = useState(false);
+
+    const API_URL =
+        process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
 
     useEffect(() => {
         function checkAuth() {
@@ -47,29 +51,57 @@ export default function Navbar() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setHasNotifications(false);
+            return;
+        }
+
+        async function loadNotifications() {
+            try {
+                const notifications = await getNotifications();
+
+                setHasNotifications(
+                    notifications.some(
+                        (notification) => !notification.is_read
+                    )
+                );
+            } catch {
+                setHasNotifications(false);
+            }
+        }
+
+        loadNotifications();
+    }, [isAuthenticated, pathname]);
+
     if (isAuthenticated === null) {
         return <NavbarSkeleton />;
     }
 
     return (
-        <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-6 py-4">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform">
+        <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-slate-950/80 px-6 py-4 backdrop-blur-md">
+            <div className="mx-auto flex max-w-7xl items-center justify-between">
+                <Link
+                    href="/"
+                    className="group flex items-center gap-3"
+                >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-lg font-bold text-white shadow-lg shadow-indigo-600/30 transition-transform group-hover:scale-105">
                         N
                     </div>
 
-                    <span className="font-bold text-xl tracking-tight text-white">
+                    <span className="text-xl font-bold tracking-tight text-white">
                         NexaFlow
                     </span>
                 </Link>
 
                 {isAuthenticated ? (
                     <>
-                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+                        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
                             <Link
                                 href="/dashboard"
-                                className={`transition-colors ${pathname === "/dashboard" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                className={`transition-colors ${pathname === "/dashboard"
+                                    ? "font-semibold text-white"
+                                    : "text-slate-400 hover:text-white"
                                     }`}
                             >
                                 Dashboard
@@ -77,7 +109,9 @@ export default function Navbar() {
 
                             <Link
                                 href="/workspaces"
-                                className={`transition-colors ${pathname === "/workspaces" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                className={`transition-colors ${pathname === "/workspaces"
+                                    ? "font-semibold text-white"
+                                    : "text-slate-400 hover:text-white"
                                     }`}
                             >
                                 Workspaces
@@ -85,7 +119,9 @@ export default function Navbar() {
 
                             <Link
                                 href="/projects"
-                                className={`transition-colors ${pathname === "/projects" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                className={`transition-colors ${pathname === "/projects"
+                                    ? "font-semibold text-white"
+                                    : "text-slate-400 hover:text-white"
                                     }`}
                             >
                                 Projects
@@ -93,7 +129,9 @@ export default function Navbar() {
 
                             <Link
                                 href="/tasks"
-                                className={`transition-colors ${pathname === "/tasks" ? "text-white font-semibold" : "text-slate-400 hover:text-white"
+                                className={`transition-colors ${pathname === "/tasks"
+                                    ? "font-semibold text-white"
+                                    : "text-slate-400 hover:text-white"
                                     }`}
                             >
                                 Tasks
@@ -103,12 +141,14 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/notifications"
-                                className={`p-2 rounded-lg bg-slate-900 border border-slate-800 transition-colors relative ${pathname === "/notifications" ? "text-white border-slate-700" : "text-slate-400 hover:text-white"
+                                className={`relative rounded-lg border bg-slate-900 p-2 transition-colors ${pathname === "/notifications"
+                                    ? "border-slate-700 text-white"
+                                    : "border-slate-800 text-slate-400 hover:text-white"
                                     }`}
                                 aria-label="Notifications"
                             >
                                 <svg
-                                    className="w-5 h-5"
+                                    className="h-5 w-5"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -121,31 +161,40 @@ export default function Navbar() {
                                     />
                                 </svg>
 
-                                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500" />
+                                {hasNotifications && (
+                                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-500" />
+                                )}
                             </Link>
 
                             <Link
                                 href="/profile"
-                                className={`flex items-center gap-3 pl-2 border-l border-slate-800 transition-opacity ${pathname === "/profile" ? "opacity-100" : "opacity-90 hover:opacity-100"
+                                className={`flex items-center gap-3 border-l border-slate-800 pl-2 transition-opacity ${pathname === "/profile"
+                                    ? "opacity-100"
+                                    : "opacity-90 hover:opacity-100"
                                     }`}
                             >
                                 {user?.profile_picture ? (
                                     <img
                                         src={`${API_URL}${user.profile_picture}`}
-                                        alt={user.first_name || user.username}
+                                        alt={
+                                            user.first_name ||
+                                            user.username
+                                        }
                                         className="h-8 w-8 rounded-full object-cover"
                                     />
                                 ) : (
-                                    <div className="h-8 w-8 rounded-full bg-indigo-600 text-white font-medium text-xs flex items-center justify-center">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-medium text-white">
                                         {user?.first_name?.[0]?.toUpperCase() ||
                                             user?.username?.[0]?.toUpperCase() ||
                                             "U"}
                                     </div>
                                 )}
 
-                                <div className="hidden sm:block text-left">
+                                <div className="hidden text-left sm:block">
                                     <div className="text-xs font-semibold text-slate-200">
-                                        {user?.first_name || user?.username || "User"}
+                                        {user?.first_name ||
+                                            user?.username ||
+                                            "User"}
                                     </div>
 
                                     <div className="text-[10px] text-slate-500">
@@ -153,21 +202,29 @@ export default function Navbar() {
                                     </div>
                                 </div>
                             </Link>
-
                         </div>
                     </>
                 ) : (
                     <>
-                        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-                            <Link href="/#features" className="hover:text-white transition-colors">
+                        <nav className="hidden items-center gap-8 text-sm font-medium text-slate-400 md:flex">
+                            <Link
+                                href="/#features"
+                                className="transition-colors hover:text-white"
+                            >
                                 Features
                             </Link>
 
-                            <Link href="/#hierarchy" className="hover:text-white transition-colors">
+                            <Link
+                                href="/#hierarchy"
+                                className="transition-colors hover:text-white"
+                            >
                                 Structure
                             </Link>
 
-                            <Link href="/#about" className="hover:text-white transition-colors">
+                            <Link
+                                href="/#about"
+                                className="transition-colors hover:text-white"
+                            >
                                 About
                             </Link>
                         </nav>
@@ -175,7 +232,9 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             <Link
                                 href="/login"
-                                className={`text-sm font-medium transition-colors ${pathname === "/login" ? "text-white" : "text-slate-300 hover:text-white"
+                                className={`text-sm font-medium transition-colors ${pathname === "/login"
+                                    ? "text-white"
+                                    : "text-slate-300 hover:text-white"
                                     }`}
                             >
                                 Sign In
@@ -183,7 +242,7 @@ export default function Navbar() {
 
                             <Link
                                 href="/register"
-                                className="text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
+                                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-95"
                             >
                                 Get Started
                             </Link>
