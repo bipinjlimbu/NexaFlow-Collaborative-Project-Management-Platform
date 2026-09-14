@@ -156,6 +156,14 @@ class WorkspaceInvitation(models.Model):
     def __str__(self):
         return f"Invitation to {self.email} for {self.workspace.name}"
     
+    def is_expired(self):
+        from django.utils import timezone
+        if self.status == self.Status.PENDING and self.expires_at < timezone.now():
+            self.status = self.Status.EXPIRED
+            self.save()
+            return True
+        return False
+
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     type = models.CharField(max_length=50)
