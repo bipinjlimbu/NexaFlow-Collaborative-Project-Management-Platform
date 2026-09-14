@@ -17,3 +17,11 @@ export async function getNotifications(): Promise<Notification[]> {
         ? data
         : data.results || data.notifications || [];
 }
+
+export async function markNotificationAsRead(
+    id: number
+): Promise<Notification> {
+    return authFetch(`/notifications/${id}/`, {
+        method: "PATCH",
+    });
+}
