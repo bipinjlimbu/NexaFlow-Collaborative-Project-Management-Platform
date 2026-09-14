@@ -25,3 +25,9 @@ export async function markNotificationAsRead(
         method: "PATCH",
     });
 }
+
+export async function deleteNotification(id: number) {
+    return authFetch(`/notifications/${id}/`, {
+        method: "DELETE",
+    });
+}
