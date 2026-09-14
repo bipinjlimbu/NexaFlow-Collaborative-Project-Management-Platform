@@ -41,3 +41,11 @@ export async function getInvitations(): Promise<WorkspaceInvitation[]> {
         ? data
         : data.results || data.invitations || [];
 }
+
+export async function acceptInvitation(
+    id: number
+): Promise<WorkspaceInvitation> {
+    return authFetch(`/invitations/${id}/accept/`, {
+        method: "PATCH",
+    });
+}
