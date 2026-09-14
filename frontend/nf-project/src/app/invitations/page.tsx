@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+    acceptInvitation,
     getInvitations,
     WorkspaceInvitation,
 } from "@/services/invitationService";
@@ -85,6 +86,9 @@ export default function InvitationsPage() {
     >([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [acceptingId, setAcceptingId] = useState<number | null>(
+        null
+    );
 
     useEffect(() => {
         const access = localStorage.getItem("access");
@@ -126,11 +130,45 @@ export default function InvitationsPage() {
         loadInvitations();
     }, [router]);
 
+    const handleAcceptInvitation = async (id: number) => {
+        try {
+            setAcceptingId(id);
+            setError("");
+
+            const updatedInvitation =
+                await acceptInvitation(id);
+
+            setInvitations((currentInvitations) =>
+                currentInvitations.map((invitation) =>
+                    invitation.id === updatedInvitation.id
+                        ? updatedInvitation
+                        : invitation
+                )
+            );
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter(
+                        (message) =>
+                            typeof message === "string"
+                    )
+                    .join(" ");
+
+                setError(
+                    messages ||
+                    "Unable to accept invitation."
+                );
+            } else {
+                setError("Unable to accept invitation.");
+            }
+        } finally {
+            setAcceptingId(null);
+        }
+    };
+
     if (loading) {
         return <InvitationsSkeleton />;
     }
-
-    console.log("Invitations:", invitations);
 
     return (
         <div className="min-h-screen bg-slate-950 text-white">
@@ -187,7 +225,11 @@ export default function InvitationsPage() {
                 {invitations.length > 0 && (
                     <div className="space-y-4">
                         {invitations.map((invitation) => {
-                            const inviter = invitation.invited_by;
+                            const inviter =
+                                invitation.invited_by;
+
+                            const isAccepting =
+                                acceptingId === invitation.id;
 
                             return (
                                 <div
@@ -216,10 +258,9 @@ export default function InvitationsPage() {
                                                         </h2>
 
                                                         <span
-                                                            className={`rounded - md border px - 2 py - 1 text - [10px] font - bold uppercase tracking - [0.12em] ${getStatusStyle(
+                                                            className={`rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${getStatusStyle(
                                                                 invitation.status
-                                                            )
-                                                                } `}
+                                                            )}`}
                                                         >
                                                             {
                                                                 invitation.status
@@ -263,10 +304,9 @@ export default function InvitationsPage() {
                                             </div>
 
                                             <span
-                                                className={`self - start rounded - lg border px - 3 py - 1.5 text - xs font - semibold capitalize ${getRoleStyle(
+                                                className={`self-start rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize ${getRoleStyle(
                                                     invitation.role
-                                                )
-                                                    } `}
+                                                )}`}
                                             >
                                                 {invitation.role}
                                             </span>
@@ -279,8 +319,7 @@ export default function InvitationsPage() {
                                                         src={`${process.env.NEXT_PUBLIC_API_URL?.replace(
                                                             "/api",
                                                             ""
-                                                        )
-                                                            }${inviter.profile_picture} `}
+                                                        )}${inviter.profile_picture}`}
                                                         alt={
                                                             inviter.first_name ||
                                                             inviter.username
@@ -314,23 +353,34 @@ export default function InvitationsPage() {
                                             </span>
                                         </div>
 
-                                        {invitation.status === "pending" && (
-                                            <div className="mt-5 flex flex-col gap-2 border-t border-slate-800/70 pt-5 sm:flex-row sm:justify-end">
-                                                <button
-                                                    type="button"
-                                                    className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400"
-                                                >
-                                                    Decline
-                                                </button>
+                                        {invitation.status ===
+                                            "pending" && (
+                                                <div className="mt-5 flex flex-col gap-2 border-t border-slate-800/70 pt-5 sm:flex-row sm:justify-end">
+                                                    <button
+                                                        type="button"
+                                                        className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400"
+                                                    >
+                                                        Decline
+                                                    </button>
 
-                                                <button
-                                                    type="button"
-                                                    className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98]"
-                                                >
-                                                    Accept invitation
-                                                </button>
-                                            </div>
-                                        )}
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            isAccepting
+                                                        }
+                                                        onClick={() =>
+                                                            handleAcceptInvitation(
+                                                                invitation.id
+                                                            )
+                                                        }
+                                                        className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                                                    >
+                                                        {isAccepting
+                                                            ? "Accepting..."
+                                                            : "Accept invitation"}
+                                                    </button>
+                                                </div>
+                                            )}
                                     </div>
                                 </div>
                             );
@@ -340,4 +390,5 @@ export default function InvitationsPage() {
             </div>
         </div>
     );
+
 }
