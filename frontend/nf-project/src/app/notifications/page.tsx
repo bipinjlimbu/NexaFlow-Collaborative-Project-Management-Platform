@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     getNotifications,
+    markNotificationAsRead,
     Notification,
 } from "@/services/notificationService";
 import NotificationsSkeleton from "@/components/NotificationsSkeleton";
@@ -131,13 +132,32 @@ export default function NotificationsPage() {
         [notifications]
     );
 
-    const handleNotificationClick = (
+    const handleNotificationClick = async (
         notification: Notification
     ) => {
         const route = getNotificationRoute(notification.type);
 
-        if (route) {
-            router.push(route);
+        try {
+            if (!notification.is_read) {
+                const updatedNotification =
+                    await markNotificationAsRead(notification.id);
+
+                setNotifications((currentNotifications) =>
+                    currentNotifications.map((item) =>
+                        item.id === updatedNotification.id
+                            ? updatedNotification
+                            : item
+                    )
+                );
+            }
+
+            if (route) {
+                router.push(route);
+            }
+        } catch (err) {
+            if (route) {
+                router.push(route);
+            }
         }
     };
 
