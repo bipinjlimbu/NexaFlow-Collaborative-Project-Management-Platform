@@ -33,3 +33,20 @@ def accept_invitation_view(request, pk):
         invitation.save()
         serializer = WorkspaceInvitationSerializer(invitation)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def decline_invitation_view(request, pk):
+    try:
+        invitation = WorkspaceInvitation.objects.get(pk=pk, invited_user=request.user)
+    except WorkspaceInvitation.DoesNotExist:
+        return Response({"error": "Invitation not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'PATCH':
+        if invitation.status != WorkspaceInvitation.Status.PENDING:
+            return Response({"error": "Invitation is not pending."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        invitation.status = WorkspaceInvitation.Status.DECLINED
+        invitation.save()
+        serializer = WorkspaceInvitationSerializer(invitation)
+        return Response(serializer.data, status=status.HTTP_200_OK)
