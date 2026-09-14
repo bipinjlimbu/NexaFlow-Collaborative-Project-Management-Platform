@@ -71,6 +71,19 @@ class AttachmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class WorkspaceInvitationSerializer(serializers.ModelSerializer):
+    workspace = serializers.SerializerMethodField()
+    invited_user = serializers.SerializerMethodField()
+    invited_by = serializers.SerializerMethodField()
+    
+    def get_workspace(self, obj):
+        return WorkspaceSerializer(obj.workspace).data
+    
+    def get_invited_user(self, obj):
+        return UserSerializer(obj.invited_user).data
+    
+    def get_invited_by(self, obj):
+        return UserSerializer(obj.invited_by).data
+    
     class Meta:
         model = WorkspaceInvitation
         fields = '__all__'
