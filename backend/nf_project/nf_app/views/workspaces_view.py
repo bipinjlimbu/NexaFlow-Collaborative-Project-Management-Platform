@@ -11,7 +11,7 @@ from ..serializers import WorkspaceSerializer, UserSerializer
 def workspaces_view(request):
     if request.method == 'GET':
         try:
-            workspaces = Workspace.objects.filter(created_by=request.user)
+            workspaces = Workspace.objects.filter(members__user=request.user).distinct()
             serializer = WorkspaceSerializer(workspaces, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Workspace.DoesNotExist:
@@ -51,7 +51,7 @@ def workspaces_view(request):
 @permission_classes([IsAuthenticated])
 def workspace_detail_view(request, pk):
     try:
-        workspace = Workspace.objects.get(pk=pk, created_by=request.user)
+        workspace = Workspace.objects.get(pk=pk, members__user=request.user)
     except Workspace.DoesNotExist:
         return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
     
