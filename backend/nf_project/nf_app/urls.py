@@ -4,6 +4,7 @@ from .views.workspaces_view import workspaces_view, workspace_detail_view, get_u
 from .views.profile_view import profile_view
 from .views.notification_view import get_notifications_view, notification_detail_view
 from .views.invitation_view import get_invitations_view, accept_invitation_view, decline_invitation_view
+from .views.project_view import projects_view
 
 urlpatterns = [
     path('register/', register_view, name='register'),
@@ -22,4 +23,5 @@ urlpatterns = [
     path('workspaces/<int:workspace_id>/members/<int:user_id>/promote/', promote_workspace_member, name='promote_workspace_member'),
     path('workspaces/<int:workspace_id>/members/<int:user_id>/demote/', demote_workspace_member, name='demote_workspace_member'),
     path('workspaces/<int:workspace_id>/members/<int:user_id>/remove/', remove_workspace_member, name='remove_workspace_member'),
+    path('projects/', projects_view, name='projects'),
 ]
