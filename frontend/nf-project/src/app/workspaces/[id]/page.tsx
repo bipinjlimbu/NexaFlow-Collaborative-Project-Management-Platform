@@ -12,6 +12,7 @@ import {
     WorkspaceUser,
 } from "@/services/workspaceService";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
+import { Plus } from "lucide-react";
 
 export default function WorkspaceDetailPage() {
     const params = useParams();
@@ -22,6 +23,8 @@ export default function WorkspaceDetailPage() {
     const [workspace, setWorkspace] = useState<WorkspaceDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
     const [showEditPanel, setShowEditPanel] = useState(false);
     const [showInvitePanel, setShowInvitePanel] = useState(false);
@@ -49,10 +52,20 @@ export default function WorkspaceDetailPage() {
 
     useEffect(() => {
         const access = localStorage.getItem("access");
+        const storedUser = localStorage.getItem("user");
 
         if (!access) {
             router.replace("/login");
             return;
+        }
+
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                setCurrentUserId(Number(user.id));
+            } catch {
+                setCurrentUserId(null);
+            }
         }
 
         async function loadWorkspace() {
@@ -117,8 +130,59 @@ export default function WorkspaceDetailPage() {
         (member) => member.role === "owner"
     );
 
+    const currentMember = workspace?.members.find(
+        (member) => member.user.id === currentUserId
+    );
+
+    const currentUserRole =
+        currentMember?.role ||
+        (workspace?.created_by === currentUserId ? "owner" : "member");
+
+    const canEditWorkspace =
+        currentUserRole === "owner" ||
+        currentUserRole === "admin";
+
+    const canDeleteWorkspace =
+        currentUserRole === "owner";
+
+    const canInviteMembers =
+        currentUserRole === "owner" ||
+        currentUserRole === "admin";
+
+    const canManageMember = (memberRole: string) => {
+        if (currentUserRole === "owner") {
+            return memberRole === "admin" || memberRole === "member";
+        }
+
+        if (currentUserRole === "admin") {
+            return memberRole === "member";
+        }
+
+        return false;
+    };
+
+    const getMemberAction = (memberRole: string) => {
+        if (currentUserRole === "owner") {
+            if (memberRole === "admin") {
+                return "Demote";
+            }
+
+            if (memberRole === "member") {
+                return "Promote";
+            }
+        }
+
+        if (currentUserRole === "admin") {
+            if (memberRole === "member") {
+                return "Promote";
+            }
+        }
+
+        return null;
+    };
+
     const handleOpenEditPanel = () => {
-        if (!workspace) {
+        if (!workspace || !canEditWorkspace) {
             return;
         }
 
@@ -130,7 +194,7 @@ export default function WorkspaceDetailPage() {
     };
 
     const handleUpdateWorkspace = async () => {
-        if (!workspace) {
+        if (!workspace || !canEditWorkspace) {
             return;
         }
 
@@ -164,7 +228,7 @@ export default function WorkspaceDetailPage() {
     };
 
     const handleDeleteWorkspace = async () => {
-        if (!workspace) {
+        if (!workspace || !canDeleteWorkspace) {
             return;
         }
 
@@ -192,6 +256,10 @@ export default function WorkspaceDetailPage() {
     };
 
     const handleOpenInvitePanel = async () => {
+        if (!canInviteMembers) {
+            return;
+        }
+
         setShowInvitePanel(true);
         setUserSearch("");
         setUsersError("");
@@ -224,7 +292,7 @@ export default function WorkspaceDetailPage() {
     };
 
     const handleInviteUser = async (userId: number) => {
-        if (!workspace) {
+        if (!workspace || !canInviteMembers) {
             return;
         }
 
@@ -308,22 +376,26 @@ export default function WorkspaceDetailPage() {
                     </button>
 
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleOpenEditPanel}
-                            className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-800"
-                        >
-                            Edit workspace
-                        </button>
+                        {canEditWorkspace && (
+                            <button
+                                onClick={handleOpenEditPanel}
+                                className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-800"
+                            >
+                                Edit workspace
+                            </button>
+                        )}
 
-                        <button
-                            onClick={() => {
-                                setDeleteError("");
-                                setShowDeleteModal(true);
-                            }}
-                            className="cursor-pointer rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20"
-                        >
-                            Delete
-                        </button>
+                        {canDeleteWorkspace && (
+                            <button
+                                onClick={() => {
+                                    setDeleteError("");
+                                    setShowDeleteModal(true);
+                                }}
+                                className="cursor-pointer rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20"
+                            >
+                                Delete
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -390,23 +462,21 @@ export default function WorkspaceDetailPage() {
                         </p>
 
                         <p className="mt-3 text-sm font-semibold capitalize text-indigo-400">
-                            {owner?.role || "Member"}
+                            {currentUserRole}
                         </p>
                     </div>
                 </div>
 
                 <div className="mt-6 grid gap-6 lg:grid-cols-3">
                     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-6 lg:col-span-2">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-lg font-semibold">
-                                    Workspace information
-                                </h2>
+                        <div>
+                            <h2 className="text-lg font-semibold">
+                                Workspace information
+                            </h2>
 
-                                <p className="mt-1 text-sm text-slate-500">
-                                    Basic details and workspace status.
-                                </p>
-                            </div>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Basic details and workspace status.
+                            </p>
                         </div>
 
                         <div className="mt-6 divide-y divide-slate-800/80">
@@ -546,76 +616,109 @@ export default function WorkspaceDetailPage() {
                             </p>
                         </div>
 
-                        <button
-                            onClick={handleOpenInvitePanel}
-                            className="cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
-                        >
-                            Invite member
-                        </button>
+                        {canInviteMembers && (
+                            <button
+                                onClick={handleOpenInvitePanel}
+                                className="cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
+                            >
+                                Invite member
+                            </button>
+                        )}
                     </div>
 
                     <div className="divide-y divide-slate-800/80">
                         {workspace.members.length > 0 ? (
-                            workspace.members.map((member) => (
-                                <div
-                                    key={member.id}
-                                    className="flex items-center justify-between gap-4 px-6 py-4"
-                                >
-                                    <div className="flex min-w-0 items-center gap-4">
-                                        {member.user.profile_picture ? (
-                                            <img
-                                                src={
-                                                    member.user.profile_picture.startsWith(
-                                                        "http"
-                                                    )
-                                                        ? member.user
-                                                            .profile_picture
-                                                        : `${process.env.NEXT_PUBLIC_API_URL?.replace(
-                                                            "/api",
-                                                            ""
-                                                        )}${member.user.profile_picture}`
-                                                }
-                                                alt={
-                                                    member.user.username
-                                                }
-                                                className="h-10 w-10 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-slate-300">
-                                                {member.user.username
-                                                    .charAt(0)
-                                                    .toUpperCase()}
+                            workspace.members.map((member) => {
+                                const action =
+                                    getMemberAction(member.role);
+
+                                const canManage =
+                                    canManageMember(member.role);
+
+                                return (
+                                    <div
+                                        key={member.id}
+                                        className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                        <div className="flex min-w-0 items-center gap-4">
+                                            {member.user.profile_picture ? (
+                                                <img
+                                                    src={
+                                                        member.user.profile_picture.startsWith(
+                                                            "http"
+                                                        )
+                                                            ? member.user
+                                                                .profile_picture
+                                                            : `${process.env.NEXT_PUBLIC_API_URL?.replace(
+                                                                "/api",
+                                                                ""
+                                                            )}${member.user.profile_picture}`
+                                                    }
+                                                    alt={
+                                                        member.user.username
+                                                    }
+                                                    className="h-10 w-10 shrink-0 rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-slate-300">
+                                                    {member.user.username
+                                                        .charAt(0)
+                                                        .toUpperCase()}
+                                                </div>
+                                            )}
+
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-medium text-white">
+                                                    {member.user.first_name ||
+                                                        member.user.username}
+                                                    {member.user.last_name
+                                                        ? ` ${member.user.last_name}`
+                                                        : ""}
+                                                </p>
+
+                                                <p className="truncate text-xs text-slate-500">
+                                                    @{member.user.username} ·{" "}
+                                                    {member.user.email}
+                                                </p>
                                             </div>
-                                        )}
+                                        </div>
 
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium text-white">
-                                                {member.user.first_name ||
-                                                    member.user.username}
-                                                {member.user.last_name
-                                                    ? ` ${member.user.last_name}`
-                                                    : ""}
-                                            </p>
+                                        <div className="flex items-center gap-2 sm:shrink-0">
+                                            <span
+                                                className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
+                                                    ? "bg-indigo-500/10 text-indigo-400"
+                                                    : member.role === "admin"
+                                                        ? "bg-amber-500/10 text-amber-400"
+                                                        : "bg-slate-800 text-slate-400"
+                                                    }`}
+                                            >
+                                                {member.role}
+                                            </span>
 
-                                            <p className="truncate text-xs text-slate-500">
-                                                @{member.user.username} ·{" "}
-                                                {member.user.email}
-                                            </p>
+                                            {canManage && action && (
+                                                <button
+                                                    type="button"
+                                                    className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium transition ${action === "Promote"
+                                                        ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400 hover:border-indigo-500/40 hover:bg-indigo-500/20"
+                                                        : "border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:bg-slate-800 hover:text-slate-200"
+                                                        }`}
+                                                >
+                                                    {action}
+                                                </button>
+                                            )}
+
+                                            {canManage && (
+                                                <button
+                                                    type="button"
+                                                    className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/20"
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
-
-                                    <span
-                                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
-                                            ? "bg-indigo-500/10 text-indigo-400"
-                                            : member.role === "admin"
-                                                ? "bg-amber-500/10 text-amber-400"
-                                                : "bg-slate-800 text-slate-400"
-                                            }`}
-                                    >
-                                        {member.role}
-                                    </span>
-                                </div>
-                            ))
+                                );
+                            })
                         ) : (
                             <div className="px-6 py-12 text-center text-sm text-slate-500">
                                 No members found.
@@ -625,14 +728,24 @@ export default function WorkspaceDetailPage() {
                 </div>
 
                 <div className="mt-6 rounded-xl border border-slate-800/80 bg-slate-900/40">
-                    <div className="border-b border-slate-800/80 px-6 py-5">
-                        <h2 className="text-lg font-semibold">
-                            Projects
-                        </h2>
+                    <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-5">
+                        <div>
+                            <h2 className="text-lg font-semibold">
+                                Projects
+                            </h2>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                            Projects associated with this workspace.
-                        </p>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Projects associated with this workspace.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
+                        >
+                            <Plus size={16} />
+                            Create project
+                        </button>
                     </div>
 
                     <div className="px-6 py-12 text-center">
@@ -653,7 +766,7 @@ export default function WorkspaceDetailPage() {
                 </div>
             </div>
 
-            {showEditPanel && (
+            {showEditPanel && canEditWorkspace && (
                 <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
                     <div className="h-full w-full max-w-md overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
                         <div className="flex items-center justify-between">
@@ -753,7 +866,7 @@ export default function WorkspaceDetailPage() {
                 </div>
             )}
 
-            {showInvitePanel && (
+            {showInvitePanel && canInviteMembers && (
                 <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
                     <div className="flex h-full w-full max-w-md flex-col border-l border-slate-800 bg-slate-950 shadow-2xl">
                         <div className="border-b border-slate-800 px-6 py-5">
@@ -938,7 +1051,7 @@ export default function WorkspaceDetailPage() {
                 </div>
             )}
 
-            {showDeleteModal && (
+            {showDeleteModal && canDeleteWorkspace && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-400">
