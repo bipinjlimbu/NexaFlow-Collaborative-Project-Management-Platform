@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     deleteWorkspace,
+    demoteWorkspaceMember,
     getUsers,
     getWorkspace,
     promoteWorkspaceMember,
@@ -50,6 +51,7 @@ export default function WorkspaceDetailPage() {
     const [inviteError, setInviteError] = useState("");
 
     const [promotingUserId, setPromotingUserId] = useState<number | null>(null);
+    const [demotingUserId, setDemotingUserId] = useState<number | null>(null);
     const [memberActionError, setMemberActionError] = useState("");
 
     useEffect(() => {
@@ -368,6 +370,64 @@ export default function WorkspaceDetailPage() {
             }
         } finally {
             setPromotingUserId(null);
+        }
+    };
+
+    const handleDemoteMember = async (userId: number) => {
+        if (!workspace || currentRole !== "owner") {
+            return;
+        }
+
+        const targetMember = workspace.members.find(
+            (member) => member.user.id === userId
+        );
+
+        if (!targetMember || targetMember.role !== "admin") {
+            return;
+        }
+
+        setDemotingUserId(userId);
+        setMemberActionError("");
+
+        try {
+            const updatedMember = await demoteWorkspaceMember(
+                workspace.id,
+                userId
+            );
+
+            setWorkspace((previous) => {
+                if (!previous) {
+                    return previous;
+                }
+
+                return {
+                    ...previous,
+                    members: previous.members.map((member) =>
+                        member.user.id === userId
+                            ? {
+                                ...member,
+                                role: updatedMember.role,
+                            }
+                            : member
+                    ),
+                };
+            });
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setMemberActionError(
+                    messages || "Unable to demote member."
+                );
+            } else {
+                setMemberActionError(
+                    "Unable to demote member."
+                );
+            }
+        } finally {
+            setDemotingUserId(null);
         }
     };
 
@@ -762,9 +822,21 @@ export default function WorkspaceDetailPage() {
                                                 member.role === "admin" && (
                                                     <button
                                                         type="button"
-                                                        className="cursor-pointer rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-400 transition hover:bg-amber-500/20"
+                                                        onClick={() =>
+                                                            handleDemoteMember(
+                                                                member.user.id
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            demotingUserId ===
+                                                            member.user.id
+                                                        }
+                                                        className="cursor-pointer rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                                     >
-                                                        Demote
+                                                        {demotingUserId ===
+                                                            member.user.id
+                                                            ? "Demoting..."
+                                                            : "Demote"}
                                                     </button>
                                                 )}
 
@@ -780,7 +852,8 @@ export default function WorkspaceDetailPage() {
                                             <span
                                                 className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
                                                     ? "bg-indigo-500/10 text-indigo-400"
-                                                    : member.role === "admin"
+                                                    : member.role ===
+                                                        "admin"
                                                         ? "bg-amber-500/10 text-amber-400"
                                                         : "bg-slate-800 text-slate-400"
                                                     }`}
