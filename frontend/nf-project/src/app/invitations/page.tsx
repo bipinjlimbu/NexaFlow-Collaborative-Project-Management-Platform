@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
     acceptInvitation,
+    declineInvitation,
     getInvitations,
     WorkspaceInvitation,
 } from "@/services/invitationService";
@@ -89,6 +90,9 @@ export default function InvitationsPage() {
     const [acceptingId, setAcceptingId] = useState<number | null>(
         null
     );
+    const [decliningId, setDecliningId] = useState<number | null>(
+        null
+    );
 
     useEffect(() => {
         const access = localStorage.getItem("access");
@@ -166,6 +170,42 @@ export default function InvitationsPage() {
         }
     };
 
+    const handleDeclineInvitation = async (id: number) => {
+        try {
+            setDecliningId(id);
+            setError("");
+
+            const updatedInvitation =
+                await declineInvitation(id);
+
+            setInvitations((currentInvitations) =>
+                currentInvitations.map((invitation) =>
+                    invitation.id === updatedInvitation.id
+                        ? updatedInvitation
+                        : invitation
+                )
+            );
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter(
+                        (message) =>
+                            typeof message === "string"
+                    )
+                    .join(" ");
+
+                setError(
+                    messages ||
+                    "Unable to decline invitation."
+                );
+            } else {
+                setError("Unable to decline invitation.");
+            }
+        } finally {
+            setDecliningId(null);
+        }
+    };
+
     if (loading) {
         return <InvitationsSkeleton />;
     }
@@ -230,6 +270,12 @@ export default function InvitationsPage() {
 
                             const isAccepting =
                                 acceptingId === invitation.id;
+
+                            const isDeclining =
+                                decliningId === invitation.id;
+
+                            const isProcessing =
+                                isAccepting || isDeclining;
 
                             return (
                                 <div
@@ -358,15 +404,25 @@ export default function InvitationsPage() {
                                                 <div className="mt-5 flex flex-col gap-2 border-t border-slate-800/70 pt-5 sm:flex-row sm:justify-end">
                                                     <button
                                                         type="button"
-                                                        className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400"
+                                                        disabled={
+                                                            isProcessing
+                                                        }
+                                                        onClick={() =>
+                                                            handleDeclineInvitation(
+                                                                invitation.id
+                                                            )
+                                                        }
+                                                        className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                                                     >
-                                                        Decline
+                                                        {isDeclining
+                                                            ? "Declining..."
+                                                            : "Decline"}
                                                     </button>
 
                                                     <button
                                                         type="button"
                                                         disabled={
-                                                            isAccepting
+                                                            isProcessing
                                                         }
                                                         onClick={() =>
                                                             handleAcceptInvitation(
@@ -390,5 +446,4 @@ export default function InvitationsPage() {
             </div>
         </div>
     );
-
 }
