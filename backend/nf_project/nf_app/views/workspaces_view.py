@@ -132,7 +132,7 @@ def send_workspace_invitation(request, workspace_id):
 @permission_classes([IsAuthenticated])
 def promote_workspace_member(request, workspace_id, user_id):
     try:
-        workspace = Workspace.objects.get(pk=workspace_id, created_by=request.user)
+        workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user, members__role__in=[WorkspaceMember.Role.OWNER, WorkspaceMember.Role.ADMIN])
     except Workspace.DoesNotExist:
         return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
 

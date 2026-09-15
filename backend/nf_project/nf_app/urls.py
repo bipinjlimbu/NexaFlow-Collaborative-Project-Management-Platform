@@ -19,5 +19,5 @@ urlpatterns = [
     path('invitations/', get_invitations_view, name='get_invitations'),
     path('invitations/<int:pk>/accept/', accept_invitation_view, name='accept_invitation'),
     path('invitations/<int:pk>/decline/', decline_invitation_view, name='decline_invitation'),
-    path('workspaces/<int:workspace_id>/members/<int:member_id>/promote/', promote_workspace_member, name='promote_workspace_member'),
+    path('workspaces/<int:workspace_id>/members/<int:user_id>/promote/', promote_workspace_member, name='promote_workspace_member'),
 ]
