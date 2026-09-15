@@ -126,3 +126,15 @@ export async function sendWorkspaceInvitation(
         }),
     });
 }
+
+export async function promoteWorkspaceMember(
+    workspaceId: number,
+    userId: number
+) {
+    return authFetch(
+        `/workspaces/${workspaceId}/members/${userId}/promote/`,
+        {
+            method: "PATCH",
+        }
+    );
+}
