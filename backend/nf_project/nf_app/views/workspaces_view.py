@@ -171,3 +171,20 @@ def demote_workspace_member(request, workspace_id, user_id):
         member.save()
         serializer = WorkspaceMemberSerializer(member)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def remove_workspace_member(request, workspace_id, user_id):
+    try:
+        workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user, members__role__in=[WorkspaceMember.Role.OWNER, WorkspaceMember.Role.ADMIN])
+    except Workspace.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        member = WorkspaceMember.objects.get(workspace=workspace, user__pk=user_id)
+    except WorkspaceMember.DoesNotExist:
+        return Response({"error": "Workspace member not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'DELETE':
+        member.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
