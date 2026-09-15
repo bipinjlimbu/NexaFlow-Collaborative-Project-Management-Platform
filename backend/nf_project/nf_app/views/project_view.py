@@ -86,3 +86,7 @@ def project_detail_view(request, pk):
         project.save()
         serializer = ProjectSerializer(project)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    if request.method == 'DELETE':
+        project.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
