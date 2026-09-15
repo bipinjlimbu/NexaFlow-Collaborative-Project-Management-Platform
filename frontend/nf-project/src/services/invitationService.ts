@@ -49,3 +49,11 @@ export async function acceptInvitation(
         method: "PATCH",
     });
 }
+
+export async function declineInvitation(
+    id: number
+): Promise<WorkspaceInvitation> {
+    return authFetch(`/invitations/${id}/decline/`, {
+        method: "PATCH",
+    });
+}
