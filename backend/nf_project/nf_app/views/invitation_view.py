@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import WorkspaceInvitation
-from ..serializers import WorkspaceInvitationSerializer
+from ..models import WorkspaceInvitation, WorkspaceMember
+from ..serializers import WorkspaceInvitationSerializer, WorkspaceMemberSerializer
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -29,6 +29,12 @@ def accept_invitation_view(request, pk):
         if invitation.status != WorkspaceInvitation.Status.PENDING:
             return Response({"error": "Invitation is not pending."}, status=status.HTTP_400_BAD_REQUEST)
         
+        workspace_member = WorkspaceMember.objects.create(
+            workspace=invitation.workspace,
+            user=request.user,
+            role=invitation.role
+        )
+        workspace_member.save()
         invitation.status = WorkspaceInvitation.Status.ACCEPTED
         invitation.save()
         serializer = WorkspaceInvitationSerializer(invitation)
