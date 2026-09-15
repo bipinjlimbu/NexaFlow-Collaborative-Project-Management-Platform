@@ -149,3 +149,25 @@ def promote_workspace_member(request, workspace_id, user_id):
         member.save()
         serializer = WorkspaceMemberSerializer(member)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def demote_workspace_member(request, workspace_id, user_id):
+    try:
+        workspace = Workspace.objects.get(pk=workspace_id, created_by=request.user)
+    except Workspace.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        member = WorkspaceMember.objects.get(workspace=workspace, user__pk=user_id)
+    except WorkspaceMember.DoesNotExist:
+        return Response({"error": "Workspace member not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PATCH':
+        if member.role == WorkspaceMember.Role.MEMBER:
+            return Response({"error": "User is already a member."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        member.role = WorkspaceMember.Role.MEMBER
+        member.save()
+        serializer = WorkspaceMemberSerializer(member)
+        return Response(serializer.data, status=status.HTTP_200_OK)
