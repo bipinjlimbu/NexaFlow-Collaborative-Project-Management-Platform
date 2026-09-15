@@ -150,3 +150,15 @@ export async function demoteWorkspaceMember(
         }
     );
 }
+
+export async function removeWorkspaceMember(
+    workspaceId: number,
+    userId: number
+) {
+    return authFetch(
+        `/workspaces/${workspaceId}/members/${userId}/remove/`,
+        {
+            method: "DELETE",
+        }
+    );
+}
