@@ -60,3 +60,29 @@ def project_detail_view(request, pk):
     if request.method == 'GET':
         serializer = ProjectSerializer(project)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    errors = {}
+    if request.method == 'PUT':
+        name = request.data.get('name')
+        description = request.data.get('description')
+        start_date = request.data.get('start_date')
+        due_date = request.data.get('due_date')
+        
+        if not name:
+            errors['name'] = 'This field is required.'
+        elif Project.objects.filter(name=name, workspace=project.workspace).exclude(pk=pk).exists():
+            errors['name'] = 'A project with this name already exists in this workspace.'
+            
+        if not description:
+            errors['description'] = 'This field is required.'
+            
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        project.name = name
+        project.description = description
+        project.start_date = start_date
+        project.due_date = due_date
+        project.save()
+        serializer = ProjectSerializer(project)
+        return Response(serializer.data, status=status.HTTP_200_OK)
