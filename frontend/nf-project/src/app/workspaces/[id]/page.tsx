@@ -8,6 +8,7 @@ import {
     getUsers,
     getWorkspace,
     promoteWorkspaceMember,
+    removeWorkspaceMember,
     sendWorkspaceInvitation,
     updateWorkspace,
     WorkspaceDetail,
@@ -52,6 +53,7 @@ export default function WorkspaceDetailPage() {
 
     const [promotingUserId, setPromotingUserId] = useState<number | null>(null);
     const [demotingUserId, setDemotingUserId] = useState<number | null>(null);
+    const [removingUserId, setRemovingUserId] = useState<number | null>(null);
     const [memberActionError, setMemberActionError] = useState("");
 
     useEffect(() => {
@@ -431,6 +433,63 @@ export default function WorkspaceDetailPage() {
         }
     };
 
+    const handleRemoveMember = async (userId: number) => {
+        if (!workspace) {
+            return;
+        }
+
+        const targetMember = workspace.members.find(
+            (member) => member.user.id === userId
+        );
+
+        if (!targetMember || !canManageMember(targetMember.role)) {
+            return;
+        }
+
+        setRemovingUserId(userId);
+        setMemberActionError("");
+
+        try {
+            await removeWorkspaceMember(
+                workspace.id,
+                userId
+            );
+
+            setWorkspace((previous) => {
+                if (!previous) {
+                    return previous;
+                }
+
+                return {
+                    ...previous,
+                    members: previous.members.filter(
+                        (member) => member.user.id !== userId
+                    ),
+                    members_count: Math.max(
+                        0,
+                        previous.members_count - 1
+                    ),
+                };
+            });
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setMemberActionError(
+                    messages || "Unable to remove member."
+                );
+            } else {
+                setMemberActionError(
+                    "Unable to remove member."
+                );
+            }
+        } finally {
+            setRemovingUserId(null);
+        }
+    };
+
     if (loading) {
         return <WorkspaceDetailSkeleton />;
     }
@@ -806,6 +865,8 @@ export default function WorkspaceDetailPage() {
                                                         }
                                                         disabled={
                                                             promotingUserId ===
+                                                            member.user.id ||
+                                                            removingUserId ===
                                                             member.user.id
                                                         }
                                                         className="cursor-pointer rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
@@ -829,6 +890,8 @@ export default function WorkspaceDetailPage() {
                                                         }
                                                         disabled={
                                                             demotingUserId ===
+                                                            member.user.id ||
+                                                            removingUserId ===
                                                             member.user.id
                                                         }
                                                         className="cursor-pointer rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-400 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
@@ -843,9 +906,25 @@ export default function WorkspaceDetailPage() {
                                             {canManage && (
                                                 <button
                                                     type="button"
-                                                    className="cursor-pointer rounded-lg bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+                                                    onClick={() =>
+                                                        handleRemoveMember(
+                                                            member.user.id
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        removingUserId ===
+                                                        member.user.id ||
+                                                        promotingUserId ===
+                                                        member.user.id ||
+                                                        demotingUserId ===
+                                                        member.user.id
+                                                    }
+                                                    className="cursor-pointer rounded-lg bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
-                                                    Remove
+                                                    {removingUserId ===
+                                                        member.user.id
+                                                        ? "Removing..."
+                                                        : "Remove"}
                                                 </button>
                                             )}
 
