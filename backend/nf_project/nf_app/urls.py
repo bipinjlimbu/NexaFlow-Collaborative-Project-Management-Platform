@@ -1,6 +1,6 @@
 from django.urls import path
 from .views.auth_view import register_view, login_view, logout_view
-from .views.workspaces_view import workspaces_view, workspace_detail_view, get_users_list, send_workspace_invitation
+from .views.workspaces_view import workspaces_view, workspace_detail_view, get_users_list, send_workspace_invitation, promote_workspace_member
 from .views.profile_view import profile_view
 from .views.notification_view import get_notifications_view, notification_detail_view
 from .views.invitation_view import get_invitations_view, accept_invitation_view, decline_invitation_view
@@ -18,5 +18,6 @@ urlpatterns = [
     path('notifications/<int:pk>/', notification_detail_view, name='notification_detail'),
     path('invitations/', get_invitations_view, name='get_invitations'),
     path('invitations/<int:pk>/accept/', accept_invitation_view, name='accept_invitation'),
-    path('invitations/<int:pk>/decline/', decline_invitation_view, name='decline_invitation')
+    path('invitations/<int:pk>/decline/', decline_invitation_view, name='decline_invitation'),
+    path('workspaces/<int:workspace_id>/members/<int:member_id>/promote/', promote_workspace_member, name='promote_workspace_member'),
 ]
