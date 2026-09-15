@@ -6,13 +6,13 @@ import {
     deleteWorkspace,
     getUsers,
     getWorkspace,
+    promoteWorkspaceMember,
     sendWorkspaceInvitation,
     updateWorkspace,
     WorkspaceDetail,
     WorkspaceUser,
 } from "@/services/workspaceService";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
-import { Plus } from "lucide-react";
 
 export default function WorkspaceDetailPage() {
     const params = useParams();
@@ -23,7 +23,6 @@ export default function WorkspaceDetailPage() {
     const [workspace, setWorkspace] = useState<WorkspaceDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
     const [showEditPanel, setShowEditPanel] = useState(false);
@@ -50,19 +49,26 @@ export default function WorkspaceDetailPage() {
     const [inviteRole, setInviteRole] = useState<"admin" | "member">("member");
     const [inviteError, setInviteError] = useState("");
 
+    const [promotingUserId, setPromotingUserId] = useState<number | null>(null);
+    const [memberActionError, setMemberActionError] = useState("");
+
     useEffect(() => {
         const access = localStorage.getItem("access");
-        const storedUser = localStorage.getItem("user");
 
         if (!access) {
             router.replace("/login");
             return;
         }
 
+        const storedUser = localStorage.getItem("user");
+
         if (storedUser) {
             try {
                 const user = JSON.parse(storedUser);
-                setCurrentUserId(Number(user.id));
+
+                if (user?.id) {
+                    setCurrentUserId(Number(user.id));
+                }
             } catch {
                 setCurrentUserId(null);
             }
@@ -134,55 +140,35 @@ export default function WorkspaceDetailPage() {
         (member) => member.user.id === currentUserId
     );
 
-    const currentUserRole =
-        currentMember?.role ||
-        (workspace?.created_by === currentUserId ? "owner" : "member");
+    const currentRole = currentMember?.role || "member";
 
-    const canEditWorkspace =
-        currentUserRole === "owner" ||
-        currentUserRole === "admin";
+    const canManageWorkspace =
+        currentRole === "owner" || currentRole === "admin";
 
-    const canDeleteWorkspace =
-        currentUserRole === "owner";
+    const canDeleteWorkspace = currentRole === "owner";
 
     const canInviteMembers =
-        currentUserRole === "owner" ||
-        currentUserRole === "admin";
+        currentRole === "owner" || currentRole === "admin";
 
-    const canManageMember = (memberRole: string) => {
-        if (currentUserRole === "owner") {
-            return memberRole === "admin" || memberRole === "member";
+    const canCreateProject =
+        currentRole === "owner" || currentRole === "admin";
+
+    const canManageMember = (
+        targetRole: "owner" | "admin" | "member"
+    ) => {
+        if (currentRole === "owner") {
+            return targetRole !== "owner";
         }
 
-        if (currentUserRole === "admin") {
-            return memberRole === "member";
+        if (currentRole === "admin") {
+            return targetRole === "member";
         }
 
         return false;
     };
 
-    const getMemberAction = (memberRole: string) => {
-        if (currentUserRole === "owner") {
-            if (memberRole === "admin") {
-                return "Demote";
-            }
-
-            if (memberRole === "member") {
-                return "Promote";
-            }
-        }
-
-        if (currentUserRole === "admin") {
-            if (memberRole === "member") {
-                return "Promote";
-            }
-        }
-
-        return null;
-    };
-
     const handleOpenEditPanel = () => {
-        if (!workspace || !canEditWorkspace) {
+        if (!workspace || !canManageWorkspace) {
             return;
         }
 
@@ -194,7 +180,7 @@ export default function WorkspaceDetailPage() {
     };
 
     const handleUpdateWorkspace = async () => {
-        if (!workspace || !canEditWorkspace) {
+        if (!workspace || !canManageWorkspace) {
             return;
         }
 
@@ -327,6 +313,64 @@ export default function WorkspaceDetailPage() {
         }
     };
 
+    const handlePromoteMember = async (userId: number) => {
+        if (!workspace || currentRole !== "owner") {
+            return;
+        }
+
+        const targetMember = workspace.members.find(
+            (member) => member.user.id === userId
+        );
+
+        if (!targetMember || targetMember.role !== "member") {
+            return;
+        }
+
+        setPromotingUserId(userId);
+        setMemberActionError("");
+
+        try {
+            const updatedMember = await promoteWorkspaceMember(
+                workspace.id,
+                userId
+            );
+
+            setWorkspace((previous) => {
+                if (!previous) {
+                    return previous;
+                }
+
+                return {
+                    ...previous,
+                    members: previous.members.map((member) =>
+                        member.user.id === userId
+                            ? {
+                                ...member,
+                                role: updatedMember.role,
+                            }
+                            : member
+                    ),
+                };
+            });
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                const messages = Object.values(err)
+                    .filter((message) => typeof message === "string")
+                    .join(" ");
+
+                setMemberActionError(
+                    messages || "Unable to promote member."
+                );
+            } else {
+                setMemberActionError(
+                    "Unable to promote member."
+                );
+            }
+        } finally {
+            setPromotingUserId(null);
+        }
+    };
+
     if (loading) {
         return <WorkspaceDetailSkeleton />;
     }
@@ -349,6 +393,7 @@ export default function WorkspaceDetailPage() {
                         </p>
 
                         <button
+                            type="button"
                             onClick={() => router.push("/workspaces")}
                             className="mt-6 cursor-pointer rounded-lg bg-indigo-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-400"
                         >
@@ -369,6 +414,7 @@ export default function WorkspaceDetailPage() {
             <div className="mx-auto max-w-7xl px-6 py-8">
                 <div className="flex items-center justify-between">
                     <button
+                        type="button"
                         onClick={() => router.push("/workspaces")}
                         className="cursor-pointer text-sm text-slate-400 transition hover:text-white"
                     >
@@ -376,8 +422,9 @@ export default function WorkspaceDetailPage() {
                     </button>
 
                     <div className="flex items-center gap-3">
-                        {canEditWorkspace && (
+                        {canManageWorkspace && (
                             <button
+                                type="button"
                                 onClick={handleOpenEditPanel}
                                 className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-800"
                             >
@@ -387,6 +434,7 @@ export default function WorkspaceDetailPage() {
 
                         {canDeleteWorkspace && (
                             <button
+                                type="button"
                                 onClick={() => {
                                     setDeleteError("");
                                     setShowDeleteModal(true);
@@ -462,7 +510,7 @@ export default function WorkspaceDetailPage() {
                         </p>
 
                         <p className="mt-3 text-sm font-semibold capitalize text-indigo-400">
-                            {currentUserRole}
+                            {currentRole}
                         </p>
                     </div>
                 </div>
@@ -542,8 +590,7 @@ export default function WorkspaceDetailPage() {
                                                 owner.user.profile_picture.startsWith(
                                                     "http"
                                                 )
-                                                    ? owner.user
-                                                        .profile_picture
+                                                    ? owner.user.profile_picture
                                                     : `${process.env.NEXT_PUBLIC_API_URL?.replace(
                                                         "/api",
                                                         ""
@@ -618,6 +665,7 @@ export default function WorkspaceDetailPage() {
 
                         {canInviteMembers && (
                             <button
+                                type="button"
                                 onClick={handleOpenInvitePanel}
                                 className="cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
                             >
@@ -626,19 +674,22 @@ export default function WorkspaceDetailPage() {
                         )}
                     </div>
 
+                    {memberActionError && (
+                        <div className="border-b border-red-500/20 bg-red-500/10 px-6 py-3 text-sm text-red-400">
+                            {memberActionError}
+                        </div>
+                    )}
+
                     <div className="divide-y divide-slate-800/80">
                         {workspace.members.length > 0 ? (
                             workspace.members.map((member) => {
-                                const action =
-                                    getMemberAction(member.role);
-
                                 const canManage =
                                     canManageMember(member.role);
 
                                 return (
                                     <div
                                         key={member.id}
-                                        className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                                        className="flex items-center justify-between gap-4 px-6 py-4"
                                     >
                                         <div className="flex min-w-0 items-center gap-4">
                                             {member.user.profile_picture ? (
@@ -647,8 +698,7 @@ export default function WorkspaceDetailPage() {
                                                         member.user.profile_picture.startsWith(
                                                             "http"
                                                         )
-                                                            ? member.user
-                                                                .profile_picture
+                                                            ? member.user.profile_picture
                                                             : `${process.env.NEXT_PUBLIC_API_URL?.replace(
                                                                 "/api",
                                                                 ""
@@ -683,7 +733,50 @@ export default function WorkspaceDetailPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 sm:shrink-0">
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            {canManage &&
+                                                currentRole === "owner" &&
+                                                member.role === "member" && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handlePromoteMember(
+                                                                member.user.id
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            promotingUserId ===
+                                                            member.user.id
+                                                        }
+                                                        className="cursor-pointer rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {promotingUserId ===
+                                                            member.user.id
+                                                            ? "Promoting..."
+                                                            : "Promote"}
+                                                    </button>
+                                                )}
+
+                                            {canManage &&
+                                                currentRole === "owner" &&
+                                                member.role === "admin" && (
+                                                    <button
+                                                        type="button"
+                                                        className="cursor-pointer rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-400 transition hover:bg-amber-500/20"
+                                                    >
+                                                        Demote
+                                                    </button>
+                                                )}
+
+                                            {canManage && (
+                                                <button
+                                                    type="button"
+                                                    className="cursor-pointer rounded-lg bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
+
                                             <span
                                                 className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${member.role === "owner"
                                                     ? "bg-indigo-500/10 text-indigo-400"
@@ -694,27 +787,6 @@ export default function WorkspaceDetailPage() {
                                             >
                                                 {member.role}
                                             </span>
-
-                                            {canManage && action && (
-                                                <button
-                                                    type="button"
-                                                    className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium transition ${action === "Promote"
-                                                        ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400 hover:border-indigo-500/40 hover:bg-indigo-500/20"
-                                                        : "border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:bg-slate-800 hover:text-slate-200"
-                                                        }`}
-                                                >
-                                                    {action}
-                                                </button>
-                                            )}
-
-                                            {canManage && (
-                                                <button
-                                                    type="button"
-                                                    className="cursor-pointer rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:border-red-500/40 hover:bg-red-500/20"
-                                                >
-                                                    Remove
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                 );
@@ -739,13 +811,14 @@ export default function WorkspaceDetailPage() {
                             </p>
                         </div>
 
-                        <button
-                            type="button"
-                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
-                        >
-                            <Plus size={16} />
-                            Create project
-                        </button>
+                        {canCreateProject && (
+                            <button
+                                type="button"
+                                className="cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
+                            >
+                                Create project
+                            </button>
+                        )}
                     </div>
 
                     <div className="px-6 py-12 text-center">
@@ -766,7 +839,7 @@ export default function WorkspaceDetailPage() {
                 </div>
             </div>
 
-            {showEditPanel && canEditWorkspace && (
+            {showEditPanel && canManageWorkspace && (
                 <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
                     <div className="h-full w-full max-w-md overflow-y-auto border-l border-slate-800 bg-slate-950 p-6 shadow-2xl">
                         <div className="flex items-center justify-between">
@@ -781,6 +854,7 @@ export default function WorkspaceDetailPage() {
                             </div>
 
                             <button
+                                type="button"
                                 onClick={() =>
                                     setShowEditPanel(false)
                                 }
@@ -853,6 +927,7 @@ export default function WorkspaceDetailPage() {
                             )}
 
                             <button
+                                type="button"
                                 onClick={handleUpdateWorkspace}
                                 disabled={saving}
                                 className="w-full cursor-pointer rounded-lg bg-indigo-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
@@ -883,6 +958,7 @@ export default function WorkspaceDetailPage() {
                                 </div>
 
                                 <button
+                                    type="button"
                                     onClick={() =>
                                         setShowInvitePanel(false)
                                     }
@@ -1011,6 +1087,7 @@ export default function WorkspaceDetailPage() {
                                                 </div>
 
                                                 <button
+                                                    type="button"
                                                     onClick={() =>
                                                         handleInviteUser(
                                                             user.id
@@ -1078,6 +1155,7 @@ export default function WorkspaceDetailPage() {
 
                         <div className="mt-6 flex justify-end gap-3">
                             <button
+                                type="button"
                                 onClick={() =>
                                     setShowDeleteModal(false)
                                 }
@@ -1088,6 +1166,7 @@ export default function WorkspaceDetailPage() {
                             </button>
 
                             <button
+                                type="button"
                                 onClick={handleDeleteWorkspace}
                                 disabled={deleting}
                                 className="cursor-pointer rounded-lg bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
