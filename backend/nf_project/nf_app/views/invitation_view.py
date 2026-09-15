@@ -9,7 +9,7 @@ from ..serializers import WorkspaceInvitationSerializer, WorkspaceMemberSerializ
 @permission_classes([IsAuthenticated])
 def get_invitations_view(request):
     try:
-        invitations = WorkspaceInvitation.objects.filter(invited_user=request.user)
+        invitations = WorkspaceInvitation.objects.filter(invited_user=request.user).order_by('-created_at')
         serializer = WorkspaceInvitationSerializer(invitations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except WorkspaceInvitation.DoesNotExist:
