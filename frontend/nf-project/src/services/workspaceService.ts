@@ -138,3 +138,15 @@ export async function promoteWorkspaceMember(
         }
     );
 }
+
+export async function demoteWorkspaceMember(
+    workspaceId: number,
+    userId: number
+) {
+    return authFetch(
+        `/workspaces/${workspaceId}/members/${userId}/demote/`,
+        {
+            method: "PATCH",
+        }
+    );
+}
