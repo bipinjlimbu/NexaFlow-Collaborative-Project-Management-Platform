@@ -48,3 +48,15 @@ def projects_view(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Project.DoesNotExist:
             return Response({"error": "Workspace not found or you do not have permission to create a project in this workspace."}, status=status.HTTP_404_NOT_FOUND)
+        
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def project_detail_view(request, pk):
+    try:
+        project = Project.objects.get(pk=pk, workspace__members__user=request.user)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = ProjectSerializer(project)
+        return Response(serializer.data, status=status.HTTP_200_OK)
