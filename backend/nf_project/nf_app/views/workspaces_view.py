@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Workspace, WorkspaceMember, User, WorkspaceInvitation, Notification
-from ..serializers import WorkspaceSerializer, UserSerializer
+from ..serializers import WorkspaceSerializer, UserSerializer, WorkspaceMemberSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -127,3 +127,25 @@ def send_workspace_invitation(request, workspace_id):
         invitation.save()
         notification.save()
         return Response({"message": "Invitation sent successfully."}, status=status.HTTP_201_CREATED)
+    
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def promote_workspace_member(request, workspace_id, user_id):
+    try:
+        workspace = Workspace.objects.get(pk=workspace_id, created_by=request.user)
+    except Workspace.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        member = WorkspaceMember.objects.get(workspace=workspace, user__pk=user_id)
+    except WorkspaceMember.DoesNotExist:
+        return Response({"error": "Workspace member not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PATCH':
+        if member.role == WorkspaceMember.Role.ADMIN:
+            return Response({"error": "User is already an admin."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        member.role = WorkspaceMember.Role.ADMIN
+        member.save()
+        serializer = WorkspaceMemberSerializer(member)
+        return Response(serializer.data, status=status.HTTP_200_OK)
