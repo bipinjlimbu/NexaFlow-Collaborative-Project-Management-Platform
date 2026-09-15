@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Workspace, WorkspaceMember, User, WorkspaceInvitation, Notification
-from ..serializers import WorkspaceSerializer, UserSerializer, WorkspaceMemberSerializer
+from ..models import Workspace, WorkspaceMember, User, WorkspaceInvitation, Notification, Project
+from ..serializers import WorkspaceSerializer, UserSerializer, WorkspaceMemberSerializer, ProjectSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -188,3 +188,16 @@ def remove_workspace_member(request, workspace_id, user_id):
     if request.method == 'DELETE':
         member.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_projects_in_workspace(request, workspace_id):
+    try:
+        workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user)
+    except Workspace.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        projects = Project.objects.filter(workspace=workspace)
+        serializer = ProjectSerializer(projects, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
