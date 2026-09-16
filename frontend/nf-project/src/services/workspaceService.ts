@@ -20,6 +20,17 @@ export interface WorkspaceUser {
     is_active: boolean;
 }
 
+export interface WorkspaceProject {
+    id: number;
+    name: string;
+    description: string;
+    workspace: number;
+    start_date: string | null;
+    due_date: string | null;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface Workspace {
     id: number;
     name: string;
@@ -87,6 +98,18 @@ export async function getWorkspace(
     id: number
 ): Promise<WorkspaceDetail> {
     return authFetch(`/workspaces/${id}/`);
+}
+
+export async function getWorkspaceProjects(
+    workspaceId: number
+): Promise<WorkspaceProject[]> {
+    const data = await authFetch(
+        `/workspaces/${workspaceId}/projects/`
+    );
+
+    return Array.isArray(data)
+        ? data
+        : data.results || data.projects || [];
 }
 
 export async function updateWorkspace(
