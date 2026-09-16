@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Project
+from ..models import Project, Workspace
 from ..serializers import ProjectSerializer
 
 @api_view(['GET', 'POST'])
@@ -41,12 +41,12 @@ def projects_view(request):
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            workspace = Project.objects.get(pk=workspace_id, members__user=request.user)
-            project = Project(name=name, description=description, workspace=workspace, start_date=start_date, due_date=due_date)
+            workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user)
+            project = Project(name=name, description=description, workspace=workspace, start_date=start_date, due_date=due_date, created_by=request.user)
             project.save()
             serializer = ProjectSerializer(project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Project.DoesNotExist:
+        except Workspace.DoesNotExist:
             return Response({"error": "Workspace not found or you do not have permission to create a project in this workspace."}, status=status.HTTP_404_NOT_FOUND)
         
 @api_view(['GET', 'PUT', 'DELETE'])
