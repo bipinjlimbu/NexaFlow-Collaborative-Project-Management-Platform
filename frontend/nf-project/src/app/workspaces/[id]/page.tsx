@@ -7,11 +7,13 @@ import {
     demoteWorkspaceMember,
     getUsers,
     getWorkspace,
+    getWorkspaceProjects,
     promoteWorkspaceMember,
     removeWorkspaceMember,
     sendWorkspaceInvitation,
     updateWorkspace,
     WorkspaceDetail,
+    WorkspaceProject,
     WorkspaceUser,
 } from "@/services/workspaceService";
 import { createProject } from "@/services/projectService";
@@ -57,6 +59,10 @@ export default function WorkspaceDetailPage() {
     const [demotingUserId, setDemotingUserId] = useState<number | null>(null);
     const [removingUserId, setRemovingUserId] = useState<number | null>(null);
     const [memberActionError, setMemberActionError] = useState("");
+
+    const [projects, setProjects] = useState<WorkspaceProject[]>([]);
+    const [projectsLoading, setProjectsLoading] = useState(true);
+    const [projectsError, setProjectsError] = useState("");
 
     const [projectName, setProjectName] = useState("");
     const [projectDescription, setProjectDescription] = useState("");
@@ -113,6 +119,46 @@ export default function WorkspaceDetailPage() {
             loadWorkspace();
         }
     }, [workspaceId, router]);
+
+    useEffect(() => {
+        if (!workspaceId) {
+            return;
+        }
+
+        async function loadProjects() {
+            try {
+                setProjectsLoading(true);
+                setProjectsError("");
+
+                const data = await getWorkspaceProjects(workspaceId);
+
+                setProjects(data);
+            } catch (err: any) {
+                if (err && typeof err === "object") {
+                    const messages = Object.values(err)
+                        .flatMap((message) =>
+                            Array.isArray(message)
+                                ? message
+                                : [message]
+                        )
+                        .filter(
+                            (message) => typeof message === "string"
+                        )
+                        .join(" ");
+
+                    setProjectsError(
+                        messages || "Unable to load projects."
+                    );
+                } else {
+                    setProjectsError("Unable to load projects.");
+                }
+            } finally {
+                setProjectsLoading(false);
+            }
+        }
+
+        loadProjects();
+    }, [workspaceId]);
 
     const existingMemberIds = useMemo(() => {
         if (!workspace) {
@@ -539,9 +585,7 @@ export default function WorkspaceDetailPage() {
                     messages || "Unable to remove member."
                 );
             } else {
-                setMemberActionError(
-                    "Unable to remove member."
-                );
+                setMemberActionError("Unable to remove member.");
             }
         } finally {
             setRemovingUserId(null);
@@ -570,13 +614,18 @@ export default function WorkspaceDetailPage() {
         setProjectError("");
 
         try {
-            await createProject({
+            const createdProject = await createProject({
                 name: projectName.trim(),
                 description: projectDescription.trim(),
                 workspace_id: workspace.id,
                 start_date: projectStartDate,
                 due_date: projectDueDate,
             });
+
+            setProjects((previous) => [
+                ...previous,
+                createdProject,
+            ]);
 
             setShowProjectPanel(false);
 
@@ -1170,20 +1219,96 @@ export default function WorkspaceDetailPage() {
                         )}
                     </div>
 
-                    <div className="px-6 py-12 text-center">
-                        {workspace.projects_count > 0 ? (
-                            <p className="text-sm text-slate-400">
-                                {workspace.projects_count} project
-                                {workspace.projects_count !==
-                                    1
-                                    ? "s"
-                                    : ""}{" "}
-                                in this workspace.
-                            </p>
+                    <div className="p-6">
+                        {projectsLoading ? (
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {[1, 2].map((item) => (
+                                    <div
+                                        key={item}
+                                        className="animate-pulse rounded-xl border border-slate-800 bg-slate-900/50 p-5"
+                                    >
+                                        <div className="h-5 w-40 rounded bg-slate-800" />
+                                        <div className="mt-3 h-4 w-full rounded bg-slate-800" />
+                                        <div className="mt-2 h-4 w-2/3 rounded bg-slate-800" />
+                                        <div className="mt-5 h-3 w-28 rounded bg-slate-800" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : projectsError ? (
+                            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4">
+                                <p className="text-sm text-red-400">
+                                    {projectsError}
+                                </p>
+                            </div>
+                        ) : projects.length > 0 ? (
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {projects.map((project) => (
+                                    <button
+                                        key={project.id}
+                                        type="button"
+                                        onClick={() =>
+                                            router.push(
+                                                `/projects/${project.id}`
+                                            )
+                                        }
+                                        className="group cursor-pointer rounded-xl border border-slate-800 bg-slate-900/50 p-5 text-left transition hover:border-slate-700 hover:bg-slate-800/60"
+                                    >
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="min-w-0">
+                                                <h3 className="truncate text-base font-semibold text-white transition group-hover:text-indigo-400">
+                                                    {project.name}
+                                                </h3>
+
+                                                <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-400">
+                                                    {project.description}
+                                                </p>
+                                            </div>
+
+                                            <span className="shrink-0 text-lg text-slate-600 transition group-hover:translate-x-1 group-hover:text-slate-300">
+                                                →
+                                            </span>
+                                        </div>
+
+                                        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500">
+                                            <span>
+                                                Start:{" "}
+                                                {project.start_date
+                                                    ? new Date(
+                                                        project.start_date
+                                                    ).toLocaleDateString()
+                                                    : "Not set"}
+                                            </span>
+
+                                            <span>
+                                                Due:{" "}
+                                                {project.due_date
+                                                    ? new Date(
+                                                        project.due_date
+                                                    ).toLocaleDateString()
+                                                    : "Not set"}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
                         ) : (
-                            <p className="text-sm text-slate-500">
-                                No projects in this workspace yet.
-                            </p>
+                            <div className="rounded-xl border border-dashed border-slate-800 px-6 py-12 text-center">
+                                <p className="text-sm text-slate-500">
+                                    No projects in this workspace yet.
+                                </p>
+
+                                {canCreateProject && (
+                                    <button
+                                        type="button"
+                                        onClick={
+                                            handleOpenProjectPanel
+                                        }
+                                        className="mt-4 cursor-pointer rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400"
+                                    >
+                                        Create your first project
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>
