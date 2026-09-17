@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import {
     createProject,
+    getProjects,
     Project as ProjectData,
 } from "@/services/projectService";
 import {
@@ -26,6 +27,12 @@ import {
 
 type ProjectStatus = "Active" | "Completed" | "In Review" | "Planning";
 type ProjectPriority = "High" | "Medium" | "Low";
+
+type BackendProject = ProjectData & {
+    status: "planning" | "active" | "inactive" | "archived";
+    priority: "low" | "medium" | "high" | "urgent";
+    created_by: number;
+};
 
 interface Project {
     id: number;
@@ -53,73 +60,6 @@ interface ProjectErrors {
     error?: string;
 }
 
-const initialProjects: Project[] = [
-    {
-        id: 1,
-        name: "E-Commerce Core API",
-        description:
-            "Core backend services for products, orders, payments, vendors, and customer management.",
-        workspace: "ApexStriker Core",
-        workspaceId: 1,
-        status: "Completed",
-        priority: "High",
-        progress: 100,
-        completedTasks: 15,
-        totalTasks: 15,
-        members: 4,
-        dueDate: "Sep 05, 2026",
-        initials: "EC",
-    },
-    {
-        id: 2,
-        name: "Mobile App Redesign",
-        description:
-            "Redesigning the mobile experience with a cleaner navigation system and improved UX.",
-        workspace: "Design Team",
-        workspaceId: 2,
-        status: "In Review",
-        priority: "Medium",
-        progress: 85,
-        completedTasks: 8,
-        totalTasks: 10,
-        members: 5,
-        dueDate: "Oct 04, 2026",
-        initials: "MA",
-    },
-    {
-        id: 3,
-        name: "Analytics Dashboard",
-        description:
-            "Internal analytics system for tracking performance, activity, and operational metrics.",
-        workspace: "ApexStriker Core",
-        workspaceId: 1,
-        status: "Active",
-        priority: "High",
-        progress: 52,
-        completedTasks: 11,
-        totalTasks: 21,
-        members: 7,
-        dueDate: "Sep 28, 2026",
-        initials: "AD",
-    },
-    {
-        id: 4,
-        name: "Marketing Website",
-        description:
-            "Company marketing website covering services, case studies, team, and contact information.",
-        workspace: "Design Team",
-        workspaceId: 2,
-        status: "Planning",
-        priority: "Medium",
-        progress: 8,
-        completedTasks: 1,
-        totalTasks: 12,
-        members: 3,
-        dueDate: "Oct 18, 2026",
-        initials: "MW",
-    },
-];
-
 const statusConfig: Record<
     ProjectStatus,
     { color: string; bg: string; icon: any }
@@ -146,6 +86,62 @@ const statusConfig: Record<
     },
 };
 
+function mapBackendStatus(
+    status: BackendProject["status"]
+): ProjectStatus {
+    switch (status) {
+        case "active":
+            return "Active";
+        case "inactive":
+            return "In Review";
+        case "archived":
+            return "Completed";
+        default:
+            return "Planning";
+    }
+}
+
+function mapBackendPriority(
+    priority: BackendProject["priority"]
+): ProjectPriority {
+    switch (priority) {
+        case "high":
+        case "urgent":
+            return "High";
+        case "low":
+            return "Low";
+        default:
+            return "Medium";
+    }
+}
+
+function formatDueDate(date: string | null) {
+    if (!date) {
+        return "Not set";
+    }
+
+    return new Date(`${date}T00:00:00`).toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+        }
+    );
+}
+
+function getProjectInitials(name: string) {
+    return (
+        name
+            .trim()
+            .split(/\s+/)
+            .slice(0, 2)
+            .map((word) => word[0])
+            .join("")
+            .toUpperCase() || "PR"
+    );
+}
+
 export default function ProjectsPage() {
     const router = useRouter();
 
@@ -155,8 +151,9 @@ export default function ProjectsPage() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
-    const [projects, setProjects] = useState<Project[]>(initialProjects);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+    const [loadingProjects, setLoadingProjects] = useState(false);
 
     const [showCreatePanel, setShowCreatePanel] = useState(false);
     const [creatingProject, setCreatingProject] = useState(false);
@@ -195,22 +192,59 @@ export default function ProjectsPage() {
     }, [router]);
 
     useEffect(() => {
-        async function loadWorkspaces() {
+        async function loadData() {
             try {
-                const data = await getWorkspaces();
+                setLoadingProjects(true);
 
-                setWorkspaces(data);
+                const [workspaceData, projectData] = await Promise.all([
+                    getWorkspaces(),
+                    getProjects(),
+                ]);
 
-                if (data.length > 0) {
-                    setProjectWorkspace(String(data[0].id));
+                setWorkspaces(workspaceData);
+
+                const mappedProjects: Project[] = (
+                    projectData as BackendProject[]
+                ).map((project) => {
+                    const workspace = workspaceData.find(
+                        (item) => item.id === project.workspace
+                    );
+
+                    return {
+                        id: project.id,
+                        name: project.name,
+                        description: project.description || "",
+                        workspace:
+                            workspace?.name || "Unknown workspace",
+                        workspaceId: project.workspace,
+                        status: mapBackendStatus(project.status),
+                        priority: mapBackendPriority(project.priority),
+                        progress: 0,
+                        completedTasks: 0,
+                        totalTasks: 0,
+                        members: 1,
+                        dueDate: formatDueDate(project.due_date),
+                        initials: getProjectInitials(project.name),
+                    };
+                });
+
+                setProjects(mappedProjects);
+
+                if (workspaceData.length > 0) {
+                    setProjectWorkspace(
+                        String(workspaceData[0].id)
+                    );
                 }
             } catch {
                 setWorkspaces([]);
+                setProjects([]);
+            } finally {
+                setLoadingProjects(false);
             }
         }
 
         if (isAuthenticated) {
-            loadWorkspaces();
+            loadData();
         }
     }, [isAuthenticated]);
 
@@ -231,8 +265,6 @@ export default function ProjectsPage() {
             return matchesSearch && matchesStatus;
         });
     }, [projects, searchQuery, statusFilter]);
-
-    const recentProjects = projects.slice(0, 2);
 
     function resetProjectForm() {
         setProjectName("");
@@ -345,45 +377,37 @@ export default function ProjectsPage() {
             setCreatingProject(true);
             setProjectErrors({});
 
-            const createdProject: ProjectData =
+            const createdProject: BackendProject =
                 await createProject({
                     name: projectName.trim(),
                     description: projectDescription.trim(),
                     workspace_id: selectedWorkspace.id,
                     start_date: projectStartDate,
                     due_date: projectDueDate,
-                });
-
-            const initials = projectName
-                .trim()
-                .split(/\s+/)
-                .slice(0, 2)
-                .map((word) => word[0])
-                .join("")
-                .toUpperCase();
+                }) as BackendProject;
 
             const newProject: Project = {
                 id: createdProject.id,
                 name: createdProject.name,
-                description: createdProject.description,
+                description: createdProject.description || "",
                 workspace: selectedWorkspace.name,
                 workspaceId: createdProject.workspace,
-                status: "Planning",
-                priority: "Medium",
+                status: mapBackendStatus(
+                    createdProject.status
+                ),
+                priority: mapBackendPriority(
+                    createdProject.priority
+                ),
                 progress: 0,
                 completedTasks: 0,
                 totalTasks: 0,
                 members: 1,
-                dueDate: createdProject.due_date
-                    ? new Date(
-                        `${createdProject.due_date}T00:00:00`
-                    ).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "2-digit",
-                        year: "numeric",
-                    })
-                    : "Not set",
-                initials: initials || "PR",
+                dueDate: formatDueDate(
+                    createdProject.due_date
+                ),
+                initials: getProjectInitials(
+                    createdProject.name
+                ),
             };
 
             setProjects((previous) => [
@@ -436,7 +460,7 @@ export default function ProjectsPage() {
         }
     }
 
-    if (!isAuthenticated) {
+    if (!isAuthenticated || loadingProjects) {
         return <ProjectsSkeleton />;
     }
 
@@ -545,9 +569,7 @@ export default function ProjectsPage() {
                                     <div>
                                         <div className="flex items-start justify-between">
                                             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-600/20 text-sm font-semibold text-indigo-400">
-                                                {
-                                                    project.initials
-                                                }
+                                                {project.initials}
                                             </div>
 
                                             <button
@@ -563,9 +585,7 @@ export default function ProjectsPage() {
                                         <div className="mt-5">
                                             <div className="flex items-center gap-2.5">
                                                 <h3 className="truncate font-semibold text-slate-100 group-hover:text-white">
-                                                    {
-                                                        project.name
-                                                    }
+                                                    {project.name}
                                                 </h3>
 
                                                 <span
@@ -574,16 +594,12 @@ export default function ProjectsPage() {
                                                     <StatusIcon
                                                         size={10}
                                                     />
-                                                    {
-                                                        project.status
-                                                    }
+                                                    {project.status}
                                                 </span>
                                             </div>
 
                                             <p className="mt-2 min-h-[40px] line-clamp-2 text-sm leading-relaxed text-slate-400">
-                                                {
-                                                    project.description
-                                                }
+                                                {project.description}
                                             </p>
                                         </div>
                                     </div>
@@ -599,25 +615,19 @@ export default function ProjectsPage() {
                                                         />
 
                                                         <span className="text-xs">
-                                                            Progress
+                                                            Priority
                                                         </span>
                                                     </div>
 
                                                     <span className="text-xs font-semibold text-slate-300">
                                                         {
-                                                            project.progress
+                                                            project.priority
                                                         }
-                                                        %
                                                     </span>
                                                 </div>
 
-                                                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-                                                    <div
-                                                        className="h-full rounded-full bg-indigo-500 transition-all duration-500"
-                                                        style={{
-                                                            width: `${project.progress}%`,
-                                                        }}
-                                                    />
+                                                <div className="mt-2 text-xs text-slate-500">
+                                                    Project priority
                                                 </div>
                                             </div>
 
@@ -686,68 +696,6 @@ export default function ProjectsPage() {
                                 your team to collaborate.
                             </p>
                         </button>
-                    </div>
-                </section>
-
-                <section className="mt-12">
-                    <div className="mb-4">
-                        <h2 className="text-lg font-semibold text-slate-100">
-                            Recently active
-                        </h2>
-
-                        <p className="mt-0.5 text-sm text-slate-400">
-                            Quickly return to your recent project
-                            work.
-                        </p>
-                    </div>
-
-                    <div className="divide-y divide-slate-800/60 overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-sm">
-                        {recentProjects.map((project) => (
-                            <button
-                                key={project.id}
-                                type="button"
-                                onClick={() =>
-                                    router.push(
-                                        `/projects/${project.id}`
-                                    )
-                                }
-                                className="group flex w-full cursor-pointer items-center gap-4 px-6 py-4 text-left transition-colors duration-200 hover:bg-slate-800/40"
-                            >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800 text-xs font-semibold text-slate-200 transition-colors group-hover:border-indigo-500/30 group-hover:text-indigo-400">
-                                    {project.initials}
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-slate-200 group-hover:text-white">
-                                        {project.name}
-                                    </p>
-
-                                    <div className="mt-0.5 flex items-center gap-2 text-xs text-slate-400">
-                                        <span>
-                                            Due{" "}
-                                            {
-                                                project.dueDate
-                                            }
-                                        </span>
-
-                                        <span className="text-slate-600">
-                                            •
-                                        </span>
-
-                                        <span className="text-slate-500">
-                                            {
-                                                project.workspace
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <ArrowRight
-                                    size={16}
-                                    className="text-slate-500 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-slate-300"
-                                />
-                            </button>
-                        ))}
                     </div>
                 </section>
             </div>
@@ -1042,4 +990,4 @@ export default function ProjectsPage() {
             )}
         </main>
     );
-}
+}                                                   
