@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Project, Workspace
+from ..models import Project, Workspace, WorkspaceMember
 from ..serializers import ProjectSerializer
 
 @api_view(['GET', 'POST'])
@@ -37,11 +37,16 @@ def projects_view(request):
         if not workspace_id:
             errors['workspace_id'] = 'This field is required.'
             
+        workspace = Workspace.objects.filter(id=workspace_id, members__user=request.user).first()
+        workspace_member = WorkspaceMember.objects.filter(workspace=workspace, user=request.user).first()
+        if workspace_member and workspace_member.role == WorkspaceMember.Role.MEMBER:
+            errors['workspace_id'] = 'You do not have permission to create a project in this workspace.'
+            
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user)
+            
             project = Project(name=name, description=description, workspace=workspace, start_date=start_date, due_date=due_date, created_by=request.user)
             project.save()
             serializer = ProjectSerializer(project)
