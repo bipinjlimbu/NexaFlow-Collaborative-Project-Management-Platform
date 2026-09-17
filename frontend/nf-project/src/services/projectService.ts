@@ -19,6 +19,14 @@ export interface CreateProjectData {
     due_date: string;
 }
 
+export async function getProjects(): Promise<Project[]> {
+    const data = await authFetch("/projects/");
+
+    return Array.isArray(data)
+        ? data
+        : data.results || data.projects || [];
+}
+
 export async function createProject(
     data: CreateProjectData
 ): Promise<Project> {
