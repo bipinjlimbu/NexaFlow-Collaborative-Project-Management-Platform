@@ -35,3 +35,9 @@ export async function createProject(
         body: JSON.stringify(data),
     });
 }
+
+export async function getProject(
+    id: number
+): Promise<Project> {
+    return authFetch(`/projects/${id}/`);
+}
