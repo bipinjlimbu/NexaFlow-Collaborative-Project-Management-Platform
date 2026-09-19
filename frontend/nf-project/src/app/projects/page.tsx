@@ -203,11 +203,9 @@ export default function ProjectsPage() {
 
                 setWorkspaces(workspaceData);
 
-                const mappedProjects: Project[] = (
-                    projectData as BackendProject[]
-                ).map((project) => {
+                const mappedProjects: Project[] = projectData.map((project) => {
                     const workspace = workspaceData.find(
-                        (item) => item.id === project.workspace
+                        (item) => item.id === project.workspace.id
                     );
 
                     return {
@@ -215,19 +213,20 @@ export default function ProjectsPage() {
                         name: project.name,
                         description: project.description || "",
                         workspace:
-                            workspace?.name || "Unknown workspace",
-                        workspaceId: project.workspace,
+                            workspace?.name ||
+                            project.workspace.name ||
+                            "Unknown workspace",
+                        workspaceId: project.workspace.id,
                         status: mapBackendStatus(project.status),
                         priority: mapBackendPriority(project.priority),
                         progress: 0,
                         completedTasks: 0,
-                        totalTasks: 0,
-                        members: 1,
+                        totalTasks: project.tasks_count,
+                        members: project.members_count,
                         dueDate: formatDueDate(project.due_date),
                         initials: getProjectInitials(project.name),
                     };
                 });
-
                 setProjects(mappedProjects);
 
                 if (workspaceData.length > 0) {
@@ -377,37 +376,28 @@ export default function ProjectsPage() {
             setCreatingProject(true);
             setProjectErrors({});
 
-            const createdProject: BackendProject =
-                await createProject({
-                    name: projectName.trim(),
-                    description: projectDescription.trim(),
-                    workspace_id: selectedWorkspace.id,
-                    start_date: projectStartDate,
-                    due_date: projectDueDate,
-                }) as BackendProject;
+            const createdProject = await createProject({
+                name: projectName.trim(),
+                description: projectDescription.trim(),
+                workspace_id: selectedWorkspace.id,
+                start_date: projectStartDate,
+                due_date: projectDueDate,
+            });
 
             const newProject: Project = {
                 id: createdProject.id,
                 name: createdProject.name,
                 description: createdProject.description || "",
-                workspace: selectedWorkspace.name,
-                workspaceId: createdProject.workspace,
-                status: mapBackendStatus(
-                    createdProject.status
-                ),
-                priority: mapBackendPriority(
-                    createdProject.priority
-                ),
+                workspace: createdProject.workspace.name,
+                workspaceId: createdProject.workspace.id,
+                status: mapBackendStatus(createdProject.status),
+                priority: mapBackendPriority(createdProject.priority),
                 progress: 0,
                 completedTasks: 0,
-                totalTasks: 0,
-                members: 1,
-                dueDate: formatDueDate(
-                    createdProject.due_date
-                ),
-                initials: getProjectInitials(
-                    createdProject.name
-                ),
+                totalTasks: createdProject.tasks_count,
+                members: createdProject.members_count,
+                dueDate: formatDueDate(createdProject.due_date),
+                initials: getProjectInitials(createdProject.name),
             };
 
             setProjects((previous) => [
