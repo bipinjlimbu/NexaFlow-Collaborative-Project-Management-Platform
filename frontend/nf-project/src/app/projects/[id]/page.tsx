@@ -22,7 +22,13 @@ function formatDate(date: string | null) {
         return "Not set";
     }
 
-    return new Date(`${date} T00:00:00`).toLocaleDateString(
+    const parsedDate = new Date(`${date}T00:00:00`);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return "Not set";
+    }
+
+    return parsedDate.toLocaleDateString(
         "en-US",
         {
             month: "short",
@@ -102,6 +108,11 @@ export default function ProjectDetailPage() {
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+    const MEDIA_URL = API_URL.replace(/\/api\/?$/, "");
+
+    console.log(`Full image URL: ${MEDIA_URL}${project?.created_by.profile_picture}`);
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -185,6 +196,8 @@ export default function ProjectDetailPage() {
         );
     }
 
+    console.log("Project data:", project);
+
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
             <div className="mx-auto max-w-7xl px-6 py-10">
@@ -217,8 +230,7 @@ export default function ProjectDetailPage() {
                                 <span
                                     className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getStatusClass(
                                         project.status
-                                    )
-                                        } `}
+                                    )}`}
                                 >
                                     {getStatusLabel(project.status)}
                                 </span>
@@ -226,8 +238,7 @@ export default function ProjectDetailPage() {
                                 <span
                                     className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getPriorityClass(
                                         project.priority
-                                    )
-                                        } `}
+                                    )}`}
                                 >
                                     {getPriorityLabel(project.priority)} Priority
                                 </span>
@@ -267,7 +278,9 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    {formatDate(project.start_date)}
+                                    {project.start_date
+                                        ? formatDate(project.start_date)
+                                        : "Not set"}
                                 </p>
                             </div>
                         </div>
@@ -422,9 +435,9 @@ export default function ProjectDetailPage() {
 
                         <div className="mt-5 flex items-center gap-4">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
-                                {project.created_by.profile_picture ? (
+                                {project?.created_by.profile_picture ? (
                                     <img
-                                        src={project.created_by.profile_picture}
+                                        src={`${MEDIA_URL}${project?.created_by.profile_picture}`}
                                         alt={project.created_by.username}
                                         className="h-full w-full object-cover"
                                     />
@@ -439,7 +452,7 @@ export default function ProjectDetailPage() {
                                 <p className="text-sm font-semibold text-slate-200">
                                     {project.created_by.first_name ||
                                         project.created_by.last_name
-                                        ? `${project.created_by.first_name} ${project.created_by.last_name} `.trim()
+                                        ? `${project.created_by.first_name} ${project.created_by.last_name}`.trim()
                                         : project.created_by.username}
                                 </p>
 
@@ -468,10 +481,20 @@ export default function ProjectDetailPage() {
                             </p>
                         </div>
 
-                        <Users
-                            size={20}
-                            className="text-slate-500"
-                        />
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                className="flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+                            >
+                                <Plus size={17} />
+                                Add member
+                            </button>
+
+                            <Users
+                                size={20}
+                                className="text-slate-500"
+                            />
+                        </div>
                     </div>
 
                     {project.members.length === 0 ? (
@@ -491,14 +514,8 @@ export default function ProjectDetailPage() {
                                         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                             {member.user.profile_picture ? (
                                                 <img
-                                                    src={
-                                                        member.user
-                                                            .profile_picture
-                                                    }
-                                                    alt={
-                                                        member.user
-                                                            .username
-                                                    }
+                                                    src={`${MEDIA_URL}${member.user.profile_picture}`}
+                                                    alt={member.user.username}
                                                     className="h-full w-full object-cover"
                                                 />
                                             ) : (
@@ -512,7 +529,7 @@ export default function ProjectDetailPage() {
                                             <p className="text-sm font-medium text-slate-200">
                                                 {member.user.first_name ||
                                                     member.user.last_name
-                                                    ? `${member.user.first_name} ${member.user.last_name} `.trim()
+                                                    ? `${member.user.first_name} ${member.user.last_name}`.trim()
                                                     : member.user.username}
                                             </p>
 
