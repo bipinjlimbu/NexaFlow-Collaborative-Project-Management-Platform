@@ -87,7 +87,7 @@ export async function createProject(
 export async function getProject(
     id: number
 ): Promise<Project> {
-    return authFetch(`/ projects / ${id}/`);
+    return authFetch(`/projects/${id}/`);
 }
 
 export async function getWorkspaceMembers(

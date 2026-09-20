@@ -13,11 +13,11 @@ import {
     X,
 } from "lucide-react";
 import {
-    addMemberToProject,
     getProject,
-    getProjectMembers,
+    getWorkspaceMembers,
+    addMemberToProject,
     Project,
-    ProjectMember,
+    WorkspaceMember,
 } from "@/services/projectService";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 
@@ -114,7 +114,7 @@ export default function ProjectDetailPage() {
     const [error, setError] = useState("");
 
     const [showMembers, setShowMembers] = useState(false);
-    const [workspaceMembers, setWorkspaceMembers] = useState<ProjectMember[]>([]);
+    const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceMember[]>([]);
     const [membersLoading, setMembersLoading] = useState(false);
     const [membersError, setMembersError] = useState("");
     const [addingMemberId, setAddingMemberId] = useState<number | null>(null);
@@ -184,7 +184,9 @@ export default function ProjectDetailPage() {
             setAddMemberError("");
             setAddMemberSuccess("");
 
-            const members = await getProjectMembers(project.id);
+            const members = await getWorkspaceMembers(
+                project.workspace.id
+            );
 
             setWorkspaceMembers(members);
         } catch (err: any) {
@@ -204,8 +206,6 @@ export default function ProjectDetailPage() {
         }
     }
 
-    console.log("Workspace members:", workspaceMembers);
-
     async function handleAddWorkspaceMember(userId: number) {
         if (!project) {
             return;
@@ -221,17 +221,9 @@ export default function ProjectDetailPage() {
                 userId
             );
 
-            const updatedProject = await getProject(project.id);
-
-            setProject(updatedProject);
-
             setAddMemberSuccess(
                 response.message || "User added to project successfully."
             );
-
-            const members = await getProjectMembers(project.id);
-
-            setWorkspaceMembers(members);
         } catch (err: any) {
             if (err && typeof err === "object") {
                 if (typeof err.error === "string") {
@@ -583,56 +575,6 @@ export default function ProjectDetailPage() {
                             />
                         </div>
                     </div>
-
-                    {project.members.length === 0 ? (
-                        <div className="mt-5 rounded-xl border border-dashed border-slate-800 p-6 text-center">
-                            <p className="text-sm text-slate-500">
-                                No project members yet.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="mt-5 space-y-3">
-                            {project.members.map((member) => (
-                                <div
-                                    key={member.id}
-                                    className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
-                                            {member.user.profile_picture ? (
-                                                <img
-                                                    src={`${MEDIA_URL}${member.user.profile_picture} `}
-                                                    alt={member.user.username}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            ) : (
-                                                member.user.username
-                                                    .slice(0, 2)
-                                                    .toUpperCase()
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <p className="text-sm font-medium text-slate-200">
-                                                {member.user.first_name ||
-                                                    member.user.last_name
-                                                    ? `${member.user.first_name} ${member.user.last_name} `.trim()
-                                                    : member.user.username}
-                                            </p>
-
-                                            <p className="text-xs text-slate-500">
-                                                @{member.user.username}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <span className="rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-xs capitalize text-slate-400">
-                                        {member.role}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -698,71 +640,51 @@ export default function ProjectDetailPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {workspaceMembers.map((member) => {
-                                        const alreadyMember = project.members.some(
-                                            (projectMember) =>
-                                                projectMember.user.id ===
-                                                member.user.id
-                                        );
-
-                                        return (
-                                            <div
-                                                key={member.id}
-                                                className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
-                                                        {member.user.profile_picture ? (
-                                                            <img
-                                                                src={`${MEDIA_URL}${member.user.profile_picture} `}
-                                                                alt={member.user.username}
-                                                                className="h-full w-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            member.user.username
-                                                                .slice(0, 2)
-                                                                .toUpperCase()
-                                                        )}
-                                                    </div>
-
-                                                    <div>
-                                                        <p className="text-sm font-medium text-slate-200">
-                                                            {member.user.first_name ||
-                                                                member.user.last_name
-                                                                ? `${member.user.first_name} ${member.user.last_name} `.trim()
-                                                                : member.user.username}
-                                                        </p>
-
-                                                        <p className="text-xs text-slate-500">
-                                                            @{member.user.username}
-                                                        </p>
-                                                    </div>
+                                    {workspaceMembers.map((member) => (
+                                        <div
+                                            key={member.user.id}
+                                            className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                    {(member.user.username || "U")
+                                                        .slice(0, 2)
+                                                        .toUpperCase()}
                                                 </div>
 
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleAddWorkspaceMember(
-                                                            member.user.id
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        alreadyMember ||
-                                                        addingMemberId ===
-                                                        member.user.id
-                                                    }
-                                                    className="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                                >
-                                                    {addingMemberId ===
-                                                        member.user.id
-                                                        ? "Adding..."
-                                                        : alreadyMember
-                                                            ? "Added"
-                                                            : "Add"}
-                                                </button>
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-200">
+                                                        {member.user.username ||
+                                                            "Unknown user"}
+                                                    </p>
+
+                                                    <p className="text-xs text-slate-500">
+                                                        @{member.user.username ||
+                                                            "user"}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        );
-                                    })}
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleAddWorkspaceMember(
+                                                        member.user.id
+                                                    )
+                                                }
+                                                disabled={
+                                                    addingMemberId ===
+                                                    member.user.id
+                                                }
+                                                className="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                {addingMemberId ===
+                                                    member.user.id
+                                                    ? "Adding..."
+                                                    : "Add"}
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
