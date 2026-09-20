@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Project, Workspace, WorkspaceMember
-from ..serializers import ProjectSerializer
+from ..serializers import ProjectSerializer, WorkspaceMemberSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -95,3 +95,16 @@ def project_detail_view(request, pk):
     if request.method == 'DELETE':
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_workspace_members(request, workspace_id):
+    try:
+        workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user)
+    except Workspace.DoesNotExist:
+        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        members = WorkspaceMember.objects.filter(workspace=workspace)
+        serializer = WorkspaceMemberSerializer(members, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
