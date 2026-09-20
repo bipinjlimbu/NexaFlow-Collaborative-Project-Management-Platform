@@ -90,3 +90,15 @@ export async function getProjectMembers(
         ? data
         : data.results || data.members || [];
 }
+
+export async function addMemberToProject(
+    projectId: number,
+    userId: number
+): Promise<{ message: string }> {
+    return authFetch(
+        `/projects/${projectId}/members/${userId}/add/`,
+        {
+            method: "PATCH",
+        }
+    );
+}
