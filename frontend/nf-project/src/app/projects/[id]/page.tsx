@@ -13,6 +13,7 @@ import {
     X,
 } from "lucide-react";
 import {
+    addMemberToProject,
     getProject,
     getProjectMembers,
     Project,
@@ -25,7 +26,7 @@ function formatDate(date: string | null) {
         return "Not set";
     }
 
-    const parsedDate = new Date(`${date}T00:00:00`);
+    const parsedDate = new Date(`${date} T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
         return "Not set";
@@ -116,12 +117,15 @@ export default function ProjectDetailPage() {
     const [workspaceMembers, setWorkspaceMembers] = useState<ProjectMember[]>([]);
     const [membersLoading, setMembersLoading] = useState(false);
     const [membersError, setMembersError] = useState("");
+    const [addingMemberId, setAddingMemberId] = useState<number | null>(null);
+    const [addMemberError, setAddMemberError] = useState("");
+    const [addMemberSuccess, setAddMemberSuccess] = useState("");
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
     const MEDIA_URL = API_URL.replace(/\/api\/?$/, "");
 
     console.log(
-        `Full image URL: ${MEDIA_URL}${project?.created_by.profile_picture}`
+        `Full image URL: ${MEDIA_URL}${project?.created_by.profile_picture} `
     );
 
     useEffect(() => {
@@ -177,6 +181,8 @@ export default function ProjectDetailPage() {
             setShowMembers(true);
             setMembersLoading(true);
             setMembersError("");
+            setAddMemberError("");
+            setAddMemberSuccess("");
 
             const members = await getProjectMembers(project.id);
 
@@ -195,6 +201,51 @@ export default function ProjectDetailPage() {
             }
         } finally {
             setMembersLoading(false);
+        }
+    }
+
+    console.log("Workspace members:", workspaceMembers);
+
+    async function handleAddWorkspaceMember(userId: number) {
+        if (!project) {
+            return;
+        }
+
+        try {
+            setAddingMemberId(userId);
+            setAddMemberError("");
+            setAddMemberSuccess("");
+
+            const response = await addMemberToProject(
+                project.id,
+                userId
+            );
+
+            const updatedProject = await getProject(project.id);
+
+            setProject(updatedProject);
+
+            setAddMemberSuccess(
+                response.message || "User added to project successfully."
+            );
+
+            const members = await getProjectMembers(project.id);
+
+            setWorkspaceMembers(members);
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                if (typeof err.error === "string") {
+                    setAddMemberError(err.error);
+                } else if (typeof err.detail === "string") {
+                    setAddMemberError(err.detail);
+                } else {
+                    setAddMemberError("Unable to add member to project.");
+                }
+            } else {
+                setAddMemberError("Unable to add member to project.");
+            }
+        } finally {
+            setAddingMemberId(null);
         }
     }
 
@@ -263,7 +314,8 @@ export default function ProjectDetailPage() {
                                 <span
                                     className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getStatusClass(
                                         project.status
-                                    )}`}
+                                    )
+                                        } `}
                                 >
                                     {getStatusLabel(project.status)}
                                 </span>
@@ -271,7 +323,8 @@ export default function ProjectDetailPage() {
                                 <span
                                     className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getPriorityClass(
                                         project.priority
-                                    )}`}
+                                    )
+                                        } `}
                                 >
                                     {getPriorityLabel(project.priority)} Priority
                                 </span>
@@ -470,7 +523,7 @@ export default function ProjectDetailPage() {
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
                                 {project?.created_by.profile_picture ? (
                                     <img
-                                        src={`${MEDIA_URL}${project?.created_by.profile_picture}`}
+                                        src={`${MEDIA_URL}${project?.created_by.profile_picture} `}
                                         alt={project.created_by.username}
                                         className="h-full w-full object-cover"
                                     />
@@ -485,7 +538,7 @@ export default function ProjectDetailPage() {
                                 <p className="text-sm font-semibold text-slate-200">
                                     {project.created_by.first_name ||
                                         project.created_by.last_name
-                                        ? `${project.created_by.first_name} ${project.created_by.last_name}`.trim()
+                                        ? `${project.created_by.first_name} ${project.created_by.last_name} `.trim()
                                         : project.created_by.username}
                                 </p>
 
@@ -548,7 +601,7 @@ export default function ProjectDetailPage() {
                                         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                             {member.user.profile_picture ? (
                                                 <img
-                                                    src={`${MEDIA_URL}${member.user.profile_picture}`}
+                                                    src={`${MEDIA_URL}${member.user.profile_picture} `}
                                                     alt={member.user.username}
                                                     className="h-full w-full object-cover"
                                                 />
@@ -563,7 +616,7 @@ export default function ProjectDetailPage() {
                                             <p className="text-sm font-medium text-slate-200">
                                                 {member.user.first_name ||
                                                     member.user.last_name
-                                                    ? `${member.user.first_name} ${member.user.last_name}`.trim()
+                                                    ? `${member.user.first_name} ${member.user.last_name} `.trim()
                                                     : member.user.username}
                                             </p>
 
@@ -599,12 +652,32 @@ export default function ProjectDetailPage() {
 
                             <button
                                 type="button"
-                                onClick={() => setShowMembers(false)}
+                                onClick={() => {
+                                    setShowMembers(false);
+                                    setAddMemberError("");
+                                    setAddMemberSuccess("");
+                                }}
                                 className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-white"
                             >
                                 <X size={19} />
                             </button>
                         </div>
+
+                        {addMemberSuccess && (
+                            <div className="mt-5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-center">
+                                <p className="text-sm text-emerald-400">
+                                    {addMemberSuccess}
+                                </p>
+                            </div>
+                        )}
+
+                        {addMemberError && (
+                            <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center">
+                                <p className="text-sm text-red-400">
+                                    {addMemberError}
+                                </p>
+                            </div>
+                        )}
 
                         <div className="mt-5 max-h-96 overflow-y-auto">
                             {membersLoading ? (
@@ -625,48 +698,71 @@ export default function ProjectDetailPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {workspaceMembers.map((member) => (
-                                        <div
-                                            key={member.id}
-                                            className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
-                                                    {member.user.profile_picture ? (
-                                                        <img
-                                                            src={`${MEDIA_URL}${member.user.profile_picture}`}
-                                                            alt={member.user.username}
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        member.user.username
-                                                            .slice(0, 2)
-                                                            .toUpperCase()
-                                                    )}
-                                                </div>
+                                    {workspaceMembers.map((member) => {
+                                        const alreadyMember = project.members.some(
+                                            (projectMember) =>
+                                                projectMember.user.id ===
+                                                member.user.id
+                                        );
 
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-200">
-                                                        {member.user.first_name ||
-                                                            member.user.last_name
-                                                            ? `${member.user.first_name} ${member.user.last_name}`.trim()
-                                                            : member.user.username}
-                                                    </p>
-
-                                                    <p className="text-xs text-slate-500">
-                                                        @{member.user.username}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                className="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500"
+                                        return (
+                                            <div
+                                                key={member.id}
+                                                className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
                                             >
-                                                Add
-                                            </button>
-                                        </div>
-                                    ))}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                        {member.user.profile_picture ? (
+                                                            <img
+                                                                src={`${MEDIA_URL}${member.user.profile_picture} `}
+                                                                alt={member.user.username}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            member.user.username
+                                                                .slice(0, 2)
+                                                                .toUpperCase()
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-sm font-medium text-slate-200">
+                                                            {member.user.first_name ||
+                                                                member.user.last_name
+                                                                ? `${member.user.first_name} ${member.user.last_name} `.trim()
+                                                                : member.user.username}
+                                                        </p>
+
+                                                        <p className="text-xs text-slate-500">
+                                                            @{member.user.username}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleAddWorkspaceMember(
+                                                            member.user.id
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        alreadyMember ||
+                                                        addingMemberId ===
+                                                        member.user.id
+                                                    }
+                                                    className="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                    {addingMemberId ===
+                                                        member.user.id
+                                                        ? "Adding..."
+                                                        : alreadyMember
+                                                            ? "Added"
+                                                            : "Add"}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
