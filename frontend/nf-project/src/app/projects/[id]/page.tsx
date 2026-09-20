@@ -22,35 +22,27 @@ import {
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 
 function formatDate(date: string | null) {
-    if (!date) {
-        return "Not set";
-    }
+    if (!date) return "Not set";
 
-    const parsedDate = new Date(`${date} T00:00:00`);
+    const parsedDate = new Date(`${date}T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
         return "Not set";
     }
 
-    return parsedDate.toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-        }
-    );
+    return parsedDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+    });
 }
 
 function formatDateTime(date: string) {
-    return new Date(date).toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-        }
-    );
+    return new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+    });
 }
 
 function getStatusLabel(status: Project["status"]) {
@@ -124,10 +116,6 @@ export default function ProjectDetailPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
     const MEDIA_URL = API_URL.replace(/\/api\/?$/, "");
 
-    console.log(
-        `Full image URL: ${MEDIA_URL}${project?.created_by.profile_picture} `
-    );
-
     useEffect(() => {
         const token = localStorage.getItem("access");
 
@@ -173,9 +161,7 @@ export default function ProjectDetailPage() {
     }, [params.id, router]);
 
     async function handleAddMember() {
-        if (!project) {
-            return;
-        }
+        if (!project) return;
 
         try {
             setShowMembers(true);
@@ -207,9 +193,7 @@ export default function ProjectDetailPage() {
     }
 
     async function handleAddWorkspaceMember(userId: number) {
-        if (!project) {
-            return;
-        }
+        if (!project) return;
 
         try {
             setAddingMemberId(userId);
@@ -272,8 +256,6 @@ export default function ProjectDetailPage() {
         );
     }
 
-    console.log("Project data:", project);
-
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
             <div className="mx-auto max-w-7xl px-6 py-10">
@@ -304,19 +286,17 @@ export default function ProjectDetailPage() {
 
                             <div className="mt-5 flex flex-wrap items-center gap-3">
                                 <span
-                                    className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getStatusClass(
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusClass(
                                         project.status
-                                    )
-                                        } `}
+                                    )}`}
                                 >
                                     {getStatusLabel(project.status)}
                                 </span>
 
                                 <span
-                                    className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getPriorityClass(
+                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${getPriorityClass(
                                         project.priority
-                                    )
-                                        } `}
+                                    )}`}
                                 >
                                     {getPriorityLabel(project.priority)} Priority
                                 </span>
@@ -356,9 +336,7 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    {project.start_date
-                                        ? formatDate(project.start_date)
-                                        : "Not set"}
+                                    {formatDate(project.start_date)}
                                 </p>
                             </div>
                         </div>
@@ -513,9 +491,9 @@ export default function ProjectDetailPage() {
 
                         <div className="mt-5 flex items-center gap-4">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
-                                {project?.created_by.profile_picture ? (
+                                {project.created_by.profile_picture ? (
                                     <img
-                                        src={`${MEDIA_URL}${project?.created_by.profile_picture} `}
+                                        src={`${MEDIA_URL}${project.created_by.profile_picture}`}
                                         alt={project.created_by.username}
                                         className="h-full w-full object-cover"
                                     />
@@ -530,7 +508,7 @@ export default function ProjectDetailPage() {
                                 <p className="text-sm font-semibold text-slate-200">
                                     {project.created_by.first_name ||
                                         project.created_by.last_name
-                                        ? `${project.created_by.first_name} ${project.created_by.last_name} `.trim()
+                                        ? `${project.created_by.first_name} ${project.created_by.last_name}`.trim()
                                         : project.created_by.username}
                                 </p>
 
@@ -640,51 +618,75 @@ export default function ProjectDetailPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {workspaceMembers.map((member) => (
-                                        <div
-                                            key={member.user.id}
-                                            className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
-                                                    {(member.user.username || "U")
-                                                        .slice(0, 2)
-                                                        .toUpperCase()}
-                                                </div>
+                                    {workspaceMembers.map((member) => {
+                                        const user = member.user;
 
-                                                <div>
-                                                    <p className="text-sm font-medium text-slate-200">
-                                                        {member.user.username ||
-                                                            "Unknown user"}
-                                                    </p>
+                                        const fullName =
+                                            `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
-                                                    <p className="text-xs text-slate-500">
-                                                        @{member.user.username ||
-                                                            "user"}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleAddWorkspaceMember(
-                                                        member.user.id
-                                                    )
-                                                }
-                                                disabled={
-                                                    addingMemberId ===
-                                                    member.user.id
-                                                }
-                                                className="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                        return (
+                                            <div
+                                                key={user.id}
+                                                className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
                                             >
-                                                {addingMemberId ===
-                                                    member.user.id
-                                                    ? "Adding..."
-                                                    : "Add"}
-                                            </button>
-                                        </div>
-                                    ))}
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                        {user.profile_picture ? (
+                                                            <img
+                                                                src={`${MEDIA_URL}${user.profile_picture}`}
+                                                                alt={
+                                                                    fullName ||
+                                                                    user.username
+                                                                }
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            (
+                                                                fullName ||
+                                                                user.username ||
+                                                                "U"
+                                                            )
+                                                                .slice(0, 2)
+                                                                .toUpperCase()
+                                                        )}
+                                                    </div>
+
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-medium text-slate-200">
+                                                            {fullName ||
+                                                                user.username}
+                                                        </p>
+
+                                                        <p className="truncate text-xs text-slate-500">
+                                                            @{user.username}
+                                                        </p>
+
+                                                        <p className="truncate text-xs text-slate-600">
+                                                            {user.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleAddWorkspaceMember(
+                                                            user.id
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        addingMemberId ===
+                                                        user.id
+                                                    }
+                                                    className="ml-4 shrink-0 cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                    {addingMemberId === user.id
+                                                        ? "Adding..."
+                                                        : "Add"}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
