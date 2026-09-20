@@ -80,3 +80,13 @@ export async function getProject(
 ): Promise<Project> {
     return authFetch(`/projects/${id}/`);
 }
+
+export async function getProjectMembers(
+    projectId: number
+): Promise<ProjectMember[]> {
+    const data = await authFetch(`/projects/${projectId}/members/`);
+
+    return Array.isArray(data)
+        ? data
+        : data.results || data.members || [];
+}
