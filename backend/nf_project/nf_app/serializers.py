@@ -63,6 +63,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class ProjectMemberSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    
+    def get_user(self, obj):
+        return UserSerializer(obj.user).data
+    
     class Meta:
         model = ProjectMember
         fields = '__all__'
