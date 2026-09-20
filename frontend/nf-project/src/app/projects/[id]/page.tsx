@@ -8,7 +8,6 @@ import {
     CheckCircle2,
     Clock,
     FolderKanban,
-    Loader2,
     Plus,
     Users,
 } from "lucide-react";
@@ -16,6 +15,7 @@ import {
     getProject,
     Project,
 } from "@/services/projectService";
+import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 
 function formatDate(date: string | null) {
     if (!date) {
@@ -112,7 +112,9 @@ export default function ProjectDetailPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
     const MEDIA_URL = API_URL.replace(/\/api\/?$/, "");
 
-    console.log(`Full image URL: ${MEDIA_URL}${project?.created_by.profile_picture}`);
+    console.log(
+        `Full image URL: ${MEDIA_URL}${project?.created_by.profile_picture}`
+    );
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -159,14 +161,7 @@ export default function ProjectDetailPage() {
     }, [params.id, router]);
 
     if (loading) {
-        return (
-            <main className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-50">
-                <Loader2
-                    size={28}
-                    className="animate-spin text-indigo-400"
-                />
-            </main>
-        );
+        return <ProjectDetailSkeleton />;
     }
 
     if (error || !project) {
