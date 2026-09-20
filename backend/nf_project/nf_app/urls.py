@@ -26,6 +26,6 @@ urlpatterns = [
     path('workspaces/<int:workspace_id>/projects/', get_projects_in_workspace, name='workspace_projects'),
     path('projects/', projects_view, name='projects'),
     path('projects/<int:pk>/', project_detail_view, name='project_detail'),
-    path('projects/<int:project_id>/members/', get_workspace_members, name='project_members'),
+    path('projects/workspace/<int:workspace_id>/members/', get_workspace_members, name='get_workspace_members'),
     path('projects/<int:project_id>/members/<int:user_id>/add/', add_member_to_project, name='add_member_to_project')
 ]
