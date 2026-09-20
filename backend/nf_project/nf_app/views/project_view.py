@@ -98,13 +98,13 @@ def project_detail_view(request, pk):
     
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_workspace_members(request, workspace_id):
+def get_workspace_members(request, project_id):
     try:
-        workspace = Workspace.objects.get(pk=workspace_id, members__user=request.user)
-    except Workspace.DoesNotExist:
-        return Response({"error": "Workspace not found."}, status=status.HTTP_404_NOT_FOUND)
+        project = Project.objects.get(pk=project_id, workspace__members__user=request.user)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        members = WorkspaceMember.objects.filter(workspace=workspace)
+        members = WorkspaceMember.objects.filter(workspace=project.workspace)
         serializer = WorkspaceMemberSerializer(members, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
