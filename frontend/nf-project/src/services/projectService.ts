@@ -23,10 +23,21 @@ export interface ProjectMember {
 export interface WorkspaceMemberUser {
     id: number;
     username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    address: string;
+    profile_picture: string | null;
+    is_active: boolean;
 }
 
 export interface WorkspaceMember {
+    id: number;
     user: WorkspaceMemberUser;
+    role?: "owner" | "admin" | "member";
+    joined_at?: string;
+    workspace?: number;
 }
 
 export interface ProjectWorkspace {
@@ -87,7 +98,7 @@ export async function createProject(
 export async function getProject(
     id: number
 ): Promise<Project> {
-    return authFetch(`/projects/${id}/`);
+    return authFetch(`/ projects / ${id}/`);
 }
 
 export async function getWorkspaceMembers(
