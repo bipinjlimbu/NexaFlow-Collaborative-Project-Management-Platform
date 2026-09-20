@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Project, Workspace, WorkspaceMember
+from ..models import Project, Workspace, WorkspaceMember, ProjectMember
 from ..serializers import ProjectSerializer, WorkspaceMemberSerializer
 
 @api_view(['GET', 'POST'])
@@ -108,3 +108,24 @@ def get_workspace_members(request, project_id):
         members = WorkspaceMember.objects.filter(workspace=project.workspace)
         serializer = WorkspaceMemberSerializer(members, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def add_member_to_project(request, project_id, user_id):
+    try:
+        project = Project.objects.get(pk=project_id, workspace__members__user=request.user)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        workspace_member = WorkspaceMember.objects.get(workspace=project.workspace, user__id=user_id)
+    except WorkspaceMember.DoesNotExist:
+        return Response({"error": "User is not a member of the workspace."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PATCH':
+        if ProjectMember.objects.filter(project=project, user=workspace_member.user).exists():
+            return Response({"error": "User is already a member of the project."}, status=status.HTTP_400_BAD_REQUEST)
+
+        project_member = ProjectMember(project=project, user=workspace_member.user)
+        project_member.save()
+        return Response({"message": "User added to project successfully."}, status=status.HTTP_200_OK)
