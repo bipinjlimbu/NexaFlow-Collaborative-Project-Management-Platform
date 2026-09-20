@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import {
     getProject,
+    getProjectMembers,
     getWorkspaceMembers,
     addMemberToProject,
     Project,
+    ProjectMember,
     WorkspaceMember,
 } from "@/services/projectService";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
@@ -102,13 +104,16 @@ export default function ProjectDetailPage() {
     const router = useRouter();
 
     const [project, setProject] = useState<Project | null>(null);
+    const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
     const [loading, setLoading] = useState(true);
+    const [membersLoading, setMembersLoading] = useState(true);
     const [error, setError] = useState("");
+    const [membersError, setMembersError] = useState("");
 
     const [showMembers, setShowMembers] = useState(false);
     const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceMember[]>([]);
-    const [membersLoading, setMembersLoading] = useState(false);
-    const [membersError, setMembersError] = useState("");
+    const [workspaceMembersLoading, setWorkspaceMembersLoading] = useState(false);
+    const [workspaceMembersError, setWorkspaceMembersError] = useState("");
     const [addingMemberId, setAddingMemberId] = useState<number | null>(null);
     const [addMemberError, setAddMemberError] = useState("");
     const [addMemberSuccess, setAddMemberSuccess] = useState("");
@@ -129,17 +134,24 @@ export default function ProjectDetailPage() {
         if (!projectId) {
             setError("Invalid project.");
             setLoading(false);
+            setMembersLoading(false);
             return;
         }
 
         async function loadProject() {
             try {
                 setLoading(true);
+                setMembersLoading(true);
                 setError("");
+                setMembersError("");
 
-                const data = await getProject(projectId);
+                const [projectData, membersData] = await Promise.all([
+                    getProject(projectId),
+                    getProjectMembers(projectId),
+                ]);
 
-                setProject(data);
+                setProject(projectData);
+                setProjectMembers(membersData);
             } catch (err: any) {
                 if (err && typeof err === "object") {
                     if (typeof err.error === "string") {
@@ -147,13 +159,14 @@ export default function ProjectDetailPage() {
                     } else if (typeof err.detail === "string") {
                         setError(err.detail);
                     } else {
-                        setError("Project not found.");
+                        setError("Unable to load project.");
                     }
                 } else {
                     setError("Unable to load project.");
                 }
             } finally {
                 setLoading(false);
+                setMembersLoading(false);
             }
         }
 
@@ -165,8 +178,8 @@ export default function ProjectDetailPage() {
 
         try {
             setShowMembers(true);
-            setMembersLoading(true);
-            setMembersError("");
+            setWorkspaceMembersLoading(true);
+            setWorkspaceMembersError("");
             setAddMemberError("");
             setAddMemberSuccess("");
 
@@ -178,17 +191,21 @@ export default function ProjectDetailPage() {
         } catch (err: any) {
             if (err && typeof err === "object") {
                 if (typeof err.error === "string") {
-                    setMembersError(err.error);
+                    setWorkspaceMembersError(err.error);
                 } else if (typeof err.detail === "string") {
-                    setMembersError(err.detail);
+                    setWorkspaceMembersError(err.detail);
                 } else {
-                    setMembersError("Unable to load workspace members.");
+                    setWorkspaceMembersError(
+                        "Unable to load workspace members."
+                    );
                 }
             } else {
-                setMembersError("Unable to load workspace members.");
+                setWorkspaceMembersError(
+                    "Unable to load workspace members."
+                );
             }
         } finally {
-            setMembersLoading(false);
+            setWorkspaceMembersLoading(false);
         }
     }
 
@@ -206,8 +223,15 @@ export default function ProjectDetailPage() {
             );
 
             setAddMemberSuccess(
-                response.message || "User added to project successfully."
+                response.message ||
+                "User added to project successfully."
             );
+
+            const updatedMembers = await getProjectMembers(
+                project.id
+            );
+
+            setProjectMembers(updatedMembers);
         } catch (err: any) {
             if (err && typeof err === "object") {
                 if (typeof err.error === "string") {
@@ -215,16 +239,21 @@ export default function ProjectDetailPage() {
                 } else if (typeof err.detail === "string") {
                     setAddMemberError(err.detail);
                 } else {
-                    setAddMemberError("Unable to add member to project.");
+                    setAddMemberError(
+                        "Unable to add member to project."
+                    );
                 }
             } else {
-                setAddMemberError("Unable to add member to project.");
+                setAddMemberError(
+                    "Unable to add member to project."
+                );
             }
         } finally {
             setAddingMemberId(null);
         }
     }
 
+    console.log("Project Members:", projectMembers);
     if (loading) {
         return <ProjectDetailSkeleton />;
     }
@@ -448,7 +477,7 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm text-slate-200">
-                                    {project.members_count}
+                                    {projectMembers.length}
                                 </p>
                             </div>
 
@@ -532,8 +561,8 @@ export default function ProjectDetailPage() {
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500">
-                                {project.members_count} member
-                                {project.members_count === 1 ? "" : "s"}
+                                {projectMembers.length} member
+                                {projectMembers.length === 1 ? "" : "s"}
                             </p>
                         </div>
 
@@ -552,6 +581,82 @@ export default function ProjectDetailPage() {
                                 className="text-slate-500"
                             />
                         </div>
+                    </div>
+
+                    <div className="mt-5">
+                        {membersLoading ? (
+                            <div className="flex items-center justify-center py-10">
+                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
+                            </div>
+                        ) : membersError ? (
+                            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-center">
+                                <p className="text-sm text-red-400">
+                                    {membersError}
+                                </p>
+                            </div>
+                        ) : projectMembers.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center">
+                                <p className="text-sm font-medium text-slate-400">
+                                    No project members yet
+                                </p>
+
+                                <p className="mt-1 text-sm text-slate-600">
+                                    Add members from your workspace to this project.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {projectMembers.map((member) => {
+                                    const user = member.user;
+
+                                    const fullName =
+                                        `${user.first_name || ""} ${user.last_name || ""}`.trim();
+
+                                    return (
+                                        <div
+                                            key={member.id}
+                                            className="flex items-center gap-3 rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
+                                        >
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                {user.profile_picture ? (
+                                                    <img
+                                                        src={`${MEDIA_URL}${user.profile_picture}`}
+                                                        alt={
+                                                            fullName ||
+                                                            user.username
+                                                        }
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    (
+                                                        fullName ||
+                                                        user.username ||
+                                                        "U"
+                                                    )
+                                                        .slice(0, 2)
+                                                        .toUpperCase()
+                                                )}
+                                            </div>
+
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-medium text-slate-200">
+                                                    {fullName ||
+                                                        user.username}
+                                                </p>
+
+                                                <p className="truncate text-xs text-slate-500">
+                                                    @{user.username}
+                                                </p>
+
+                                                <p className="truncate text-xs text-slate-600">
+                                                    {user.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -600,14 +705,14 @@ export default function ProjectDetailPage() {
                         )}
 
                         <div className="mt-5 max-h-96 overflow-y-auto">
-                            {membersLoading ? (
+                            {workspaceMembersLoading ? (
                                 <div className="flex items-center justify-center py-12">
                                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
                                 </div>
-                            ) : membersError ? (
+                            ) : workspaceMembersError ? (
                                 <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center">
                                     <p className="text-sm text-red-400">
-                                        {membersError}
+                                        {workspaceMembersError}
                                     </p>
                                 </div>
                             ) : workspaceMembers.length === 0 ? (
