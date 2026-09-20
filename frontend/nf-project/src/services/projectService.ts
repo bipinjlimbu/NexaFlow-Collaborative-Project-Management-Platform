@@ -98,7 +98,7 @@ export async function createProject(
 export async function getProject(
     id: number
 ): Promise<Project> {
-    return authFetch(`/projects/${id}/`);
+    return authFetch(`/ projects / ${id}/`);
 }
 
 export async function getWorkspaceMembers(
@@ -106,6 +106,18 @@ export async function getWorkspaceMembers(
 ): Promise<WorkspaceMember[]> {
     const data = await authFetch(
         `/projects/workspace/${workspaceId}/members/`
+    );
+
+    return Array.isArray(data)
+        ? data
+        : data.results || data.members || [];
+}
+
+export async function getProjectMembers(
+    projectId: number
+): Promise<ProjectMember[]> {
+    const data = await authFetch(
+        `/projects/${projectId}/members/`
     );
 
     return Array.isArray(data)
