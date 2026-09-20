@@ -10,10 +10,13 @@ import {
     FolderKanban,
     Plus,
     Users,
+    X,
 } from "lucide-react";
 import {
     getProject,
+    getProjectMembers,
     Project,
+    ProjectMember,
 } from "@/services/projectService";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 
@@ -109,6 +112,11 @@ export default function ProjectDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [showMembers, setShowMembers] = useState(false);
+    const [workspaceMembers, setWorkspaceMembers] = useState<ProjectMember[]>([]);
+    const [membersLoading, setMembersLoading] = useState(false);
+    const [membersError, setMembersError] = useState("");
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
     const MEDIA_URL = API_URL.replace(/\/api\/?$/, "");
 
@@ -159,6 +167,36 @@ export default function ProjectDetailPage() {
 
         loadProject();
     }, [params.id, router]);
+
+    async function handleAddMember() {
+        if (!project) {
+            return;
+        }
+
+        try {
+            setShowMembers(true);
+            setMembersLoading(true);
+            setMembersError("");
+
+            const members = await getProjectMembers(project.id);
+
+            setWorkspaceMembers(members);
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                if (typeof err.error === "string") {
+                    setMembersError(err.error);
+                } else if (typeof err.detail === "string") {
+                    setMembersError(err.detail);
+                } else {
+                    setMembersError("Unable to load workspace members.");
+                }
+            } else {
+                setMembersError("Unable to load workspace members.");
+            }
+        } finally {
+            setMembersLoading(false);
+        }
+    }
 
     if (loading) {
         return <ProjectDetailSkeleton />;
@@ -479,6 +517,7 @@ export default function ProjectDetailPage() {
                         <div className="flex items-center gap-3">
                             <button
                                 type="button"
+                                onClick={handleAddMember}
                                 className="flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
                             >
                                 <Plus size={17} />
@@ -543,6 +582,97 @@ export default function ProjectDetailPage() {
                     )}
                 </div>
             </div>
+
+            {showMembers && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 backdrop-blur-sm">
+                    <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg font-semibold text-slate-100">
+                                    Workspace members
+                                </h2>
+
+                                <p className="mt-1 text-sm text-slate-500">
+                                    Select a member to add to this project
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setShowMembers(false)}
+                                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                            >
+                                <X size={19} />
+                            </button>
+                        </div>
+
+                        <div className="mt-5 max-h-96 overflow-y-auto">
+                            {membersLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
+                                </div>
+                            ) : membersError ? (
+                                <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center">
+                                    <p className="text-sm text-red-400">
+                                        {membersError}
+                                    </p>
+                                </div>
+                            ) : workspaceMembers.length === 0 ? (
+                                <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center">
+                                    <p className="text-sm text-slate-500">
+                                        No workspace members found.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {workspaceMembers.map((member) => (
+                                        <div
+                                            key={member.id}
+                                            className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                    {member.user.profile_picture ? (
+                                                        <img
+                                                            src={`${MEDIA_URL}${member.user.profile_picture}`}
+                                                            alt={member.user.username}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        member.user.username
+                                                            .slice(0, 2)
+                                                            .toUpperCase()
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-sm font-medium text-slate-200">
+                                                        {member.user.first_name ||
+                                                            member.user.last_name
+                                                            ? `${member.user.first_name} ${member.user.last_name}`.trim()
+                                                            : member.user.username}
+                                                    </p>
+
+                                                    <p className="text-xs text-slate-500">
+                                                        @{member.user.username}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                className="cursor-pointer rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500"
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
