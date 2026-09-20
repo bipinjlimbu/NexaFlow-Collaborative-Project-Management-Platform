@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Project, Workspace, WorkspaceMember, ProjectMember
-from ..serializers import ProjectSerializer, WorkspaceMemberSerializer
+from ..serializers import ProjectSerializer, WorkspaceMemberSerializer, ProjectMemberSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -129,3 +129,16 @@ def add_member_to_project(request, project_id, user_id):
         project_member = ProjectMember(project=project, user=workspace_member.user)
         project_member.save()
         return Response({"message": "User added to project successfully."}, status=status.HTTP_200_OK)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_project_members(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id, workspace__members__user=request.user)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        members = ProjectMember.objects.filter(project=project)
+        serializer = ProjectMemberSerializer(members, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
