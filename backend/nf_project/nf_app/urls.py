@@ -27,6 +27,6 @@ urlpatterns = [
     path('projects/', projects_view, name='projects'),
     path('projects/<int:pk>/', project_detail_view, name='project_detail'),
     path('projects/workspace/<int:workspace_id>/members/', get_workspace_members, name='get_workspace_members'),
-    path('projects/<int:project_id>/members/<int:user_id>/add/', add_member_to_project, name='add_member_to_project')
+    path('projects/<int:project_id>/members/<int:user_id>/add/', add_member_to_project, name='add_member_to_project'),
     path('projects/<int:project_id>/members/', get_project_members, name='get_project_members'),
 ]
