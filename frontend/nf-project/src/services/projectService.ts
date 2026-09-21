@@ -2,9 +2,9 @@ import { authFetch } from "@/lib/api";
 import type {
     Project,
     ProjectMember,
-    ProjectWorkspaceMember,
     CreateProjectData,
 } from "@/types/project";
+import type { WorkspaceDetailMember } from "@/types/workspace";
 
 export async function getProjects(): Promise<Project[]> {
     const data = await authFetch("/projects/");
@@ -32,7 +32,7 @@ export async function getProject(
 
 export async function getWorkspaceMembers(
     workspaceId: number
-): Promise<ProjectWorkspaceMember[]> {
+): Promise<WorkspaceDetailMember[]> {
     const data = await authFetch(
         `/projects/workspace/${workspaceId}/members/`
     );
