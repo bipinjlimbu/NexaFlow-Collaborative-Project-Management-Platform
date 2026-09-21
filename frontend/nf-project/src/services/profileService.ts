@@ -1,32 +1,14 @@
 import { authFetch } from "@/lib/api";
-
-export interface UpdateProfileData {
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    address: string;
-    profile_picture?: File | null;
-}
-
-export interface ProfileError {
-    username?: string;
-    email?: string;
-    first_name?: string;
-    last_name?: string;
-    phone_number?: string;
-    address?: string;
-    profile_picture?: string;
-    error?: string;
-    detail?: string;
-    message?: string;
-}
+import type {
+    UpdateProfileData,
+    ProfileError,
+} from "@/types/profile";
 
 export async function updateProfile(
     data: UpdateProfileData
 ) {
     const formData = new FormData();
+
 
     formData.append("username", data.username);
     formData.append("email", data.email);
@@ -42,11 +24,11 @@ export async function updateProfile(
     const access = localStorage.getItem("access");
 
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/profile/`,
+        `${process.env.NEXT_PUBLIC_API_URL} /profile/`,
         {
             method: "PUT",
             headers: {
-                Authorization: `Bearer ${access}`,
+                Authorization: `Bearer ${access} `,
             },
             body: formData,
         }
@@ -59,6 +41,7 @@ export async function updateProfile(
     }
 
     return result;
+
 }
 
 export async function deleteProfile() {
