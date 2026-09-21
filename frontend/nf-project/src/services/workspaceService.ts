@@ -1,81 +1,12 @@
 import { authFetch } from "@/lib/api";
-
-export interface WorkspaceMember {
-    id: number;
-    user: number;
-    workspace: number;
-    role: "owner" | "admin" | "member";
-    joined_at: string;
-}
-
-export interface WorkspaceUser {
-    id: number;
-    username: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    address: string;
-    profile_picture: string | null;
-    is_active: boolean;
-}
-
-export interface WorkspaceProject {
-    id: number;
-    name: string;
-    description: string;
-    workspace: number;
-    start_date: string | null;
-    due_date: string | null;
-    created_at?: string;
-    updated_at?: string;
-}
-
-export interface Workspace {
-    id: number;
-    name: string;
-    description: string | null;
-    created_by: number;
-    created_at: string;
-    updated_at: string;
-    is_archived: boolean;
-    members: WorkspaceMember[];
-    members_count: number;
-    projects_count: number;
-    role?: "owner" | "admin" | "member";
-}
-
-export interface WorkspaceDetailMember {
-    id: number;
-    joined_at: string;
-    role: "owner" | "admin" | "member";
-    user: WorkspaceUser;
-    workspace: number;
-}
-
-export interface WorkspaceDetail {
-    id: number;
-    name: string;
-    description: string | null;
-    created_by: number;
-    created_at: string;
-    updated_at: string;
-    is_archived: boolean;
-    members: WorkspaceDetailMember[];
-    members_count: number;
-    projects_count: number;
-}
-
-export interface CreateWorkspaceData {
-    name: string;
-    description: string;
-}
-
-export interface UpdateWorkspaceData {
-    name: string;
-    description: string;
-    is_archived: boolean;
-}
+import type { User } from "@/types/user";
+import type {
+    Workspace,
+    WorkspaceDetail,
+    WorkspaceProject,
+    CreateWorkspaceData,
+    UpdateWorkspaceData,
+} from "@/types/workspace";
 
 export async function getWorkspaces(): Promise<Workspace[]> {
     const data = await authFetch("/workspaces/");
@@ -83,6 +14,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     return Array.isArray(data)
         ? data
         : data.results || data.workspaces || [];
+
 }
 
 export async function createWorkspace(
@@ -110,6 +42,7 @@ export async function getWorkspaceProjects(
     return Array.isArray(data)
         ? data
         : data.results || data.projects || [];
+
 }
 
 export async function updateWorkspace(
@@ -128,12 +61,13 @@ export async function deleteWorkspace(id: number) {
     });
 }
 
-export async function getUsers(): Promise<WorkspaceUser[]> {
+export async function getUsers(): Promise<User[]> {
     const data = await authFetch("/users/");
 
     return Array.isArray(data)
         ? data
         : data.results || data.users || [];
+
 }
 
 export async function sendWorkspaceInvitation(
