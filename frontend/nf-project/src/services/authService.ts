@@ -1,9 +1,14 @@
 import { apiFetch } from "@/lib/api";
+import type {
+    LoginResponse,
+    RegisterData,
+    RegisterResponse,
+} from "@/types/auth";
 
 export async function login(
     username: string,
     password: string
-) {
+): Promise<LoginResponse> {
     return apiFetch("/login/", {
         method: "POST",
         body: JSON.stringify({
@@ -13,17 +18,9 @@ export async function login(
     });
 }
 
-export async function register(data: {
-    username: string;
-    email: string;
-    password: string;
-    confirm_password: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    address: string;
-    profile_picture: File | null;
-}) {
+export async function register(
+    data: RegisterData
+): Promise<RegisterResponse> {
     const formData = new FormData();
 
     formData.append("username", data.username);
@@ -40,7 +37,7 @@ export async function register(data: {
     }
 
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/register/`,
+        `${process.env.NEXT_PUBLIC_API_URL} /register/`,
         {
             method: "POST",
             body: formData,
@@ -54,6 +51,7 @@ export async function register(data: {
     }
 
     return result;
+
 }
 
 export async function logout(refresh: string) {
