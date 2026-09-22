@@ -18,21 +18,19 @@ import {
 import {
     createProject,
     getProjects,
-    Project as ProjectData,
 } from "@/services/projectService";
 import {
     getWorkspaces,
-    Workspace,
 } from "@/services/workspaceService";
+import type {
+    Project as ProjectData,
+    ProjectPriority as BackendProjectPriority,
+    ProjectStatus as BackendProjectStatus,
+} from "@/types/project";
+import type { Workspace } from "@/types/workspace";
 
 type ProjectStatus = "Active" | "Completed" | "In Review" | "Planning";
 type ProjectPriority = "High" | "Medium" | "Low";
-
-type BackendProject = ProjectData & {
-    status: "planning" | "active" | "inactive" | "archived";
-    priority: "low" | "medium" | "high" | "urgent";
-    created_by: number;
-};
 
 interface Project {
     id: number;
@@ -87,7 +85,7 @@ const statusConfig: Record<
 };
 
 function mapBackendStatus(
-    status: BackendProject["status"]
+    status: BackendProjectStatus
 ): ProjectStatus {
     switch (status) {
         case "active":
@@ -102,7 +100,7 @@ function mapBackendStatus(
 }
 
 function mapBackendPriority(
-    priority: BackendProject["priority"]
+    priority: BackendProjectPriority
 ): ProjectPriority {
     switch (priority) {
         case "high":
@@ -227,6 +225,7 @@ export default function ProjectsPage() {
                         initials: getProjectInitials(project.name),
                     };
                 });
+
                 setProjects(mappedProjects);
 
                 if (workspaceData.length > 0) {
@@ -980,4 +979,4 @@ export default function ProjectsPage() {
             )}
         </main>
     );
-}                                                   
+}
