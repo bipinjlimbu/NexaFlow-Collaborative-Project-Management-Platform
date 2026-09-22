@@ -6,8 +6,8 @@ import {
     acceptInvitation,
     declineInvitation,
     getInvitations,
-    WorkspaceInvitation,
 } from "@/services/invitationService";
+import type { WorkspaceInvitation } from "@/types/invitation";
 import InvitationsSkeleton from "@/components/InvitationsSkeleton";
 
 function getRoleStyle(role: string) {
@@ -76,7 +76,6 @@ function formatRelativeDate(date: string) {
     }
 
     return formatDate(date);
-
 }
 
 export default function InvitationsPage() {
