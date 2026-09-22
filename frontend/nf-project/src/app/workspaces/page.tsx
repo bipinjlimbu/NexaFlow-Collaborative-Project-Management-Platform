@@ -6,8 +6,8 @@ import WorkspacesSkeleton from "@/components/WorkspacesSkeleton";
 import {
     createWorkspace,
     getWorkspaces,
-    type Workspace,
 } from "@/services/workspaceService";
+import type { Workspace } from "@/types/workspace";
 import {
     ArrowRight,
     FolderKanban,
@@ -172,7 +172,7 @@ export default function WorkspacesPage() {
                 <div className="mb-8 flex flex-col justify-between gap-6 border-b border-slate-800/80 pb-6 sm:flex-row sm:items-end">
                     <div>
                         <span className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-400">
-                            ApexStriker Ecosystem
+                            NexaFlow Ecosystem
                         </span>
 
                         <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
