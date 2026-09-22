@@ -24,6 +24,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         const token = localStorage.getItem("access");
+
         if (token) {
             alert("You are already logged in.");
             router.replace("/dashboard");
@@ -34,6 +35,7 @@ export default function LoginPage() {
 
     function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
         setUsername(e.target.value);
+
         if (fieldErrors.username) {
             setFieldErrors((prev) => {
                 const next = { ...prev };
@@ -45,6 +47,7 @@ export default function LoginPage() {
 
     function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
         setPassword(e.target.value);
+
         if (fieldErrors.password) {
             setFieldErrors((prev) => {
                 const next = { ...prev };
@@ -63,13 +66,13 @@ export default function LoginPage() {
         try {
             const data = await login(username, password);
 
-            const access = data?.tokens?.access || data?.access;
-            const refresh = data?.tokens?.refresh || data?.refresh;
-            const user = data?.user;
+            const access = data.access;
+            const refresh = data.refresh;
+            const user = data.user;
 
-            if (access) localStorage.setItem("access", access);
-            if (refresh) localStorage.setItem("refresh", refresh);
-            if (user) localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("access", access);
+            localStorage.setItem("refresh", refresh);
+            localStorage.setItem("user", JSON.stringify(user));
 
             window.dispatchEvent(new Event("auth-change"));
 
@@ -79,11 +82,23 @@ export default function LoginPage() {
                 const payload = err.errors || err;
 
                 if (payload.detail) {
-                    setError(typeof payload.detail === "string" ? payload.detail : payload.detail[0]);
+                    setError(
+                        typeof payload.detail === "string"
+                            ? payload.detail
+                            : payload.detail[0]
+                    );
                 } else if (payload.error) {
-                    setError(typeof payload.error === "string" ? payload.error : payload.error[0]);
+                    setError(
+                        typeof payload.error === "string"
+                            ? payload.error
+                            : payload.error[0]
+                    );
                 } else if (payload.non_field_errors) {
-                    setError(Array.isArray(payload.non_field_errors) ? payload.non_field_errors[0] : payload.non_field_errors);
+                    setError(
+                        Array.isArray(payload.non_field_errors)
+                            ? payload.non_field_errors[0]
+                            : payload.non_field_errors
+                    );
                 } else {
                     setFieldErrors(payload);
                 }
@@ -116,7 +131,11 @@ export default function LoginPage() {
                             NexaFlow
                         </span>
                     </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Sign In</h1>
+
+                    <h1 className="text-2xl font-bold tracking-tight text-white pt-2">
+                        Sign In
+                    </h1>
+
                     <p className="text-sm text-slate-400">
                         Sign in to your NexaFlow account
                     </p>
@@ -160,7 +179,10 @@ export default function LoginPage() {
 
                 <p className="text-center text-xs text-slate-400 pt-2">
                     Don&apos;t have an account?{" "}
-                    <Link href="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+                    <Link
+                        href="/register"
+                        className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                    >
                         Create account
                     </Link>
                 </p>
