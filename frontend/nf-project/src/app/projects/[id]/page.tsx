@@ -17,16 +17,18 @@ import {
     getProjectMembers,
     getWorkspaceMembers,
     addMemberToProject,
+} from "@/services/projectService";
+import type {
     Project,
     ProjectMember,
-    WorkspaceMember,
-} from "@/services/projectService";
+} from "@/types/project";
+import type { WorkspaceDetailMember } from "@/types/workspace";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 
 function formatDate(date: string | null) {
     if (!date) return "Not set";
 
-    const parsedDate = new Date(`${date}T00:00:00`);
+    const parsedDate = new Date(`${date} T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
         return "Not set";
@@ -111,7 +113,7 @@ export default function ProjectDetailPage() {
     const [membersError, setMembersError] = useState("");
 
     const [showMembers, setShowMembers] = useState(false);
-    const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceMember[]>([]);
+    const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceDetailMember[]>([]);
     const [workspaceMembersLoading, setWorkspaceMembersLoading] = useState(false);
     const [workspaceMembersError, setWorkspaceMembersError] = useState("");
     const [addingMemberId, setAddingMemberId] = useState<number | null>(null);
@@ -254,6 +256,7 @@ export default function ProjectDetailPage() {
     }
 
     console.log("Project Members:", projectMembers);
+
     if (loading) {
         return <ProjectDetailSkeleton />;
     }
@@ -315,17 +318,19 @@ export default function ProjectDetailPage() {
 
                             <div className="mt-5 flex flex-wrap items-center gap-3">
                                 <span
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusClass(
+                                    className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getStatusClass(
                                         project.status
-                                    )}`}
+                                    )
+                                        } `}
                                 >
                                     {getStatusLabel(project.status)}
                                 </span>
 
                                 <span
-                                    className={`rounded-full border px-3 py-1 text-xs font-medium ${getPriorityClass(
+                                    className={`rounded - full border px - 3 py - 1 text - xs font - medium ${getPriorityClass(
                                         project.priority
-                                    )}`}
+                                    )
+                                        } `}
                                 >
                                     {getPriorityLabel(project.priority)} Priority
                                 </span>
@@ -522,7 +527,7 @@ export default function ProjectDetailPage() {
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
                                 {project.created_by.profile_picture ? (
                                     <img
-                                        src={`${MEDIA_URL}${project.created_by.profile_picture}`}
+                                        src={`${MEDIA_URL}${project.created_by.profile_picture} `}
                                         alt={project.created_by.username}
                                         className="h-full w-full object-cover"
                                     />
@@ -537,7 +542,7 @@ export default function ProjectDetailPage() {
                                 <p className="text-sm font-semibold text-slate-200">
                                     {project.created_by.first_name ||
                                         project.created_by.last_name
-                                        ? `${project.created_by.first_name} ${project.created_by.last_name}`.trim()
+                                        ? `${project.created_by.first_name} ${project.created_by.last_name} `.trim()
                                         : project.created_by.username}
                                 </p>
 
@@ -610,7 +615,7 @@ export default function ProjectDetailPage() {
                                     const user = member.user;
 
                                     const fullName =
-                                        `${user.first_name || ""} ${user.last_name || ""}`.trim();
+                                        `${user.first_name || ""} ${user.last_name || ""} `.trim();
 
                                     return (
                                         <div
@@ -620,7 +625,7 @@ export default function ProjectDetailPage() {
                                             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                                 {user.profile_picture ? (
                                                     <img
-                                                        src={`${MEDIA_URL}${user.profile_picture}`}
+                                                        src={`${MEDIA_URL}${user.profile_picture} `}
                                                         alt={
                                                             fullName ||
                                                             user.username
@@ -727,7 +732,7 @@ export default function ProjectDetailPage() {
                                         const user = member.user;
 
                                         const fullName =
-                                            `${user.first_name || ""} ${user.last_name || ""}`.trim();
+                                            `${user.first_name || ""} ${user.last_name || ""} `.trim();
 
                                         return (
                                             <div
@@ -738,7 +743,7 @@ export default function ProjectDetailPage() {
                                                     <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                                         {user.profile_picture ? (
                                                             <img
-                                                                src={`${MEDIA_URL}${user.profile_picture}`}
+                                                                src={`${MEDIA_URL}${user.profile_picture} `}
                                                                 alt={
                                                                     fullName ||
                                                                     user.username
