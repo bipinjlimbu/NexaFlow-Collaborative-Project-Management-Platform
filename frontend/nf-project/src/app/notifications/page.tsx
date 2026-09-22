@@ -6,8 +6,8 @@ import {
     deleteNotification,
     getNotifications,
     markNotificationAsRead,
-    Notification,
 } from "@/services/notificationService";
+import type { Notification } from "@/types/notification";
 import NotificationsSkeleton from "@/components/NotificationsSkeleton";
 
 function getNotificationRoute(type: string) {
