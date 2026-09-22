@@ -12,11 +12,13 @@ import {
     removeWorkspaceMember,
     sendWorkspaceInvitation,
     updateWorkspace,
-    WorkspaceDetail,
-    WorkspaceProject,
-    WorkspaceUser,
 } from "@/services/workspaceService";
 import { createProject } from "@/services/projectService";
+import type {
+    WorkspaceDetail,
+    WorkspaceProject,
+} from "@/types/workspace";
+import type { User } from "@/types/user";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
 
 export default function WorkspaceDetailPage() {
@@ -45,7 +47,7 @@ export default function WorkspaceDetailPage() {
     const [deleting, setDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState("");
 
-    const [users, setUsers] = useState<WorkspaceUser[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [usersError, setUsersError] = useState("");
     const [userSearch, setUserSearch] = useState("");
@@ -622,9 +624,22 @@ export default function WorkspaceDetailPage() {
                 due_date: projectDueDate,
             });
 
+            const workspaceProject: WorkspaceProject = {
+                id: createdProject.id,
+                name: createdProject.name,
+                description: createdProject.description,
+                workspace: workspace.id,
+                status: createdProject.status,
+                priority: createdProject.priority,
+                start_date: createdProject.start_date,
+                due_date: createdProject.due_date,
+                created_at: createdProject.created_at,
+                updated_at: createdProject.updated_at,
+            };
+
             setProjects((previous) => [
                 ...previous,
-                createdProject,
+                workspaceProject,
             ]);
 
             setShowProjectPanel(false);
