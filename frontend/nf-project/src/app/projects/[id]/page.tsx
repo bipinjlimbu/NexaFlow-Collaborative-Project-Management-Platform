@@ -26,6 +26,7 @@ import type {
 } from "@/types/project";
 import type { WorkspaceDetailMember } from "@/types/workspace";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
+import EditProjectForm from "@/components/EditProjectForm";
 
 function formatDate(date: string | null) {
     if (!date) return "Not set";
@@ -115,10 +116,16 @@ export default function ProjectDetailPage() {
     const [membersError, setMembersError] = useState("");
 
     const [showMembers, setShowMembers] = useState(false);
-    const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceDetailMember[]>([]);
-    const [workspaceMembersLoading, setWorkspaceMembersLoading] = useState(false);
-    const [workspaceMembersError, setWorkspaceMembersError] = useState("");
-    const [addingMemberId, setAddingMemberId] = useState<number | null>(null);
+    const [showEditForm, setShowEditForm] = useState(false);
+
+    const [workspaceMembers, setWorkspaceMembers] =
+        useState<WorkspaceDetailMember[]>([]);
+    const [workspaceMembersLoading, setWorkspaceMembersLoading] =
+        useState(false);
+    const [workspaceMembersError, setWorkspaceMembersError] =
+        useState("");
+    const [addingMemberId, setAddingMemberId] =
+        useState<number | null>(null);
     const [addMemberError, setAddMemberError] = useState("");
     const [addMemberSuccess, setAddMemberSuccess] = useState("");
 
@@ -270,7 +277,10 @@ export default function ProjectDetailPage() {
                         onClick={() => router.push("/projects")}
                         className="group mb-8 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-400 backdrop-blur-sm transition-all duration-200 hover:border-slate-700 hover:bg-slate-800 hover:text-white"
                     >
-                        <ArrowLeft size={16} className="transition-transform duration-200 group-hover:-translate-x-1" />
+                        <ArrowLeft
+                            size={16}
+                            className="transition-transform duration-200 group-hover:-translate-x-1"
+                        />
                         Back to projects
                     </button>
 
@@ -296,32 +306,31 @@ export default function ProjectDetailPage() {
                     onClick={() => router.push("/projects")}
                     className="group mb-8 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800/80 bg-slate-900/50 px-4 py-2 text-xs font-semibold text-slate-400 backdrop-blur-sm transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/80 hover:text-white"
                 >
-                    <ArrowLeft size={16} className="transition-transform duration-200 group-hover:-translate-x-1" />
+                    <ArrowLeft
+                        size={16}
+                        className="transition-transform duration-200 group-hover:-translate-x-1"
+                    />
                     Back to projects
                 </button>
 
-                {/* Header Section */}
                 <div className="mb-8 border-b border-slate-800/80 pb-8">
                     <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                        {/* Left Column: Icon + Name, Description, and Badges */}
                         <div className="space-y-4">
-                            {/* Same line: Folder Icon & Project Name */}
                             <div className="flex items-center gap-3.5">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-600/20 text-indigo-400 shadow-md shadow-indigo-950/20">
                                     <FolderKanban size={22} />
                                 </div>
+
                                 <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                                     {project.name}
                                 </h1>
                             </div>
 
-                            {/* Description */}
                             <p className="max-w-2xl text-sm leading-relaxed text-slate-400">
                                 {project.description ||
                                     "No project description provided."}
                             </p>
 
-                            {/* Status & Priority Badges */}
                             <div className="flex flex-wrap items-center gap-2.5 pt-1">
                                 <span
                                     className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-sm ${getStatusClass(
@@ -336,15 +345,16 @@ export default function ProjectDetailPage() {
                                         project.priority
                                     )}`}
                                 >
-                                    {getPriorityLabel(project.priority)} Priority
+                                    {getPriorityLabel(project.priority)}{" "}
+                                    Priority
                                 </span>
                             </div>
                         </div>
 
-                        {/* Right Column: Shifted Edit & Delete Buttons */}
                         <div className="flex items-center gap-2.5 sm:shrink-0">
                             <button
                                 type="button"
+                                onClick={() => setShowEditForm(true)}
                                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300 shadow-sm transition-all duration-200 hover:border-indigo-500/50 hover:bg-indigo-600 hover:text-white active:scale-95"
                             >
                                 <Pencil size={14} />
@@ -467,7 +477,8 @@ export default function ProjectDetailPage() {
                         </p>
 
                         <p className="mt-1 text-sm text-slate-500">
-                            Add your first task to start working on this project.
+                            Add your first task to start working on this
+                            project.
                         </p>
                     </div>
                 </div>
@@ -551,7 +562,9 @@ export default function ProjectDetailPage() {
                                 {project.created_by.profile_picture ? (
                                     <img
                                         src={`${MEDIA_URL}${project.created_by.profile_picture}`}
-                                        alt={project.created_by.username}
+                                        alt={
+                                            project.created_by.username
+                                        }
                                         className="h-full w-full object-cover"
                                     />
                                 ) : (
@@ -590,7 +603,9 @@ export default function ProjectDetailPage() {
 
                             <p className="mt-1 text-sm text-slate-500">
                                 {projectMembers.length} member
-                                {projectMembers.length === 1 ? "" : "s"}
+                                {projectMembers.length === 1
+                                    ? ""
+                                    : "s"}
                             </p>
                         </div>
 
@@ -629,7 +644,8 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm text-slate-600">
-                                    Add members from your workspace to this project.
+                                    Add members from your workspace to this
+                                    project.
                                 </p>
                             </div>
                         ) : (
@@ -825,6 +841,16 @@ export default function ProjectDetailPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showEditForm && (
+                <EditProjectForm
+                    project={project}
+                    onClose={() => setShowEditForm(false)}
+                    onUpdated={(updatedProject) =>
+                        setProject(updatedProject)
+                    }
+                />
             )}
         </main>
     );
