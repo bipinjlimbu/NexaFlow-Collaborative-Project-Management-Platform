@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Project, Workspace, WorkspaceMember, ProjectMember
-from ..serializers import ProjectSerializer, WorkspaceMemberSerializer, ProjectMemberSerializer
+from ..models import Project, Workspace, WorkspaceMember, ProjectMember, Task
+from ..serializers import ProjectSerializer, WorkspaceMemberSerializer, ProjectMemberSerializer, TaskSerializer
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -141,4 +141,17 @@ def get_project_members(request, project_id):
     if request.method == 'GET':
         members = ProjectMember.objects.filter(project=project)
         serializer = ProjectMemberSerializer(members, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_tasks_in_project(request, project_id):
+    try:
+        project = Project.objects.get(pk=project_id, workspace__members__user=request.user)
+    except Project.DoesNotExist:
+        return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        tasks = Task.objects.filter(project=project)
+        serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
