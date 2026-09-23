@@ -1,9 +1,12 @@
 import type { User } from "./user";
 
 export interface LoginResponse {
-    access: string;
-    refresh: string;
+    message: string;
     user: User;
+    tokens: {
+        access: string;
+        refresh: string;
+    };
 }
 
 export interface RegisterData {
