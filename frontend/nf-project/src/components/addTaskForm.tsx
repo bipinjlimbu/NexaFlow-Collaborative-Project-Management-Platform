@@ -199,8 +199,8 @@ export default function AddTaskForm({
                                 setTitle(event.target.value)
                             }
                             className={`w-full rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.title
-                                    ? "border-rose-500/50 focus:border-rose-500"
-                                    : "border-slate-800 focus:border-indigo-500"
+                                ? "border-rose-500/50 focus:border-rose-500"
+                                : "border-slate-800 focus:border-indigo-500"
                                 }`}
                         />
 
@@ -225,8 +225,8 @@ export default function AddTaskForm({
                             }
                             rows={4}
                             className={`w-full resize-none rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.description
-                                    ? "border-rose-500/50 focus:border-rose-500"
-                                    : "border-slate-800 focus:border-indigo-500"
+                                ? "border-rose-500/50 focus:border-rose-500"
+                                : "border-slate-800 focus:border-indigo-500"
                                 }`}
                         />
 
@@ -312,8 +312,8 @@ export default function AddTaskForm({
                                 setDueDate(event.target.value)
                             }
                             className={`w-full rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.due_date
-                                    ? "border-rose-500/50 focus:border-rose-500"
-                                    : "border-slate-800 focus:border-indigo-500"
+                                ? "border-rose-500/50 focus:border-rose-500"
+                                : "border-slate-800 focus:border-indigo-500"
                                 }`}
                         />
 
@@ -337,8 +337,8 @@ export default function AddTaskForm({
                                 )
                             }
                             className={`w-full cursor-pointer rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.assigned_to
-                                    ? "border-rose-500/50 focus:border-rose-500"
-                                    : "border-slate-800 focus:border-indigo-500"
+                                ? "border-rose-500/50 focus:border-rose-500"
+                                : "border-slate-800 focus:border-indigo-500"
                                 }`}
                         >
                             <option value="">
