@@ -5,6 +5,7 @@ import type {
     CreateProjectData,
     UpdateProjectData,
 } from "@/types/project";
+import type { Task } from "@/types/task";
 import type { WorkspaceDetailMember } from "@/types/workspace";
 
 export async function getProjects(): Promise<Project[]> {
@@ -27,7 +28,7 @@ export async function createProject(
 export async function getProject(
     id: number
 ): Promise<Project> {
-    return authFetch(`/projects/${id}/`);
+    return authFetch(`/ projects / ${id}/`);
 }
 
 export async function updateProject(
@@ -82,4 +83,16 @@ export async function addMemberToProject(
             method: "PATCH",
         }
     );
+}
+
+export async function getTasksInProject(
+    projectId: number
+): Promise<Task[]> {
+    const data = await authFetch(
+        `/projects/${projectId}/tasks/`
+    );
+
+    return Array.isArray(data)
+        ? data
+        : data.results || data.tasks || [];
 }
