@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Workspace, WorkspaceMember, Project, ProjectMember, Task, Label, TaskLabel, Comment, Attachment, WorkspaceInvitation, Notification, Activity
+from .models import User, Workspace, WorkspaceMember, Project, ProjectMember, Task, Comment, Attachment, WorkspaceInvitation, Notification, Activity
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
