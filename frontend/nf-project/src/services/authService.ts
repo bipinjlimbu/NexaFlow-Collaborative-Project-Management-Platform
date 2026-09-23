@@ -51,7 +51,6 @@ export async function register(
     }
 
     return result;
-
 }
 
 export async function logout(refresh: string) {
