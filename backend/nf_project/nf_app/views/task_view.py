@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Task
+from ..models import Task, Project, User
 from ..serializers import TaskSerializer
 
 @api_view(['GET', 'POST'])
@@ -15,5 +15,53 @@ def tasks_view(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Task.DoesNotExist:
             return Response({"error": "Tasks not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    errors = {}
+    if request.method == 'POST':
+        title = request.data.get('title')
+        description = request.data.get('description')
+        status = request.data.get('status', Task.Status.BACKLOG)
+        priority = request.data.get('priority', Task.Priority.MEDIUM)
+        project_id = request.data.get('project')
+        due_date = request.data.get('due_date')
+        created_by = request.user
+        assigned_to_id = request.data.get('assigned_to')
+        
+        project = Project.objects.filter(id=project_id).first()
+        assigned_to = User.objects.filter(id=assigned_to_id).first() if assigned_to_id else None
+        
+        if not title:
+            errors['title'] = 'This field is required.'
+            
+        if not description:
+            errors['description'] = 'This field is required.'
+            
+        if not project:
+            errors['project'] = 'This field is required.'
+            
+        if not due_date:
+            errors['due_date'] = 'This field is required.'
+            
+        if not assigned_to:
+            errors['assigned_to'] = 'This field is required.'
+            
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            task = Task.objects.create(
+                title=title,
+                description=description,
+                project=project,
+                status=status,
+                priority=priority,
+                due_date=due_date,
+                assigned_to=assigned_to,
+                created_by=created_by
+            )
+            serializer = TaskSerializer(task)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
