@@ -27,3 +27,13 @@ export interface Task {
     updated_at: string;
     completed_at: string | null;
 }
+
+export interface CreateTaskData {
+    title: string;
+    description: string;
+    status: TaskStatus;
+    priority: TaskPriority;
+    project: number;
+    due_date: string;
+    assigned_to: number;
+}
