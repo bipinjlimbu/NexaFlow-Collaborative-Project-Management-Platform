@@ -26,7 +26,6 @@ import type {
     ProjectMember,
 } from "@/types/project";
 import type { WorkspaceDetailMember } from "@/types/workspace";
-import type { Task } from "@/types/task";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 import EditProjectForm from "@/components/EditProjectForm";
 import AddTaskForm from "@/components/AddTaskForm";
@@ -34,7 +33,7 @@ import AddTaskForm from "@/components/AddTaskForm";
 function formatDate(date: string | null) {
     if (!date) return "Not set";
 
-    const parsedDate = new Date(`${date} T00:00:00`);
+    const parsedDate = new Date(`${date}T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
         return "Not set";
@@ -366,19 +365,17 @@ export default function ProjectDetailPage() {
 
                             <div className="flex flex-wrap items-center gap-2.5 pt-1">
                                 <span
-                                    className={`inline - flex items - center rounded - full border px - 3 py - 1 text - xs font - medium shadow - sm backdrop - blur - sm ${getStatusClass(
+                                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-sm ${getStatusClass(
                                         project.status
-                                    )
-                                        } `}
+                                    )}`}
                                 >
                                     {getStatusLabel(project.status)}
                                 </span>
 
                                 <span
-                                    className={`inline - flex items - center rounded - full border px - 3 py - 1 text - xs font - medium shadow - sm backdrop - blur - sm ${getPriorityClass(
+                                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-sm ${getPriorityClass(
                                         project.priority
-                                    )
-                                        } `}
+                                    )}`}
                                 >
                                     {getPriorityLabel(project.priority)}{" "}
                                     Priority
@@ -505,9 +502,7 @@ export default function ProjectDetailPage() {
 
                         <button
                             type="button"
-                            onClick={() =>
-                                setShowAddTaskForm(true)
-                            }
+                            onClick={() => setShowAddTaskForm(true)}
                             className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 ring-1 ring-indigo-500/50 transition-all duration-200 hover:bg-indigo-500 hover:shadow-indigo-600/25 active:scale-[0.98]"
                         >
                             <Plus size={17} />
@@ -613,7 +608,7 @@ export default function ProjectDetailPage() {
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700/80 bg-indigo-500/10 text-sm font-semibold text-indigo-400 shadow-inner">
                                 {project.created_by.profile_picture ? (
                                     <img
-                                        src={`${MEDIA_URL}${project.created_by.profile_picture} `}
+                                        src={`${MEDIA_URL}${project.created_by.profile_picture}`}
                                         alt={
                                             project.created_by.username
                                         }
@@ -630,7 +625,7 @@ export default function ProjectDetailPage() {
                                 <p className="text-sm font-semibold text-slate-200">
                                     {project.created_by.first_name ||
                                         project.created_by.last_name
-                                        ? `${project.created_by.first_name || ""} ${project.created_by.last_name || ""} `.trim()
+                                        ? `${project.created_by.first_name || ""} ${project.created_by.last_name || ""}`.trim()
                                         : project.created_by.username}
                                 </p>
 
@@ -706,7 +701,7 @@ export default function ProjectDetailPage() {
                                     const user = member.user;
 
                                     const fullName =
-                                        `${user.first_name || ""} ${user.last_name || ""} `.trim();
+                                        `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
                                     return (
                                         <div
@@ -716,7 +711,7 @@ export default function ProjectDetailPage() {
                                             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700/80 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                                 {user.profile_picture ? (
                                                     <img
-                                                        src={`${MEDIA_URL}${user.profile_picture} `}
+                                                        src={`${MEDIA_URL}${user.profile_picture}`}
                                                         alt={
                                                             fullName ||
                                                             user.username
@@ -823,7 +818,7 @@ export default function ProjectDetailPage() {
                                         const user = member.user;
 
                                         const fullName =
-                                            `${user.first_name || ""} ${user.last_name || ""} `.trim();
+                                            `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
                                         return (
                                             <div
@@ -834,7 +829,7 @@ export default function ProjectDetailPage() {
                                                     <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700/80 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                                         {user.profile_picture ? (
                                                             <img
-                                                                src={`${MEDIA_URL}${user.profile_picture} `}
+                                                                src={`${MEDIA_URL}${user.profile_picture}`}
                                                                 alt={
                                                                     fullName ||
                                                                     user.username
@@ -910,16 +905,8 @@ export default function ProjectDetailPage() {
                     projectId={project.id}
                     projectMembers={projectMembers}
                     onClose={() => setShowAddTaskForm(false)}
-                    onCreated={(task: Task) => {
-                        setProject((currentProject) =>
-                            currentProject
-                                ? {
-                                    ...currentProject,
-                                    tasks_count:
-                                        currentProject.tasks_count + 1,
-                                }
-                                : currentProject
-                        );
+                    onCreated={() => {
+                        setShowAddTaskForm(false);
                     }}
                 />
             )}
