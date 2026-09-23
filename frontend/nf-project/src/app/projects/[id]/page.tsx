@@ -19,6 +19,7 @@ import {
     getProjectMembers,
     getWorkspaceMembers,
     addMemberToProject,
+    deleteProject,
 } from "@/services/projectService";
 import type {
     Project,
@@ -117,6 +118,8 @@ export default function ProjectDetailPage() {
 
     const [showMembers, setShowMembers] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
 
     const [workspaceMembers, setWorkspaceMembers] =
         useState<WorkspaceDetailMember[]>([]);
@@ -183,6 +186,33 @@ export default function ProjectDetailPage() {
 
         loadProject();
     }, [params.id, router]);
+
+    async function handleDelete() {
+        if (!project || deleting) return;
+
+        try {
+            setDeleting(true);
+            setDeleteError("");
+
+            await deleteProject(project.id);
+
+            router.push("/projects");
+        } catch (err: any) {
+            if (err && typeof err === "object") {
+                if (typeof err.error === "string") {
+                    setDeleteError(err.error);
+                } else if (typeof err.detail === "string") {
+                    setDeleteError(err.detail);
+                } else {
+                    setDeleteError("Unable to delete project.");
+                }
+            } else {
+                setDeleteError("Unable to delete project.");
+            }
+
+            setDeleting(false);
+        }
+    }
 
     async function handleAddMember() {
         if (!project) return;
@@ -354,7 +384,9 @@ export default function ProjectDetailPage() {
                         <div className="flex items-center gap-2.5 sm:shrink-0">
                             <button
                                 type="button"
-                                onClick={() => setShowEditForm(true)}
+                                onClick={() =>
+                                    setShowEditForm(true)
+                                }
                                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300 shadow-sm transition-all duration-200 hover:border-indigo-500/50 hover:bg-indigo-600 hover:text-white active:scale-95"
                             >
                                 <Pencil size={14} />
@@ -363,13 +395,21 @@ export default function ProjectDetailPage() {
 
                             <button
                                 type="button"
-                                className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-400 shadow-sm transition-all duration-200 hover:border-rose-500/50 hover:bg-rose-600 hover:text-white active:scale-95"
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-400 shadow-sm transition-all duration-200 hover:border-rose-500/50 hover:bg-rose-600 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <Trash2 size={14} />
-                                Delete
+                                {deleting ? "Deleting..." : "Delete"}
                             </button>
                         </div>
                     </div>
+
+                    {deleteError && (
+                        <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
+                            {deleteError}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -526,7 +566,9 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm font-medium text-slate-200">
-                                    {formatDateTime(project.created_at)}
+                                    {formatDateTime(
+                                        project.created_at
+                                    )}
                                 </p>
                             </div>
 
@@ -536,7 +578,9 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm font-medium text-slate-200">
-                                    {formatDateTime(project.updated_at)}
+                                    {formatDateTime(
+                                        project.updated_at
+                                    )}
                                 </p>
                             </div>
 
