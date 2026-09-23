@@ -77,16 +77,6 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
         
-class LabelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Label
-        fields = '__all__'
-        
-class TaskLabelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TaskLabel
-        fields = '__all__'
-        
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
