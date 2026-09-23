@@ -66,7 +66,7 @@ def tasks_view(request):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def task_detail_view(request, pk):
     try:
@@ -77,3 +77,7 @@ def task_detail_view(request, pk):
     if request.method == 'GET':
         serializer = TaskSerializer(task)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    if request.method == 'DELETE':
+        task.delete()
+        return Response({"message": "Task deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
