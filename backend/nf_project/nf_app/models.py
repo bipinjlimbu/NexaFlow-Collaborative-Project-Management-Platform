@@ -97,22 +97,7 @@ class Task(models.Model):
     
     def __str__(self):
         return self.title
-    
-class Label(models.Model):
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='labels')
-    name = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
-    
-    def __str__(self):
-        return self.name
-    
-class TaskLabel(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_labels')
-    label = models.ForeignKey(Label, on_delete=models.CASCADE, related_name='label_tasks')
-    
-    def __str__(self):
-        return f"{self.label.name} for {self.task.title}"
-    
+        
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
