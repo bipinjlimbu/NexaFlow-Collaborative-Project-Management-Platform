@@ -8,7 +8,9 @@ import LoginSkeleton from "@/components/LoginSkeleton";
 
 function FieldError({ error }: { error?: string | string[] }) {
     if (!error) return null;
+
     const message = Array.isArray(error) ? error[0] : error;
+
     return <p className="text-xs text-rose-400 mt-1">{message}</p>;
 }
 
@@ -19,7 +21,9 @@ export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string | string[]>>({});
+    const [fieldErrors, setFieldErrors] = useState<
+        Record<string, string | string[]>
+    >({});
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -33,7 +37,9 @@ export default function LoginPage() {
         }
     }, [router]);
 
-    function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleUsernameChange(
+        e: React.ChangeEvent<HTMLInputElement>
+    ) {
         setUsername(e.target.value);
 
         if (fieldErrors.username) {
@@ -45,7 +51,9 @@ export default function LoginPage() {
         }
     }
 
-    function handlePasswordChange(e: React.ChangeEvent<HTMLInputElement>) {
+    function handlePasswordChange(
+        e: React.ChangeEvent<HTMLInputElement>
+    ) {
         setPassword(e.target.value);
 
         if (fieldErrors.password) {
@@ -59,6 +67,7 @@ export default function LoginPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+
         setError(null);
         setFieldErrors({});
         setLoading(true);
@@ -66,8 +75,8 @@ export default function LoginPage() {
         try {
             const data = await login(username, password);
 
-            const access = data.access;
-            const refresh = data.refresh;
+            const access = data.tokens.access;
+            const refresh = data.tokens.refresh;
             const user = data.user;
 
             localStorage.setItem("access", access);
@@ -127,6 +136,7 @@ export default function LoginPage() {
                         <div className="h-8 w-8 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-md shadow-indigo-600/30">
                             N
                         </div>
+
                         <span className="font-bold text-lg tracking-tight text-white">
                             NexaFlow
                         </span>
@@ -155,6 +165,7 @@ export default function LoginPage() {
                         onChange={handleUsernameChange}
                         className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
+
                     <FieldError error={fieldErrors.username} />
                 </div>
 
@@ -166,6 +177,7 @@ export default function LoginPage() {
                         onChange={handlePasswordChange}
                         className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
+
                     <FieldError error={fieldErrors.password} />
                 </div>
 
