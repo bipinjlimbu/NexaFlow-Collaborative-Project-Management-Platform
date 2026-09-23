@@ -22,7 +22,7 @@ def tasks_view(request):
     if request.method == 'POST':
         title = request.data.get('title')
         description = request.data.get('description')
-        status = request.data.get('status', Task.Status.BACKLOG)
+        task_status = request.data.get('status', Task.Status.BACKLOG)
         priority = request.data.get('priority', Task.Priority.MEDIUM)
         project_id = request.data.get('project')
         due_date = request.data.get('due_date')
@@ -57,7 +57,7 @@ def tasks_view(request):
                 title=title,
                 description=description,
                 project=project,
-                status=status,
+                status=task_status,
                 priority=priority,
                 due_date=due_date,
                 assigned_to=assigned_to,
