@@ -40,6 +40,14 @@ export async function updateProject(
     });
 }
 
+export async function deleteProject(
+    id: number
+): Promise<void> {
+    await authFetch(`/projects/${id}/`, {
+        method: "DELETE",
+    });
+}
+
 export async function getWorkspaceMembers(
     workspaceId: number
 ): Promise<WorkspaceDetailMember[]> {
