@@ -20,11 +20,13 @@ import {
     getWorkspaceMembers,
     addMemberToProject,
     deleteProject,
+    getTasksInProject,
 } from "@/services/projectService";
 import type {
     Project,
     ProjectMember,
 } from "@/types/project";
+import type { Task } from "@/types/task";
 import type { WorkspaceDetailMember } from "@/types/workspace";
 import ProjectDetailSkeleton from "@/components/ProjectDetailSkeleton";
 import EditProjectForm from "@/components/EditProjectForm";
@@ -106,16 +108,75 @@ function getStatusClass(status: Project["status"]) {
     }
 }
 
+function getTaskStatusLabel(status: Task["status"]) {
+    switch (status) {
+        case "todo":
+            return "To Do";
+        case "in_progress":
+            return "In Progress";
+        case "review":
+            return "Review";
+        case "done":
+            return "Done";
+        default:
+            return "Backlog";
+    }
+}
+
+function getTaskStatusClass(status: Task["status"]) {
+    switch (status) {
+        case "todo":
+            return "border-indigo-500/30 bg-indigo-500/10 text-indigo-400";
+        case "in_progress":
+            return "border-amber-500/30 bg-amber-500/10 text-amber-400";
+        case "review":
+            return "border-purple-500/30 bg-purple-500/10 text-purple-400";
+        case "done":
+            return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
+        default:
+            return "border-slate-700 bg-slate-800/60 text-slate-400";
+    }
+}
+
+function getTaskPriorityLabel(priority: Task["priority"]) {
+    switch (priority) {
+        case "low":
+            return "Low";
+        case "high":
+            return "High";
+        case "urgent":
+            return "Urgent";
+        default:
+            return "Medium";
+    }
+}
+
+function getTaskPriorityClass(priority: Task["priority"]) {
+    switch (priority) {
+        case "low":
+            return "border-slate-700 bg-slate-800/60 text-slate-300";
+        case "high":
+            return "border-orange-500/30 bg-orange-500/10 text-orange-400";
+        case "urgent":
+            return "border-rose-500/30 bg-rose-500/10 text-rose-400";
+        default:
+            return "border-amber-500/30 bg-amber-500/10 text-amber-400";
+    }
+}
+
 export default function ProjectDetailPage() {
     const params = useParams();
     const router = useRouter();
 
     const [project, setProject] = useState<Project | null>(null);
     const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [membersLoading, setMembersLoading] = useState(true);
+    const [tasksLoading, setTasksLoading] = useState(true);
     const [error, setError] = useState("");
     const [membersError, setMembersError] = useState("");
+    const [tasksError, setTasksError] = useState("");
 
     const [showMembers, setShowMembers] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
@@ -151,6 +212,7 @@ export default function ProjectDetailPage() {
             setError("Invalid project.");
             setLoading(false);
             setMembersLoading(false);
+            setTasksLoading(false);
             return;
         }
 
@@ -158,16 +220,21 @@ export default function ProjectDetailPage() {
             try {
                 setLoading(true);
                 setMembersLoading(true);
+                setTasksLoading(true);
                 setError("");
                 setMembersError("");
+                setTasksError("");
 
-                const [projectData, membersData] = await Promise.all([
-                    getProject(projectId),
-                    getProjectMembers(projectId),
-                ]);
+                const [projectData, membersData, tasksData] =
+                    await Promise.all([
+                        getProject(projectId),
+                        getProjectMembers(projectId),
+                        getTasksInProject(projectId),
+                    ]);
 
                 setProject(projectData);
                 setProjectMembers(membersData);
+                setTasks(tasksData);
             } catch (err: any) {
                 if (err && typeof err === "object") {
                     if (typeof err.error === "string") {
@@ -183,6 +250,7 @@ export default function ProjectDetailPage() {
             } finally {
                 setLoading(false);
                 setMembersLoading(false);
+                setTasksLoading(false);
             }
         }
 
@@ -293,6 +361,19 @@ export default function ProjectDetailPage() {
             }
         } finally {
             setAddingMemberId(null);
+        }
+    }
+
+    async function handleTaskCreated() {
+        if (!project) return;
+
+        try {
+            const updatedTasks = await getTasksInProject(project.id);
+
+            setTasks(updatedTasks);
+            setShowAddTaskForm(false);
+        } catch {
+            setShowAddTaskForm(false);
         }
     }
 
@@ -481,7 +562,7 @@ export default function ProjectDetailPage() {
                                 </p>
 
                                 <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    {project.tasks_count}
+                                    {tasks.length}
                                 </p>
                             </div>
                         </div>
@@ -510,19 +591,140 @@ export default function ProjectDetailPage() {
                         </button>
                     </div>
 
-                    <div className="mt-5 rounded-xl border border-dashed border-slate-800/80 bg-slate-950/20 p-8 text-center">
-                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-500">
-                            <CheckCircle2 size={21} />
-                        </div>
+                    <div className="mt-5">
+                        {tasksLoading ? (
+                            <div className="flex items-center justify-center py-10">
+                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
+                            </div>
+                        ) : tasksError ? (
+                            <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-5 text-center">
+                                <p className="text-sm text-rose-400">
+                                    {tasksError}
+                                </p>
+                            </div>
+                        ) : tasks.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-slate-800/80 bg-slate-950/20 p-8 text-center">
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-500">
+                                    <CheckCircle2 size={21} />
+                                </div>
 
-                        <p className="mt-4 text-sm font-medium text-slate-300">
-                            No tasks yet
-                        </p>
+                                <p className="mt-4 text-sm font-medium text-slate-300">
+                                    No tasks yet
+                                </p>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                            Add your first task to start working on this
-                            project.
-                        </p>
+                                <p className="mt-1 text-sm text-slate-500">
+                                    Add your first task to start working on this
+                                    project.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {tasks.map((task) => {
+                                    const assignedUser =
+                                        task.assigned_to;
+
+                                    const assignedName =
+                                        assignedUser
+                                            ? `${assignedUser.first_name || ""} ${assignedUser.last_name || ""}`.trim() ||
+                                            assignedUser.username
+                                            : "Unassigned";
+
+                                    return (
+                                        <div
+                                            key={task.id}
+                                            className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-5 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80"
+                                        >
+                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                                <div className="min-w-0">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <h3 className="truncate text-sm font-semibold text-slate-200">
+                                                            {task.title}
+                                                        </h3>
+
+                                                        <span
+                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getTaskStatusClass(
+                                                                task.status
+                                                            )}`}
+                                                        >
+                                                            {getTaskStatusLabel(
+                                                                task.status
+                                                            )}
+                                                        </span>
+
+                                                        <span
+                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getTaskPriorityClass(
+                                                                task.priority
+                                                            )}`}
+                                                        >
+                                                            {getTaskPriorityLabel(
+                                                                task.priority
+                                                            )}
+                                                        </span>
+                                                    </div>
+
+                                                    <p className="mt-2 text-sm leading-relaxed text-slate-500">
+                                                        {task.description ||
+                                                            "No task description provided."}
+                                                    </p>
+                                                </div>
+
+                                                <div className="shrink-0 text-left sm:text-right">
+                                                    <p className="text-xs text-slate-500">
+                                                        Due date
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm font-medium text-slate-300">
+                                                        {formatDate(
+                                                            task.due_date
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-800/70 pt-4">
+                                                <div>
+                                                    <p className="text-xs text-slate-600">
+                                                        Assigned to
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                                        {assignedName}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs text-slate-600">
+                                                        Created by
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                                        {task.created_by
+                                                            .first_name ||
+                                                            task.created_by
+                                                                .last_name
+                                                            ? `${task.created_by.first_name || ""} ${task.created_by.last_name || ""}`.trim()
+                                                            : task.created_by
+                                                                .username}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs text-slate-600">
+                                                        Created
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                                        {formatDateTime(
+                                                            task.created_at
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -905,9 +1107,7 @@ export default function ProjectDetailPage() {
                     projectId={project.id}
                     projectMembers={projectMembers}
                     onClose={() => setShowAddTaskForm(false)}
-                    onCreated={() => {
-                        setShowAddTaskForm(false);
-                    }}
+                    onCreated={handleTaskCreated}
                 />
             )}
         </main>
