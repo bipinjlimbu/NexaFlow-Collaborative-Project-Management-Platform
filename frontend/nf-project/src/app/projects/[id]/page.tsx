@@ -35,7 +35,8 @@ import AddTaskForm from "@/components/AddTaskForm";
 function formatDate(date: string | null) {
     if (!date) return "Not set";
 
-    const parsedDate = new Date(`${date}T00:00:00`);
+
+    const parsedDate = new Date(`${date} T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
         return "Not set";
@@ -46,6 +47,7 @@ function formatDate(date: string | null) {
         day: "2-digit",
         year: "numeric",
     });
+
 }
 
 function formatDateTime(date: string) {
@@ -632,7 +634,8 @@ export default function ProjectDetailPage() {
                                     return (
                                         <div
                                             key={task.id}
-                                            className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-5 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80"
+                                            onClick={() => router.push(`/tasks/${task.id}`)}
+                                            className="cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/40 p-5 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80"
                                         >
                                             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                                 <div className="min-w-0">
