@@ -64,3 +64,10 @@ export interface CreateProjectData {
     start_date: string;
     due_date: string;
 }
+
+export interface UpdateProjectData {
+    name: string;
+    description: string;
+    start_date: string | null;
+    due_date: string | null;
+}
