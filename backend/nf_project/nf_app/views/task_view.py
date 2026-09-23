@@ -46,7 +46,7 @@ def tasks_view(request):
             
         if not assigned_to:
             errors['assigned_to'] = 'This field is required.'
-        elif assigned_to and not project.members.filter(id=assigned_to.id).exists():
+        elif assigned_to and not project.members.filter(user=assigned_to).exists():
             errors['assigned_to'] = 'The assigned user is not a member of the project.'
             
         if errors:
