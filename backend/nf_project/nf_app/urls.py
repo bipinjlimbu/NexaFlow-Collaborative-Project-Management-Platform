@@ -4,7 +4,7 @@ from .views.workspaces_view import workspaces_view, workspace_detail_view, get_u
 from .views.profile_view import profile_view
 from .views.notification_view import get_notifications_view, notification_detail_view
 from .views.invitation_view import get_invitations_view, accept_invitation_view, decline_invitation_view
-from .views.project_view import projects_view, project_detail_view, get_workspace_members, add_member_to_project, get_project_members
+from .views.project_view import projects_view, project_detail_view, get_workspace_members, add_member_to_project, get_project_members, get_tasks_in_project
 from .views.task_view import tasks_view, task_detail_view
 
 urlpatterns = [
@@ -30,6 +30,7 @@ urlpatterns = [
     path('projects/workspace/<int:workspace_id>/members/', get_workspace_members, name='get_workspace_members'),
     path('projects/<int:project_id>/members/<int:user_id>/add/', add_member_to_project, name='add_member_to_project'),
     path('projects/<int:project_id>/members/', get_project_members, name='get_project_members'),
+    path('projects/<int:project_id>/tasks/', get_tasks_in_project, name='get_tasks_in_project'),
     path('tasks/', tasks_view, name='tasks'),
     path('tasks/<int:pk>/', task_detail_view, name='task_detail'),
 ]
