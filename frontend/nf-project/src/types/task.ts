@@ -13,11 +13,34 @@ export type TaskPriority =
     | "high"
     | "urgent";
 
+export interface TaskProject {
+    id: number;
+    name: string;
+    description: string;
+    due_date: string | null;
+    priority: string;
+    start_date: string | null;
+    status: string;
+    tasks_count: number;
+    members_count: number;
+    created_at: string;
+    updated_at: string;
+    created_by: User;
+    workspace: {
+        id: number;
+        name: string;
+        members_count?: number;
+        projects_count?: number;
+        [key: string]: unknown;
+    };
+    members: User[];
+}
+
 export interface Task {
     id: number;
     title: string;
     description: string | null;
-    project: number;
+    project: TaskProject;
     status: TaskStatus;
     priority: TaskPriority;
     due_date: string | null;
