@@ -10,7 +10,7 @@ from ..serializers import TaskSerializer
 def tasks_view(request):
     if request.method == 'GET':
         try:
-            tasks = Task.objects.filter(assigned_to=request.user)
+            tasks = Task.objects.filter(project__workspace__members__user=request.user)
             serializer = TaskSerializer(tasks, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Task.DoesNotExist:
