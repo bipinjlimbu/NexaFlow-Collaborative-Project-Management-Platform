@@ -15,3 +15,9 @@ export async function getTasks(): Promise<Task[]> {
         method: "GET",
     });
 }
+
+export async function getTask(id: number): Promise<Task> {
+    return authFetch(`/tasks/${id}/`, {
+        method: "GET",
+    });
+}
