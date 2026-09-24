@@ -73,6 +73,19 @@ class ProjectMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class TaskSerializer(serializers.ModelSerializer):
+    project = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
+    created_by = serializers.SerializerMethodField()
+    
+    def get_project(self, obj):
+        return ProjectSerializer(obj.project).data
+    
+    def get_assigned_to(self, obj):
+        return UserSerializer(obj.assigned_to).data
+    
+    def get_created_by(self, obj):
+        return UserSerializer(obj.created_by).data
+    
     class Meta:
         model = Task
         fields = '__all__'
