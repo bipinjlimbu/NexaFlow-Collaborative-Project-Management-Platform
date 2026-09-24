@@ -4,6 +4,8 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TasksSkeleton from "@/components/TasksSkeleton";
+import { getTasks } from "@/services/taskService";
+import type { Task as ApiTask } from "@/types/task";
 
 type TaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
 type TaskPriority = "HIGH" | "MEDIUM" | "LOW";
@@ -22,129 +24,6 @@ interface Task {
     dueLabel: string;
     updated: string;
 }
-
-const tasks: Task[] = [
-    {
-        id: 1,
-        title: "Create Student Module",
-        description:
-            "Build the student management module with profile, enrollment, and academic information.",
-        project: "College Management System",
-        workspace: "TechNova",
-        status: "IN_PROGRESS",
-        priority: "HIGH",
-        assignee: "Bipin",
-        initials: "BP",
-        dueDate: "Sep 10, 2026",
-        dueLabel: "Today",
-        updated: "15 min ago",
-    },
-    {
-        id: 2,
-        title: "Create Login System",
-        description:
-            "Implement authentication flow including login, logout, token handling, and protected routes.",
-        project: "College Management System",
-        workspace: "TechNova",
-        status: "DONE",
-        priority: "HIGH",
-        assignee: "Aarav",
-        initials: "AR",
-        dueDate: "Sep 08, 2026",
-        dueLabel: "Yesterday",
-        updated: "1 hour ago",
-    },
-    {
-        id: 3,
-        title: "Attendance Module Integration",
-        description:
-            "Connect attendance records with student profiles and class schedules.",
-        project: "College Management System",
-        workspace: "TechNova",
-        status: "TODO",
-        priority: "MEDIUM",
-        assignee: "Bipin",
-        initials: "BP",
-        dueDate: "Sep 12, 2026",
-        dueLabel: "Sep 12",
-        updated: "2 hours ago",
-    },
-    {
-        id: 4,
-        title: "Payment Gateway Webhook Setup",
-        description:
-            "Configure payment callbacks and webhook processing for successful transactions.",
-        project: "E-Commerce Core API",
-        workspace: "ApexStriker",
-        status: "DONE",
-        priority: "HIGH",
-        assignee: "Rohan",
-        initials: "RK",
-        dueDate: "Sep 05, 2026",
-        dueLabel: "Sep 05",
-        updated: "Yesterday",
-    },
-    {
-        id: 5,
-        title: "Mobile Navigation Redesign",
-        description:
-            "Redesign mobile navigation and improve access to primary application sections.",
-        project: "Mobile App Redesign",
-        workspace: "TechNova",
-        status: "IN_REVIEW",
-        priority: "MEDIUM",
-        assignee: "Aarav",
-        initials: "AR",
-        dueDate: "Sep 15, 2026",
-        dueLabel: "Sep 15",
-        updated: "3 hours ago",
-    },
-    {
-        id: 6,
-        title: "Dashboard Analytics Cards",
-        description:
-            "Create reusable analytics cards for project and workspace performance metrics.",
-        project: "Analytics Dashboard",
-        workspace: "NexaFlow Team",
-        status: "IN_PROGRESS",
-        priority: "HIGH",
-        assignee: "Bipin",
-        initials: "BP",
-        dueDate: "Sep 18, 2026",
-        dueLabel: "Sep 18",
-        updated: "40 min ago",
-    },
-    {
-        id: 7,
-        title: "Create Button Components",
-        description:
-            "Build reusable button variants for the NexaFlow design system.",
-        project: "Design System",
-        workspace: "Design Team",
-        status: "IN_PROGRESS",
-        priority: "LOW",
-        assignee: "Maya",
-        initials: "MY",
-        dueDate: "Sep 20, 2026",
-        dueLabel: "Sep 20",
-        updated: "4 hours ago",
-    },
-    {
-        id: 8,
-        title: "API Documentation",
-        description:
-            "Document authentication, projects, tasks, and workspace API endpoints.",
-        project: "E-Commerce Core API",
-        workspace: "ApexStriker",
-        status: "TODO",
-        priority: "LOW",
-        assignee: "Rohan",
-        initials: "RK",
-        dueDate: "Sep 22, 2026",
-        dueLabel: "Sep 22",
-        updated: "Yesterday",
-    },
-];
 
 const statusStyles: Record<TaskStatus, string> = {
     TODO: "border-slate-700 bg-slate-800/70 text-slate-400",
@@ -172,9 +51,153 @@ const priorityDots: Record<TaskPriority, string> = {
     LOW: "bg-slate-500",
 };
 
+function mapStatus(status: ApiTask["status"]): TaskStatus {
+    switch (status) {
+        case "in_progress":
+            return "IN_PROGRESS";
+        case "review":
+            return "IN_REVIEW";
+        case "done":
+            return "DONE";
+        default:
+            return "TODO";
+    }
+}
+
+function mapPriority(priority: ApiTask["priority"]): TaskPriority {
+    switch (priority) {
+        case "high":
+        case "urgent":
+            return "HIGH";
+        case "medium":
+            return "MEDIUM";
+        default:
+            return "LOW";
+    }
+}
+
+function getInitials(task: ApiTask) {
+    if (!task.assigned_to) {
+        return "—";
+    }
+
+    const firstInitial = task.assigned_to.first_name?.charAt(0) || "";
+    const lastInitial = task.assigned_to.last_name?.charAt(0) || "";
+
+    if (firstInitial || lastInitial) {
+        return `${firstInitial}${lastInitial}`.toUpperCase();
+    }
+
+    return task.assigned_to.username?.charAt(0).toUpperCase() || "—";
+}
+
+function getAssignee(task: ApiTask) {
+    if (!task.assigned_to) {
+        return "Unassigned";
+    }
+
+    if (task.assigned_to.first_name || task.assigned_to.last_name) {
+        return `${task.assigned_to.first_name || ""} ${task.assigned_to.last_name || ""}`.trim();
+    }
+
+    return task.assigned_to.username;
+}
+
+function formatDueDate(date: string | null) {
+    if (!date) {
+        return "No due date";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return date;
+    }
+
+    return parsedDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+    });
+}
+
+function getDueLabel(date: string | null) {
+    if (!date) {
+        return "No Due Date";
+    }
+
+    const today = new Date();
+    const dueDate = new Date(date);
+
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const difference =
+        Math.round(
+            (dueDate.getTime() - today.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+
+    if (difference === 0) {
+        return "Today";
+    }
+
+    if (difference === -1) {
+        return "Yesterday";
+    }
+
+    if (difference === 1) {
+        return "Tomorrow";
+    }
+
+    return dueDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+    });
+}
+
+function getUpdatedLabel(date: string) {
+    const updatedDate = new Date(date);
+    const now = new Date();
+
+    const difference = now.getTime() - updatedDate.getTime();
+
+    const minutes = Math.floor(difference / (1000 * 60));
+    const hours = Math.floor(difference / (1000 * 60 * 60));
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+
+    if (minutes < 1) {
+        return "Just now";
+    }
+
+    if (minutes < 60) {
+        return `${minutes} min ago`;
+    }
+
+    if (hours < 24) {
+        return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    }
+
+    if (days === 1) {
+        return "Yesterday";
+    }
+
+    if (days < 7) {
+        return `${days} days ago`;
+    }
+
+    return updatedDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
 export default function TasksPage() {
     const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
@@ -184,6 +207,7 @@ export default function TasksPage() {
     useEffect(() => {
         const checkAuth = () => {
             const token = localStorage.getItem("access");
+
             if (!token) {
                 router.push("/login");
                 setIsAuthenticated(false);
@@ -193,9 +217,47 @@ export default function TasksPage() {
         };
 
         checkAuth();
+
         window.addEventListener("auth-change", checkAuth);
+
         return () => window.removeEventListener("auth-change", checkAuth);
     }, [router]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            return;
+        }
+
+        const loadTasks = async () => {
+            try {
+                const data = await getTasks();
+
+                const mappedTasks: Task[] = data.map((task) => ({
+                    id: task.id,
+                    title: task.title,
+                    description: task.description || "No description",
+                    project: task.project.name,
+                    workspace: task.project.workspace.name,
+                    status: mapStatus(task.status),
+                    priority: mapPriority(task.priority),
+                    assignee: getAssignee(task),
+                    initials: getInitials(task),
+                    dueDate: formatDueDate(task.due_date),
+                    dueLabel: getDueLabel(task.due_date),
+                    updated: getUpdatedLabel(task.updated_at),
+                }));
+
+                setTasks(mappedTasks);
+            } catch (error) {
+                console.error(error);
+                setTasks([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadTasks();
+    }, [isAuthenticated]);
 
     const projects = [...new Set(tasks.map((task) => task.project))];
 
@@ -225,7 +287,7 @@ export default function TasksPage() {
                 matchesProject
             );
         });
-    }, [search, statusFilter, priorityFilter, projectFilter]);
+    }, [tasks, search, statusFilter, priorityFilter, projectFilter]);
 
     const todoCount = tasks.filter((task) => task.status === "TODO").length;
     const progressCount = tasks.filter(
@@ -238,7 +300,7 @@ export default function TasksPage() {
         (task) => task.status === "DONE"
     ).length;
 
-    if (isAuthenticated === null || !isAuthenticated) {
+    if (isAuthenticated === null || !isAuthenticated || loading) {
         return <TasksSkeleton />;
     }
 
@@ -267,14 +329,6 @@ export default function TasksPage() {
                                 your projects.
                             </p>
                         </div>
-
-                        <Link
-                            href="/tasks/new"
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition hover:bg-indigo-500"
-                        >
-                            <span className="text-lg leading-none">+</span>
-                            Create Task
-                        </Link>
                     </div>
                 </header>
 
