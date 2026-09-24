@@ -9,3 +9,9 @@ export async function createTask(
         body: JSON.stringify(data),
     });
 }
+
+export async function getTasks(): Promise<Task[]> {
+    return authFetch("/tasks/", {
+        method: "GET",
+    });
+}
