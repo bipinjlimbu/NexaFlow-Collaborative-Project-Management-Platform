@@ -18,6 +18,7 @@ import type {
     WorkspaceDetail,
     WorkspaceProject,
 } from "@/types/workspace";
+import type { ProjectStatus, ProjectPriority } from "@/types/project";
 import type { User } from "@/types/user";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
 
@@ -70,6 +71,8 @@ export default function WorkspaceDetailPage() {
     const [projectDescription, setProjectDescription] = useState("");
     const [projectStartDate, setProjectStartDate] = useState("");
     const [projectDueDate, setProjectDueDate] = useState("");
+    const [projectStatus, setProjectStatus] = useState<ProjectStatus>("active");
+    const [projectPriority, setProjectPriority] = useState<ProjectPriority>("medium");
     const [creatingProject, setCreatingProject] = useState(false);
     const [projectError, setProjectError] = useState("");
 
@@ -603,6 +606,8 @@ export default function WorkspaceDetailPage() {
         setProjectDescription("");
         setProjectStartDate("");
         setProjectDueDate("");
+        setProjectStatus("active");
+        setProjectPriority("medium");
         setProjectError("");
         setShowProjectPanel(true);
     };
@@ -620,6 +625,8 @@ export default function WorkspaceDetailPage() {
                 name: projectName.trim(),
                 description: projectDescription.trim(),
                 workspace_id: workspace.id,
+                status: projectStatus,
+                priority: projectPriority,
                 start_date: projectStartDate,
                 due_date: projectDueDate,
             });
@@ -648,6 +655,8 @@ export default function WorkspaceDetailPage() {
             setProjectDescription("");
             setProjectStartDate("");
             setProjectDueDate("");
+            setProjectStatus("active");
+            setProjectPriority("medium");
 
             setWorkspace((previous) => {
                 if (!previous) {
@@ -1704,6 +1713,70 @@ export default function WorkspaceDetailPage() {
                                         rows={5}
                                         className="mt-2 w-full resize-none rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-slate-300">
+                                        Status
+                                    </label>
+
+                                    <select
+                                        value={projectStatus}
+                                        onChange={(event) =>
+                                            setProjectStatus(
+                                                event.target.value as ProjectStatus
+                                            )
+                                        }
+                                        className="mt-2 w-full cursor-pointer rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500"
+                                    >
+                                        <option value="planning">
+                                            Planning
+                                        </option>
+
+                                        <option value="active">
+                                            Active
+                                        </option>
+
+                                        <option value="inactive">
+                                            Inactive
+                                        </option>
+
+                                        <option value="archived">
+                                            Archived
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium text-slate-300">
+                                        Priority
+                                    </label>
+
+                                    <select
+                                        value={projectPriority}
+                                        onChange={(event) =>
+                                            setProjectPriority(
+                                                event.target.value as ProjectPriority
+                                            )
+                                        }
+                                        className="mt-2 w-full cursor-pointer rounded-lg border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500"
+                                    >
+                                        <option value="low">
+                                            Low
+                                        </option>
+
+                                        <option value="medium">
+                                            Medium
+                                        </option>
+
+                                        <option value="high">
+                                            High
+                                        </option>
+
+                                        <option value="urgent">
+                                            Urgent
+                                        </option>
+                                    </select>
                                 </div>
 
                                 <div>
