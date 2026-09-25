@@ -46,3 +46,9 @@ export async function changeTaskPriority(
         body: JSON.stringify({ priority }),
     });
 }
+
+export async function deleteTask(id: number): Promise<void> {
+    return authFetch(`/tasks/${id}/`, {
+        method: "DELETE",
+    });
+}
