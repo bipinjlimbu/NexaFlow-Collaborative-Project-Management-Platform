@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { changeTaskStatus, getTask } from "@/services/taskService";
-import type { Task, TaskStatus } from "@/types/task";
+import {
+    changeTaskPriority,
+    changeTaskStatus,
+    getTask,
+} from "@/services/taskService";
+import type { Task, TaskPriority, TaskStatus } from "@/types/task";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -14,7 +18,9 @@ export default function TaskDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [showStatusMenu, setShowStatusMenu] = useState(false);
+    const [showPriorityMenu, setShowPriorityMenu] = useState(false);
     const [changingStatus, setChangingStatus] = useState(false);
+    const [changingPriority, setChangingPriority] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -70,6 +76,30 @@ export default function TaskDetailPage() {
         }
     };
 
+    const handlePriorityChange = async (priority: TaskPriority) => {
+        if (!task || changingPriority || priority === task.priority) {
+            setShowPriorityMenu(false);
+            return;
+        }
+
+        try {
+            setChangingPriority(true);
+
+            await changeTaskPriority(task.id, priority);
+
+            setTask({
+                ...task,
+                priority,
+            });
+
+            setShowPriorityMenu(false);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setChangingPriority(false);
+        }
+    };
+
     if (loading) {
         return (
             <main className="min-h-screen bg-slate-950 text-slate-50">
@@ -112,13 +142,13 @@ export default function TaskDetailPage() {
 
     const assignee = task.assigned_to
         ? task.assigned_to.first_name || task.assigned_to.last_name
-            ? `${task.assigned_to.first_name || ""} ${task.assigned_to.last_name || ""} `.trim()
+            ? `${task.assigned_to.first_name || ""} ${task.assigned_to.last_name || ""}`.trim()
             : task.assigned_to.username
         : "Unassigned";
 
     const createdBy =
         task.created_by.first_name || task.created_by.last_name
-            ? `${task.created_by.first_name || ""} ${task.created_by.last_name || ""} `.trim()
+            ? `${task.created_by.first_name || ""} ${task.created_by.last_name || ""}`.trim()
             : task.created_by.username;
 
     const priorityLabel =
@@ -161,6 +191,28 @@ export default function TaskDetailPage() {
             },
         ];
 
+    const priorityOptions: {
+        value: TaskPriority;
+        label: string;
+    }[] = [
+            {
+                value: "low",
+                label: "Low",
+            },
+            {
+                value: "medium",
+                label: "Medium",
+            },
+            {
+                value: "high",
+                label: "High",
+            },
+            {
+                value: "urgent",
+                label: "Urgent",
+            },
+        ];
+
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50">
             <div className="mx-auto max-w-5xl px-6 py-10">
@@ -198,14 +250,14 @@ export default function TaskDetailPage() {
                         </div>
 
                         <span
-                            className={`inline - flex w - fit rounded - full border px - 3 py - 1.5 text - xs font - medium ${task.status === "done"
+                            className={`inline-flex w-fit rounded-full border px-3 py-1.5 text-xs font-medium ${task.status === "done"
                                 ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
                                 : task.status === "in_progress"
                                     ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-400"
                                     : task.status === "review"
                                         ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
                                         : "border-slate-700 bg-slate-800/70 text-slate-400"
-                                } `}
+                                }`}
                         >
                             {statusLabel}
                         </span>
@@ -217,9 +269,10 @@ export default function TaskDetailPage() {
                         <div className="relative flex-1">
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setShowStatusMenu(!showStatusMenu)
-                                }
+                                onClick={() => {
+                                    setShowStatusMenu(!showStatusMenu);
+                                    setShowPriorityMenu(false);
+                                }}
                                 disabled={changingStatus}
                                 className="w-full rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-sm font-medium text-indigo-400 transition hover:border-indigo-500/40 hover:bg-indigo-500/15 hover:text-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
                             >
@@ -239,10 +292,10 @@ export default function TaskDetailPage() {
                                                     option.value
                                                 )
                                             }
-                                            className={`flex w - full items - center justify - between rounded - md px - 3 py - 2.5 text - left text - sm transition ${task.status === option.value
+                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${task.status === option.value
                                                 ? "bg-indigo-500/10 text-indigo-400"
                                                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                                                } `}
+                                                }`}
                                         >
                                             <span>{option.label}</span>
 
@@ -257,12 +310,49 @@ export default function TaskDetailPage() {
                             )}
                         </div>
 
-                        <button
-                            type="button"
-                            className="flex-1 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-400 transition hover:border-amber-500/40 hover:bg-amber-500/15 hover:text-amber-300"
-                        >
-                            Change Priority
-                        </button>
+                        <div className="relative flex-1">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowPriorityMenu(!showPriorityMenu);
+                                    setShowStatusMenu(false);
+                                }}
+                                disabled={changingPriority}
+                                className="w-full rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-400 transition hover:border-amber-500/40 hover:bg-amber-500/15 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {changingPriority
+                                    ? "Changing Priority..."
+                                    : "Change Priority"}
+                            </button>
+
+                            {showPriorityMenu && (
+                                <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-slate-800 bg-slate-900 p-1.5 shadow-xl shadow-black/30">
+                                    {priorityOptions.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() =>
+                                                handlePriorityChange(
+                                                    option.value
+                                                )
+                                            }
+                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${task.priority === option.value
+                                                ? "bg-amber-500/10 text-amber-400"
+                                                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                                                }`}
+                                        >
+                                            <span>{option.label}</span>
+
+                                            {task.priority === option.value && (
+                                                <span className="text-xs">
+                                                    ✓
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <button
                             type="button"
@@ -309,23 +399,23 @@ export default function TaskDetailPage() {
 
                                 <div className="mt-2 flex items-center gap-2">
                                     <span
-                                        className={`h - 2 w - 2 rounded - full ${task.priority === "urgent" ||
+                                        className={`h-2 w-2 rounded-full ${task.priority === "urgent" ||
                                             task.priority === "high"
                                             ? "bg-rose-400"
                                             : task.priority === "medium"
                                                 ? "bg-amber-400"
                                                 : "bg-slate-500"
-                                            } `}
+                                            }`}
                                     />
 
                                     <span
-                                        className={`text - sm font - medium ${task.priority === "urgent" ||
+                                        className={`text-sm font-medium ${task.priority === "urgent" ||
                                             task.priority === "high"
                                             ? "text-rose-400"
                                             : task.priority === "medium"
                                                 ? "text-amber-400"
                                                 : "text-slate-400"
-                                            } `}
+                                            }`}
                                     >
                                         {priorityLabel}
                                     </span>
