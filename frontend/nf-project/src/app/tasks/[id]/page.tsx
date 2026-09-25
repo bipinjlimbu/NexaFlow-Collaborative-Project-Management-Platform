@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    changeTaskPriority,
-    changeTaskStatus,
+    deleteTask,
     getTask,
 } from "@/services/taskService";
-import type { Task, TaskPriority, TaskStatus } from "@/types/task";
+import type { Task } from "@/types/task";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -16,11 +15,8 @@ export default function TaskDetailPage() {
 
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
-    const [showStatusMenu, setShowStatusMenu] = useState(false);
-    const [showPriorityMenu, setShowPriorityMenu] = useState(false);
-    const [changingStatus, setChangingStatus] = useState(false);
-    const [changingPriority, setChangingPriority] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -52,51 +48,27 @@ export default function TaskDetailPage() {
         loadTask();
     }, [params.id, router]);
 
-    const handleStatusChange = async (status: TaskStatus) => {
-        if (!task || changingStatus || status === task.status) {
-            setShowStatusMenu(false);
+    const handleDelete = async () => {
+        if (!task || deleting) {
+            return;
+        }
+
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this task?"
+        );
+
+        if (!confirmed) {
             return;
         }
 
         try {
-            setChangingStatus(true);
-
-            await changeTaskStatus(task.id, status);
-
-            setTask({
-                ...task,
-                status,
-            });
-
-            setShowStatusMenu(false);
+            setDeleting(true);
+            await deleteTask(task.id);
+            router.push("/tasks");
         } catch (error) {
             console.error(error);
-        } finally {
-            setChangingStatus(false);
-        }
-    };
-
-    const handlePriorityChange = async (priority: TaskPriority) => {
-        if (!task || changingPriority || priority === task.priority) {
-            setShowPriorityMenu(false);
-            return;
-        }
-
-        try {
-            setChangingPriority(true);
-
-            await changeTaskPriority(task.id, priority);
-
-            setTask({
-                ...task,
-                priority,
-            });
-
-            setShowPriorityMenu(false);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setChangingPriority(false);
+            setDeleting(false);
+            alert("Failed to delete task.");
         }
     };
 
@@ -165,54 +137,6 @@ export default function TaskDetailPage() {
                         ? "Backlog"
                         : "Done";
 
-    const statusOptions: {
-        value: TaskStatus;
-        label: string;
-    }[] = [
-            {
-                value: "backlog",
-                label: "Backlog",
-            },
-            {
-                value: "todo",
-                label: "To Do",
-            },
-            {
-                value: "in_progress",
-                label: "In Progress",
-            },
-            {
-                value: "review",
-                label: "In Review",
-            },
-            {
-                value: "done",
-                label: "Done",
-            },
-        ];
-
-    const priorityOptions: {
-        value: TaskPriority;
-        label: string;
-    }[] = [
-            {
-                value: "low",
-                label: "Low",
-            },
-            {
-                value: "medium",
-                label: "Medium",
-            },
-            {
-                value: "high",
-                label: "High",
-            },
-            {
-                value: "urgent",
-                label: "Urgent",
-            },
-        ];
-
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50">
             <div className="mx-auto max-w-5xl px-6 py-10">
@@ -266,99 +190,27 @@ export default function TaskDetailPage() {
 
                 <section className="mb-6 rounded-xl border border-slate-800/80 bg-slate-900/30 p-4">
                     <div className="flex flex-col gap-3 sm:flex-row">
-                        <div className="relative flex-1">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setShowStatusMenu(!showStatusMenu);
-                                    setShowPriorityMenu(false);
-                                }}
-                                disabled={changingStatus}
-                                className="w-full rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-sm font-medium text-indigo-400 transition hover:border-indigo-500/40 hover:bg-indigo-500/15 hover:text-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {changingStatus
-                                    ? "Changing Status..."
-                                    : "Change Status"}
-                            </button>
-
-                            {showStatusMenu && (
-                                <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-slate-800 bg-slate-900 p-1.5 shadow-xl shadow-black/30">
-                                    {statusOptions.map((option) => (
-                                        <button
-                                            key={option.value}
-                                            type="button"
-                                            onClick={() =>
-                                                handleStatusChange(
-                                                    option.value
-                                                )
-                                            }
-                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${task.status === option.value
-                                                ? "bg-indigo-500/10 text-indigo-400"
-                                                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                                                }`}
-                                        >
-                                            <span>{option.label}</span>
-
-                                            {task.status === option.value && (
-                                                <span className="text-xs">
-                                                    ✓
-                                                </span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="relative flex-1">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setShowPriorityMenu(!showPriorityMenu);
-                                    setShowStatusMenu(false);
-                                }}
-                                disabled={changingPriority}
-                                className="w-full rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-400 transition hover:border-amber-500/40 hover:bg-amber-500/15 hover:text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {changingPriority
-                                    ? "Changing Priority..."
-                                    : "Change Priority"}
-                            </button>
-
-                            {showPriorityMenu && (
-                                <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-slate-800 bg-slate-900 p-1.5 shadow-xl shadow-black/30">
-                                    {priorityOptions.map((option) => (
-                                        <button
-                                            key={option.value}
-                                            type="button"
-                                            onClick={() =>
-                                                handlePriorityChange(
-                                                    option.value
-                                                )
-                                            }
-                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${task.priority === option.value
-                                                ? "bg-amber-500/10 text-amber-400"
-                                                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                                                }`}
-                                        >
-                                            <span>{option.label}</span>
-
-                                            {task.priority === option.value && (
-                                                <span className="text-xs">
-                                                    ✓
-                                                </span>
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <button
+                            type="button"
+                            className="flex-1 rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-sm font-medium text-indigo-400 transition hover:border-indigo-500/40 hover:bg-indigo-500/15 hover:text-indigo-300"
+                        >
+                            Change Status
+                        </button>
 
                         <button
                             type="button"
-                            className="flex-1 rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-400 transition hover:border-rose-500/40 hover:bg-rose-500/15 hover:text-rose-300"
+                            className="flex-1 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-400 transition hover:border-amber-500/40 hover:bg-amber-500/15 hover:text-amber-300"
                         >
-                            Delete Task
+                            Change Priority
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="flex-1 rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-400 transition hover:border-rose-500/40 hover:bg-rose-500/15 hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {deleting ? "Deleting..." : "Delete Task"}
                         </button>
                     </div>
                 </section>
