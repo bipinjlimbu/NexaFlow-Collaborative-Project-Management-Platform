@@ -9,6 +9,7 @@ import {
 } from "@/services/taskService";
 import type { Task } from "@/types/task";
 import TaskDetailSkeleton from "@/components/TaskDetailSkeleton";
+import TaskEditForm from "@/components/TaskEditForm";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -17,6 +18,7 @@ export default function TaskDetailPage() {
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
+    const [editing, setEditing] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -71,6 +73,11 @@ export default function TaskDetailPage() {
             setDeleting(false);
             alert("Failed to delete task.");
         }
+    };
+
+    const handleEditSuccess = (updatedTask: Task) => {
+        setTask(updatedTask);
+        setEditing(false);
     };
 
     if (loading) {
@@ -196,6 +203,7 @@ export default function TaskDetailPage() {
 
                         <button
                             type="button"
+                            onClick={() => setEditing(true)}
                             className="flex-1 rounded-lg border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm font-medium text-sky-400 transition hover:border-sky-500/40 hover:bg-sky-500/15 hover:text-sky-300"
                         >
                             Edit Task
@@ -369,6 +377,14 @@ export default function TaskDetailPage() {
                     </div>
                 </section>
             </div>
+
+            {editing && (
+                <TaskEditForm
+                    task={task}
+                    onSuccess={handleEditSuccess}
+                    onCancel={() => setEditing(false)}
+                />
+            )}
         </main>
     );
 }
