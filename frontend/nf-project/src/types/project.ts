@@ -62,6 +62,8 @@ export interface CreateProjectData {
     name: string;
     description: string;
     workspace_id: number;
+    status: ProjectStatus;
+    priority: ProjectPriority;
     start_date: string;
     due_date: string;
 }
@@ -69,6 +71,8 @@ export interface CreateProjectData {
 export interface UpdateProjectData {
     name: string;
     description: string;
+    status: ProjectStatus;
+    priority: ProjectPriority;
     start_date: string | null;
     due_date: string | null;
 }
