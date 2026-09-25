@@ -55,6 +55,7 @@ export interface Project {
     members: ProjectMember[];
     members_count: number;
     tasks_count: number;
+    completed_tasks_count: number;
 }
 
 export interface CreateProjectData {
