@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProjectsSkeleton from "@/components/ProjectsSkeleton";
+import AddProjectForm from "@/components/AddProjectForm";
 import {
     Activity,
     ArrowRight,
@@ -13,15 +14,9 @@ import {
     MoreHorizontal,
     Plus,
     Search,
-    X,
 } from "lucide-react";
-import {
-    createProject,
-    getProjects,
-} from "@/services/projectService";
-import {
-    getWorkspaces,
-} from "@/services/workspaceService";
+import { getProjects } from "@/services/projectService";
+import { getWorkspaces } from "@/services/workspaceService";
 import type {
     Project as ProjectData,
     ProjectPriority as BackendProjectPriority,
@@ -29,7 +24,12 @@ import type {
 } from "@/types/project";
 import type { Workspace } from "@/types/workspace";
 
-type ProjectStatus = "Active" | "Completed" | "In Review" | "Planning";
+type ProjectStatus =
+    | "Active"
+    | "Completed"
+    | "In Review"
+    | "Planning";
+
 type ProjectPriority = "High" | "Medium" | "Low";
 
 interface Project {
@@ -46,18 +46,6 @@ interface Project {
     members: number;
     dueDate: string;
     initials: string;
-}
-
-interface ProjectErrors {
-    name?: string;
-    description?: string;
-    workspace_id?: string;
-    status?: string;
-    priority?: string;
-    start_date?: string;
-    due_date?: string;
-    detail?: string;
-    error?: string;
 }
 
 const statusConfig: Record<
@@ -120,7 +108,7 @@ function formatDueDate(date: string | null) {
         return "Not set";
     }
 
-    return new Date(`${date} T00:00:00`).toLocaleDateString(
+    return new Date(`${date}T00:00:00`).toLocaleDateString(
         "en-US",
         {
             month: "short",
@@ -128,7 +116,6 @@ function formatDueDate(date: string | null) {
             year: "numeric",
         }
     );
-
 }
 
 function getProjectInitials(name: string) {
@@ -146,26 +133,16 @@ function getProjectInitials(name: string) {
 export default function ProjectsPage() {
     const router = useRouter();
 
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
-        null
-    );
+    const [isAuthenticated, setIsAuthenticated] =
+        useState<boolean | null>(null);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [projects, setProjects] = useState<Project[]>([]);
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
     const [loadingProjects, setLoadingProjects] = useState(false);
-
-    const [showCreatePanel, setShowCreatePanel] = useState(false);
-    const [creatingProject, setCreatingProject] = useState(false);
-    const [projectErrors, setProjectErrors] =
-        useState<ProjectErrors>({});
-
-    const [projectName, setProjectName] = useState("");
-    const [projectDescription, setProjectDescription] = useState("");
-    const [projectWorkspace, setProjectWorkspace] = useState("");
-    const [projectStartDate, setProjectStartDate] = useState("");
-    const [projectDueDate, setProjectDueDate] = useState("");
+    const [showCreatePanel, setShowCreatePanel] =
+        useState(false);
 
     const availableWorkspaces = useMemo(() => {
         return workspaces;
@@ -188,7 +165,10 @@ export default function ProjectsPage() {
         window.addEventListener("auth-change", checkAuth);
 
         return () => {
-            window.removeEventListener("auth-change", checkAuth);
+            window.removeEventListener(
+                "auth-change",
+                checkAuth
+            );
         };
     }, [router]);
 
@@ -197,45 +177,57 @@ export default function ProjectsPage() {
             try {
                 setLoadingProjects(true);
 
-                const [workspaceData, projectData] = await Promise.all([
-                    getWorkspaces(),
-                    getProjects(),
-                ]);
+                const [workspaceData, projectData] =
+                    await Promise.all([
+                        getWorkspaces(),
+                        getProjects(),
+                    ]);
 
                 setWorkspaces(workspaceData);
 
-                const mappedProjects: Project[] = projectData.map((project) => {
-                    const workspace = workspaceData.find(
-                        (item) => item.id === project.workspace.id
-                    );
+                const mappedProjects: Project[] =
+                    projectData.map((project) => {
+                        const workspace =
+                            workspaceData.find(
+                                (item) =>
+                                    item.id ===
+                                    project.workspace.id
+                            );
 
-                    return {
-                        id: project.id,
-                        name: project.name,
-                        description: project.description || "",
-                        workspace:
-                            workspace?.name ||
-                            project.workspace.name ||
-                            "Unknown workspace",
-                        workspaceId: project.workspace.id,
-                        status: mapBackendStatus(project.status),
-                        priority: mapBackendPriority(project.priority),
-                        progress: 0,
-                        completedTasks: project.completed_tasks_count,
-                        totalTasks: project.tasks_count,
-                        members: project.members_count,
-                        dueDate: formatDueDate(project.due_date),
-                        initials: getProjectInitials(project.name),
-                    };
-                });
+                        return {
+                            id: project.id,
+                            name: project.name,
+                            description:
+                                project.description || "",
+                            workspace:
+                                workspace?.name ||
+                                project.workspace.name ||
+                                "Unknown workspace",
+                            workspaceId:
+                                project.workspace.id,
+                            status: mapBackendStatus(
+                                project.status
+                            ),
+                            priority: mapBackendPriority(
+                                project.priority
+                            ),
+                            progress: 0,
+                            completedTasks:
+                                project.completed_tasks_count,
+                            totalTasks:
+                                project.tasks_count,
+                            members:
+                                project.members_count,
+                            dueDate: formatDueDate(
+                                project.due_date
+                            ),
+                            initials: getProjectInitials(
+                                project.name
+                            ),
+                        };
+                    });
 
                 setProjects(mappedProjects);
-
-                if (workspaceData.length > 0) {
-                    setProjectWorkspace(
-                        String(workspaceData[0].id)
-                    );
-                }
             } catch {
                 setWorkspaces([]);
                 setProjects([]);
@@ -267,191 +259,48 @@ export default function ProjectsPage() {
         });
     }, [projects, searchQuery, statusFilter]);
 
-    function resetProjectForm() {
-        setProjectName("");
-        setProjectDescription("");
-        setProjectStartDate("");
-        setProjectDueDate("");
-        setProjectErrors({});
-
-        if (availableWorkspaces.length > 0) {
-            setProjectWorkspace(
-                String(availableWorkspaces[0].id)
-            );
-        } else {
-            setProjectWorkspace("");
-        }
-    }
-
     function openCreatePanel() {
-        setProjectErrors({});
-
-        if (
-            !projectWorkspace &&
-            availableWorkspaces.length > 0
-        ) {
-            setProjectWorkspace(
-                String(availableWorkspaces[0].id)
-            );
-        }
-
         setShowCreatePanel(true);
     }
 
-    function closeCreatePanel() {
-        if (creatingProject) {
-            return;
-        }
+    function handleProjectCreated(
+        createdProject: ProjectData
+    ) {
+        const newProject: Project = {
+            id: createdProject.id,
+            name: createdProject.name,
+            description: createdProject.description || "",
+            workspace: createdProject.workspace.name,
+            workspaceId: createdProject.workspace.id,
+            status: mapBackendStatus(
+                createdProject.status
+            ),
+            priority: mapBackendPriority(
+                createdProject.priority
+            ),
+            progress: 0,
+            completedTasks:
+                createdProject.completed_tasks_count,
+            totalTasks: createdProject.tasks_count,
+            members: createdProject.members_count,
+            dueDate: formatDueDate(
+                createdProject.due_date
+            ),
+            initials: getProjectInitials(
+                createdProject.name
+            ),
+        };
+
+        setProjects((previous) => [
+            newProject,
+            ...previous,
+        ]);
 
         setShowCreatePanel(false);
-        resetProjectForm();
-    }
 
-    function clearFieldError(
-        field: keyof ProjectErrors
-    ) {
-        setProjectErrors((previous) => {
-            const updated = { ...previous };
-            delete updated[field];
-            delete updated.detail;
-            delete updated.error;
-            return updated;
-        });
-    }
-
-    async function handleCreateProject(
-        event: React.FormEvent<HTMLFormElement>
-    ) {
-        event.preventDefault();
-
-        setProjectErrors({});
-
-        const selectedWorkspace = availableWorkspaces.find(
-            (workspace) =>
-                workspace.id === Number(projectWorkspace)
+        router.push(
+            `/projects/${createdProject.id}`
         );
-
-        if (!selectedWorkspace) {
-            setProjectErrors({
-                workspace_id: "Please select a workspace.",
-            });
-            return;
-        }
-
-        if (!projectName.trim()) {
-            setProjectErrors({
-                name: "This field is required.",
-            });
-            return;
-        }
-
-        if (!projectDescription.trim()) {
-            setProjectErrors({
-                description: "This field is required.",
-            });
-            return;
-        }
-
-        if (!projectStartDate) {
-            setProjectErrors({
-                start_date: "This field is required.",
-            });
-            return;
-        }
-
-        if (!projectDueDate) {
-            setProjectErrors({
-                due_date: "This field is required.",
-            });
-            return;
-        }
-
-        if (projectDueDate < projectStartDate) {
-            setProjectErrors({
-                due_date:
-                    "Due date cannot be before the start date.",
-            });
-            return;
-        }
-
-        try {
-            setCreatingProject(true);
-            setProjectErrors({});
-
-            const createdProject = await createProject({
-                name: projectName.trim(),
-                description: projectDescription.trim(),
-                workspace_id: selectedWorkspace.id,
-                status: "active",
-                priority: "medium",
-                start_date: projectStartDate,
-                due_date: projectDueDate,
-            });
-
-            const newProject: Project = {
-                id: createdProject.id,
-                name: createdProject.name,
-                description: createdProject.description || "",
-                workspace: createdProject.workspace.name,
-                workspaceId: createdProject.workspace.id,
-                status: mapBackendStatus(createdProject.status),
-                priority: mapBackendPriority(createdProject.priority),
-                progress: 0,
-                completedTasks: createdProject.completed_tasks_count,
-                totalTasks: createdProject.tasks_count,
-                members: createdProject.members_count,
-                dueDate: formatDueDate(createdProject.due_date),
-                initials: getProjectInitials(createdProject.name),
-            };
-
-            setProjects((previous) => [
-                newProject,
-                ...previous,
-            ]);
-
-            setShowCreatePanel(false);
-            resetProjectForm();
-
-            router.push(`/projects/${createdProject.id}`);
-        } catch (err: any) {
-            if (err && typeof err === "object") {
-                const normalizedErrors: ProjectErrors = {};
-
-                Object.entries(err).forEach(
-                    ([key, value]) => {
-                        if (Array.isArray(value)) {
-                            normalizedErrors[
-                                key as keyof ProjectErrors
-                            ] = value.join(" ");
-                        } else if (
-                            typeof value === "string"
-                        ) {
-                            normalizedErrors[
-                                key as keyof ProjectErrors
-                            ] = value;
-                        }
-                    }
-                );
-
-                if (
-                    Object.keys(normalizedErrors).length > 0
-                ) {
-                    setProjectErrors(normalizedErrors);
-                } else {
-                    setProjectErrors({
-                        detail:
-                            "Unable to create project.",
-                    });
-                }
-            } else {
-                setProjectErrors({
-                    detail:
-                        "Unable to create project.",
-                });
-            }
-        } finally {
-            setCreatingProject(false);
-        }
     }
 
     if (!isAuthenticated || loadingProjects) {
@@ -500,7 +349,9 @@ export default function ProjectsPage() {
                             placeholder="Search projects..."
                             value={searchQuery}
                             onChange={(e) =>
-                                setSearchQuery(e.target.value)
+                                setSearchQuery(
+                                    e.target.value
+                                )
                             }
                             className="h-11 w-full bg-transparent px-3 text-sm text-slate-100 outline-none placeholder:text-slate-500"
                         />
@@ -579,21 +430,27 @@ export default function ProjectsPage() {
                                         <div className="mt-5">
                                             <div className="flex items-center gap-2.5">
                                                 <h3 className="truncate font-semibold text-slate-100 group-hover:text-white">
-                                                    {project.name}
+                                                    {
+                                                        project.name
+                                                    }
                                                 </h3>
 
                                                 <span
-                                                    className={`flex shrink - 0 items - center gap - 1 rounded - md border px - 2 py - 0.5 text - [10px] font - medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color} `}
+                                                    className={`flex shrink-0 items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color}`}
                                                 >
                                                     <StatusIcon
                                                         size={10}
                                                     />
-                                                    {project.status}
+                                                    {
+                                                        project.status
+                                                    }
                                                 </span>
                                             </div>
 
                                             <p className="mt-2 min-h-[40px] line-clamp-2 text-sm leading-relaxed text-slate-400">
-                                                {project.description}
+                                                {
+                                                    project.description
+                                                }
                                             </p>
                                         </div>
                                     </div>
@@ -642,7 +499,7 @@ export default function ProjectsPage() {
                                                         project.completedTasks
                                                     }{" "}
                                                     <span className="text-xs font-medium text-slate-500">
-                                                        /{" "}
+                                                        /
                                                         {
                                                             project.totalTasks
                                                         }
@@ -695,292 +552,13 @@ export default function ProjectsPage() {
             </div>
 
             {showCreatePanel && (
-                <div className="fixed inset-0 z-50 flex justify-end">
-                    <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={closeCreatePanel}
-                    />
-
-                    <div className="relative flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-slate-950 shadow-2xl">
-                        <div className="flex items-center justify-between border-b border-slate-800 px-6 py-5">
-                            <div>
-                                <h2 className="text-lg font-semibold text-white">
-                                    Create project
-                                </h2>
-
-                                <p className="mt-1 text-sm text-slate-500">
-                                    Create a new project inside
-                                    a workspace.
-                                </p>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={closeCreatePanel}
-                                disabled={creatingProject}
-                                className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <X size={19} />
-                            </button>
-                        </div>
-
-                        <form
-                            onSubmit={handleCreateProject}
-                            className="flex flex-1 flex-col overflow-y-auto"
-                        >
-                            <div className="flex-1 space-y-6 px-6 py-6">
-                                {projectErrors.detail && (
-                                    <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                                        {
-                                            projectErrors.detail
-                                        }
-                                    </div>
-                                )}
-
-                                {projectErrors.error && (
-                                    <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                                        {projectErrors.error}
-                                    </div>
-                                )}
-
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                                        Project name
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        value={projectName}
-                                        onChange={(e) => {
-                                            setProjectName(
-                                                e.target.value
-                                            );
-                                            clearFieldError(
-                                                "name"
-                                            );
-                                        }}
-                                        placeholder="Enter project name"
-                                        className={`h - 11 w - full rounded - xl border bg - slate - 900 px - 4 text - sm text - slate - 100 outline - none transition placeholder: text - slate - 600 ${projectErrors.name
-                                            ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                            : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            } `}
-                                    />
-
-                                    {projectErrors.name && (
-                                        <p className="mt-2 text-xs text-red-400">
-                                            {
-                                                projectErrors.name
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                                        Workspace
-                                    </label>
-
-                                    <select
-                                        value={
-                                            projectWorkspace
-                                        }
-                                        onChange={(e) => {
-                                            setProjectWorkspace(
-                                                e.target.value
-                                            );
-                                            clearFieldError(
-                                                "workspace_id"
-                                            );
-                                        }}
-                                        className={`h - 11 w - full cursor - pointer rounded - xl border bg - slate - 900 px - 4 text - sm text - slate - 100 outline - none transition ${projectErrors.workspace_id
-                                            ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                            : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            } `}
-                                    >
-                                        {availableWorkspaces.length ===
-                                            0 ? (
-                                            <option value="">
-                                                No workspace available
-                                            </option>
-                                        ) : (
-                                            availableWorkspaces.map(
-                                                (workspace) => (
-                                                    <option
-                                                        key={
-                                                            workspace.id
-                                                        }
-                                                        value={
-                                                            workspace.id
-                                                        }
-                                                    >
-                                                        {
-                                                            workspace.name
-                                                        }
-                                                    </option>
-                                                )
-                                            )
-                                        )}
-                                    </select>
-
-                                    {projectErrors.workspace_id && (
-                                        <p className="mt-2 text-xs text-red-400">
-                                            {
-                                                projectErrors.workspace_id
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                                        Description
-                                    </label>
-
-                                    <textarea
-                                        value={
-                                            projectDescription
-                                        }
-                                        onChange={(e) => {
-                                            setProjectDescription(
-                                                e.target.value
-                                            );
-                                            clearFieldError(
-                                                "description"
-                                            );
-                                        }}
-                                        placeholder="Describe what this project is about..."
-                                        rows={5}
-                                        className={`w - full resize - none rounded - xl border bg - slate - 900 px - 4 py - 3 text - sm text - slate - 100 outline - none transition placeholder: text - slate - 600 ${projectErrors.description
-                                            ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                            : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            } `}
-                                    />
-
-                                    {projectErrors.description && (
-                                        <p className="mt-2 text-xs text-red-400">
-                                            {
-                                                projectErrors.description
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                                    <div>
-                                        <label className="mb-2 block text-sm font-medium text-slate-200">
-                                            Start date
-                                        </label>
-
-                                        <div className="relative">
-                                            <Calendar
-                                                size={16}
-                                                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-                                            />
-
-                                            <input
-                                                type="date"
-                                                value={
-                                                    projectStartDate
-                                                }
-                                                onChange={(e) => {
-                                                    setProjectStartDate(
-                                                        e.target
-                                                            .value
-                                                    );
-                                                    clearFieldError(
-                                                        "start_date"
-                                                    );
-                                                }}
-                                                className={`h - 11 w - full rounded - xl border bg - slate - 900 pl - 10 pr - 3 text - sm text - slate - 100 outline - none transition ${projectErrors.start_date
-                                                    ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                                    : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                                    } `}
-                                            />
-                                        </div>
-
-                                        {projectErrors.start_date && (
-                                            <p className="mt-2 text-xs text-red-400">
-                                                {
-                                                    projectErrors.start_date
-                                                }
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <label className="mb-2 block text-sm font-medium text-slate-200">
-                                            Due date
-                                        </label>
-
-                                        <div className="relative">
-                                            <Calendar
-                                                size={16}
-                                                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-                                            />
-
-                                            <input
-                                                type="date"
-                                                value={
-                                                    projectDueDate
-                                                }
-                                                min={
-                                                    projectStartDate ||
-                                                    undefined
-                                                }
-                                                onChange={(e) => {
-                                                    setProjectDueDate(
-                                                        e.target
-                                                            .value
-                                                    );
-                                                    clearFieldError(
-                                                        "due_date"
-                                                    );
-                                                }}
-                                                className={`h - 11 w - full rounded - xl border bg - slate - 900 pl - 10 pr - 3 text - sm text - slate - 100 outline - none transition ${projectErrors.due_date
-                                                    ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                                    : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                                    } `}
-                                            />
-                                        </div>
-
-                                        {projectErrors.due_date && (
-                                            <p className="mt-2 text-xs text-red-400">
-                                                {
-                                                    projectErrors.due_date
-                                                }
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-5">
-                                <button
-                                    type="button"
-                                    onClick={closeCreatePanel}
-                                    disabled={
-                                        creatingProject
-                                    }
-                                    className="h-10 cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    Cancel
-                                </button>
-
-                                <button
-                                    type="submit"
-                                    disabled={
-                                        creatingProject
-                                    }
-                                    className="h-10 cursor-pointer rounded-xl bg-indigo-600 px-5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                    {creatingProject
-                                        ? "Creating..."
-                                        : "Create project"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <AddProjectForm
+                    workspaces={availableWorkspaces}
+                    onClose={() =>
+                        setShowCreatePanel(false)
+                    }
+                    onCreated={handleProjectCreated}
+                />
             )}
         </main>
     );
