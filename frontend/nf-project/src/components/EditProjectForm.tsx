@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { updateProject } from "@/services/projectService";
-import type { Project } from "@/types/project";
+import type {
+    Project,
+    ProjectStatus,
+    ProjectPriority,
+} from "@/types/project";
 
 interface EditProjectFormProps {
     project: Project;
@@ -26,6 +30,12 @@ export default function EditProjectForm({
     const [dueDate, setDueDate] = useState(
         project.due_date || ""
     );
+    const [status, setStatus] = useState<ProjectStatus>(
+        project.status
+    );
+    const [priority, setPriority] = useState<ProjectPriority>(
+        project.priority
+    );
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
@@ -36,6 +46,8 @@ export default function EditProjectForm({
         setDescription(project.description || "");
         setStartDate(project.start_date || "");
         setDueDate(project.due_date || "");
+        setStatus(project.status);
+        setPriority(project.priority);
         setErrors({});
         setGeneralError("");
     }, [project]);
@@ -81,6 +93,8 @@ export default function EditProjectForm({
                 {
                     name: name.trim(),
                     description: description.trim(),
+                    status,
+                    priority,
                     start_date: startDate || null,
                     due_date: dueDate || null,
                 }
@@ -127,7 +141,6 @@ export default function EditProjectForm({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md transition-all">
             <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/95 p-6 shadow-2xl shadow-indigo-950/20 transition-all">
-                {/* Header */}
                 <div className="flex items-start justify-between border-b border-slate-800/60 pb-4">
                     <div>
                         <h2 className="text-xl font-semibold tracking-tight text-slate-100">
@@ -148,19 +161,16 @@ export default function EditProjectForm({
                     </button>
                 </div>
 
-                {/* General Error Banner */}
                 {generalError && (
                     <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-xs font-medium text-rose-400">
                         {generalError}
                     </div>
                 )}
 
-                {/* Form */}
                 <form
                     onSubmit={handleSubmit}
                     className="mt-5 space-y-4"
                 >
-                    {/* Project Name */}
                     <div>
                         <label className="mb-1.5 block text-xs font-medium text-slate-300">
                             Project name
@@ -184,7 +194,6 @@ export default function EditProjectForm({
                         )}
                     </div>
 
-                    {/* Description */}
                     <div>
                         <label className="mb-1.5 block text-xs font-medium text-slate-300">
                             Description
@@ -208,9 +217,81 @@ export default function EditProjectForm({
                         )}
                     </div>
 
-                    {/* Dates Grid */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        {/* Start Date */}
+                        <div>
+                            <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                                Status
+                            </label>
+                            <select
+                                value={status}
+                                onChange={(event) =>
+                                    setStatus(
+                                        event.target.value as ProjectStatus
+                                    )
+                                }
+                                className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 transition-all focus:outline-none focus:ring-2 [color-scheme:dark] ${errors.status
+                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
+                                    : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
+                                    }`}
+                            >
+                                <option value="planning">
+                                    Planning
+                                </option>
+                                <option value="active">
+                                    Active
+                                </option>
+                                <option value="inactive">
+                                    Inactive
+                                </option>
+                                <option value="archived">
+                                    Archived
+                                </option>
+                            </select>
+                            {errors.status && (
+                                <p className="mt-1 text-xs text-rose-400">
+                                    {errors.status}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                                Priority
+                            </label>
+                            <select
+                                value={priority}
+                                onChange={(event) =>
+                                    setPriority(
+                                        event.target.value as ProjectPriority
+                                    )
+                                }
+                                className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 transition-all focus:outline-none focus:ring-2 [color-scheme:dark] ${errors.priority
+                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
+                                    : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
+                                    }`}
+                            >
+                                <option value="low">
+                                    Low
+                                </option>
+                                <option value="medium">
+                                    Medium
+                                </option>
+                                <option value="high">
+                                    High
+                                </option>
+                                <option value="urgent">
+                                    Urgent
+                                </option>
+                            </select>
+                            {errors.priority && (
+                                <p className="mt-1 text-xs text-rose-400">
+                                    {errors.priority}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <label className="mb-1.5 block text-xs font-medium text-slate-300">
                                 Start date
@@ -233,7 +314,6 @@ export default function EditProjectForm({
                             )}
                         </div>
 
-                        {/* Due Date */}
                         <div>
                             <label className="mb-1.5 block text-xs font-medium text-slate-300">
                                 Due date
@@ -257,8 +337,7 @@ export default function EditProjectForm({
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800/60">
+                    <div className="flex items-center justify-end gap-3 border-t border-slate-800/60 pt-3">
                         <button
                             type="button"
                             onClick={onClose}
