@@ -8,7 +8,7 @@ import { getTasks } from "@/services/taskService";
 import type { Task as ApiTask } from "@/types/task";
 
 type TaskStatus = "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
-type TaskPriority = "HIGH" | "MEDIUM" | "LOW";
+type TaskPriority = "HIGH" | "MEDIUM" | "LOW" | "URGENT";
 
 interface Task {
     id: number;
@@ -40,13 +40,15 @@ const statusLabels: Record<TaskStatus, string> = {
 };
 
 const priorityStyles: Record<TaskPriority, string> = {
-    HIGH: "text-rose-400",
+    URGENT: "text-rose-400",
+    HIGH: "text-orange-400",
     MEDIUM: "text-amber-400",
     LOW: "text-slate-400",
 };
 
 const priorityDots: Record<TaskPriority, string> = {
-    HIGH: "bg-rose-400",
+    URGENT: "bg-rose-400",
+    HIGH: "bg-orange-400",
     MEDIUM: "bg-amber-400",
     LOW: "bg-slate-500",
 };
@@ -66,8 +68,9 @@ function mapStatus(status: ApiTask["status"]): TaskStatus {
 
 function mapPriority(priority: ApiTask["priority"]): TaskPriority {
     switch (priority) {
-        case "high":
         case "urgent":
+            return "URGENT";
+        case "high":
             return "HIGH";
         case "medium":
             return "MEDIUM";
@@ -314,7 +317,11 @@ export default function TasksPage() {
                                 <span className="rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-400">
                                     Task Management
                                 </span>
-                                <span className="text-xs text-slate-600">/</span>
+
+                                <span className="text-xs text-slate-600">
+                                    /
+                                </span>
+
                                 <span className="font-mono text-[11px] text-slate-500">
                                     NEXAFLOW
                                 </span>
@@ -337,6 +344,7 @@ export default function TasksPage() {
                         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
                             Total Tasks
                         </span>
+
                         <div className="mt-3 text-2xl font-semibold text-white">
                             {tasks.length.toString().padStart(2, "0")}
                         </div>
@@ -347,8 +355,10 @@ export default function TasksPage() {
                             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
                                 To Do
                             </span>
+
                             <span className="h-2 w-2 rounded-full bg-slate-500" />
                         </div>
+
                         <div className="mt-3 text-2xl font-semibold text-white">
                             {todoCount.toString().padStart(2, "0")}
                         </div>
@@ -359,8 +369,10 @@ export default function TasksPage() {
                             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
                                 In Progress
                             </span>
+
                             <span className="h-2 w-2 rounded-full bg-indigo-400" />
                         </div>
+
                         <div className="mt-3 text-2xl font-semibold text-white">
                             {progressCount.toString().padStart(2, "0")}
                         </div>
@@ -371,8 +383,10 @@ export default function TasksPage() {
                             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
                                 In Review
                             </span>
+
                             <span className="h-2 w-2 rounded-full bg-amber-400" />
                         </div>
+
                         <div className="mt-3 text-2xl font-semibold text-white">
                             {reviewCount.toString().padStart(2, "0")}
                         </div>
@@ -383,8 +397,10 @@ export default function TasksPage() {
                             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
                                 Completed
                             </span>
+
                             <span className="h-2 w-2 rounded-full bg-emerald-400" />
                         </div>
+
                         <div className="mt-3 text-2xl font-semibold text-white">
                             {completedCount.toString().padStart(2, "0")}
                         </div>
@@ -425,6 +441,7 @@ export default function TasksPage() {
                             className="h-11 rounded-lg border border-slate-800 bg-slate-950 px-4 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
                         >
                             <option value="All">All Priority</option>
+                            <option value="URGENT">Urgent</option>
                             <option value="HIGH">High</option>
                             <option value="MEDIUM">Medium</option>
                             <option value="LOW">Low</option>
@@ -436,6 +453,7 @@ export default function TasksPage() {
                             className="h-11 rounded-lg border border-slate-800 bg-slate-950 px-4 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
                         >
                             <option value="All">All Projects</option>
+
                             {projects.map((project) => (
                                 <option key={project} value={project}>
                                     {project}
@@ -451,6 +469,7 @@ export default function TasksPage() {
                             <h2 className="text-lg font-semibold text-white">
                                 Task Stream
                             </h2>
+
                             <p className="mt-1 text-xs text-slate-500">
                                 {filteredTasks.length} tasks matching your filters
                             </p>
@@ -481,15 +500,19 @@ export default function TasksPage() {
                                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
                                     Task
                                 </span>
+
                                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
                                     Project
                                 </span>
+
                                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
                                     Status
                                 </span>
+
                                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
                                     Priority
                                 </span>
+
                                 <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
                                     Due
                                 </span>
@@ -529,7 +552,9 @@ export default function TasksPage() {
                                                                 {task.assignee}
                                                             </span>
 
-                                                            <span className="text-slate-700">•</span>
+                                                            <span className="text-slate-700">
+                                                                •
+                                                            </span>
 
                                                             <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-slate-600">
                                                                 {task.workspace}
@@ -543,6 +568,7 @@ export default function TasksPage() {
                                                 <p className="truncate text-xs font-medium text-slate-300">
                                                     {task.project}
                                                 </p>
+
                                                 <p className="mt-1 text-[10px] text-slate-600">
                                                     Project
                                                 </p>
@@ -565,7 +591,9 @@ export default function TasksPage() {
                                                     className={`text-xs font-medium ${priorityStyles[task.priority]}`}
                                                 >
                                                     {task.priority.charAt(0) +
-                                                        task.priority.slice(1).toLowerCase()}
+                                                        task.priority
+                                                            .slice(1)
+                                                            .toLowerCase()}
                                                 </span>
                                             </div>
 
