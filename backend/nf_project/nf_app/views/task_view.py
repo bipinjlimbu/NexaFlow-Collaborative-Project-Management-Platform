@@ -68,7 +68,7 @@ def tasks_view(request):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@api_view(['GET', 'DELETE'])
+@api_view(['GET','PUT','DELETE'])
 @permission_classes([IsAuthenticated])
 def task_detail_view(request, pk):
     try:
@@ -80,6 +80,43 @@ def task_detail_view(request, pk):
         serializer = TaskSerializer(task)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    errors = {}
+    if request.method == 'PUT':
+        title = request.data.get('title')
+        description = request.data.get('description')
+        task_status = request.data.get('status', task.status)
+        priority = request.data.get('priority', task.priority)
+        due_date = request.data.get('due_date', task.due_date)
+        assigned_to_id = request.data.get('assigned_to', task.assigned_to.id if task.assigned_to else None)
+        assigned_to = User.objects.filter(id=assigned_to_id).first() if assigned_to_id else None
+        
+        if not title:
+            errors['title'] = 'This field is required.'
+            
+        if not description:
+            errors['description'] = 'This field is required.'
+            
+        if not due_date:
+            errors['due_date'] = 'This field is required.'
+            
+        if not assigned_to:
+            errors['assigned_to'] = 'This field is required.'
+        elif assigned_to and not task.project.members.filter(user=assigned_to).exists():
+            errors['assigned_to'] = 'The assigned user is not a member of the project.'
+            
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        task.title = title
+        task.description = description
+        task.status = task_status
+        task.priority = priority
+        task.due_date = due_date
+        task.assigned_to = assigned_to
+        task.save()
+        serializer = TaskSerializer(task)    
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
     if request.method == 'DELETE':
         task.delete()
         return Response({"message": "Task deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
