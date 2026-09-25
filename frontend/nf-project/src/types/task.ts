@@ -60,3 +60,12 @@ export interface CreateTaskData {
     due_date: string;
     assigned_to: number;
 }
+
+export interface EditTaskData {
+    title: string;
+    description: string;
+    status: TaskStatus;
+    priority: TaskPriority;
+    due_date: string;
+    assigned_to: number;
+}
