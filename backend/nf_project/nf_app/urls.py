@@ -5,7 +5,7 @@ from .views.profile_view import profile_view
 from .views.notification_view import get_notifications_view, notification_detail_view
 from .views.invitation_view import get_invitations_view, accept_invitation_view, decline_invitation_view
 from .views.project_view import projects_view, project_detail_view, get_workspace_members, add_member_to_project, get_project_members, get_tasks_in_project
-from .views.task_view import tasks_view, task_detail_view
+from .views.task_view import tasks_view, task_detail_view, change_task_status_view, change_task_priority_view
 
 urlpatterns = [
     path('register/', register_view, name='register'),
@@ -33,4 +33,6 @@ urlpatterns = [
     path('projects/<int:project_id>/tasks/', get_tasks_in_project, name='get_tasks_in_project'),
     path('tasks/', tasks_view, name='tasks'),
     path('tasks/<int:pk>/', task_detail_view, name='task_detail'),
+    path('tasks/<int:pk>/change_status/', change_task_status_view, name='change_task_status'),
+    path('tasks/<int:pk>/change_priority/', change_task_priority_view, name='change_task_priority'),
 ]
