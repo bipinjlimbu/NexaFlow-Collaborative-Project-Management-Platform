@@ -83,3 +83,19 @@ def task_detail_view(request, pk):
     if request.method == 'DELETE':
         task.delete()
         return Response({"message": "Task deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def change_task_status_view(request, pk):
+    try:
+        task = Task.objects.get(pk=pk)
+    except Task.DoesNotExist:
+        return Response({"error": "Task not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    new_status = request.data.get('status')
+    if new_status not in dict(Task.Status.choices):
+        return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
+
+    task.status = new_status
+    task.save()
+    return Response({"message": "Task status updated successfully."}, status=status.HTTP_200_OK)
