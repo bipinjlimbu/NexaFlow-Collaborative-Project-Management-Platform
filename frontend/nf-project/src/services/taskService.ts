@@ -1,6 +1,7 @@
 import { authFetch } from "@/lib/api";
 import type {
     CreateTaskData,
+    EditTaskData,
     Task,
     TaskPriority,
     TaskStatus,
@@ -44,6 +45,16 @@ export async function changeTaskPriority(
     return authFetch(`/tasks/${id}/change_priority/`, {
         method: "PATCH",
         body: JSON.stringify({ priority }),
+    });
+}
+
+export async function editTask(
+    id: number,
+    data: EditTaskData
+): Promise<Task> {
+    return authFetch(`/tasks/${id}/`, {
+        method: "PUT",
+        body: JSON.stringify(data),
     });
 }
 
