@@ -47,7 +47,6 @@ export default function TaskDetailPage() {
                 const data = await getTask(id);
                 setTask(data);
             } catch (error) {
-                console.error(error);
                 setError("Task not found.");
             } finally {
                 setLoading(false);
