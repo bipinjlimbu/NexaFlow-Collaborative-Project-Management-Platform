@@ -36,7 +36,7 @@ function formatDate(date: string | null) {
     if (!date) return "Not set";
 
 
-    const parsedDate = new Date(`${date} T00:00:00`);
+    const parsedDate = new Date(`${date}T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
         return "Not set";
