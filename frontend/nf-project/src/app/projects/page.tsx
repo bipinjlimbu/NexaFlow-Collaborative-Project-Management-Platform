@@ -118,7 +118,7 @@ function formatDueDate(date: string | null) {
         return "Not set";
     }
 
-    return new Date(`${date}T00:00:00`).toLocaleDateString(
+    return new Date(`${date} T00:00:00`).toLocaleDateString(
         "en-US",
         {
             month: "short",
@@ -126,6 +126,7 @@ function formatDueDate(date: string | null) {
             year: "numeric",
         }
     );
+
 }
 
 function getProjectInitials(name: string) {
@@ -218,7 +219,7 @@ export default function ProjectsPage() {
                         status: mapBackendStatus(project.status),
                         priority: mapBackendPriority(project.priority),
                         progress: 0,
-                        completedTasks: 0,
+                        completedTasks: project.completed_tasks_count,
                         totalTasks: project.tasks_count,
                         members: project.members_count,
                         dueDate: formatDueDate(project.due_date),
@@ -392,7 +393,7 @@ export default function ProjectsPage() {
                 status: mapBackendStatus(createdProject.status),
                 priority: mapBackendPriority(createdProject.priority),
                 progress: 0,
-                completedTasks: 0,
+                completedTasks: createdProject.completed_tasks_count,
                 totalTasks: createdProject.tasks_count,
                 members: createdProject.members_count,
                 dueDate: formatDueDate(createdProject.due_date),
@@ -459,7 +460,7 @@ export default function ProjectsPage() {
                 <div className="mb-8 flex flex-col justify-between gap-6 border-b border-slate-800/80 pb-6 sm:flex-row sm:items-end">
                     <div>
                         <span className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-400">
-                            ApexStriker Ecosystem
+                            NexaFlow Ecosystem
                         </span>
 
                         <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -578,7 +579,7 @@ export default function ProjectsPage() {
                                                 </h3>
 
                                                 <span
-                                                    className={`flex shrink-0 items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color}`}
+                                                    className={`flex shrink - 0 items - center gap - 1 rounded - md border px - 2 py - 0.5 text - [10px] font - medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color} `}
                                                 >
                                                     <StatusIcon
                                                         size={10}
@@ -755,10 +756,10 @@ export default function ProjectsPage() {
                                             );
                                         }}
                                         placeholder="Enter project name"
-                                        className={`h-11 w-full rounded-xl border bg-slate-900 px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${projectErrors.name
+                                        className={`h - 11 w - full rounded - xl border bg - slate - 900 px - 4 text - sm text - slate - 100 outline - none transition placeholder: text - slate - 600 ${projectErrors.name
                                             ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
                                             : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            }`}
+                                            } `}
                                     />
 
                                     {projectErrors.name && (
@@ -787,10 +788,10 @@ export default function ProjectsPage() {
                                                 "workspace_id"
                                             );
                                         }}
-                                        className={`h-11 w-full cursor-pointer rounded-xl border bg-slate-900 px-4 text-sm text-slate-100 outline-none transition ${projectErrors.workspace_id
+                                        className={`h - 11 w - full cursor - pointer rounded - xl border bg - slate - 900 px - 4 text - sm text - slate - 100 outline - none transition ${projectErrors.workspace_id
                                             ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
                                             : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            }`}
+                                            } `}
                                     >
                                         {availableWorkspaces.length ===
                                             0 ? (
@@ -845,10 +846,10 @@ export default function ProjectsPage() {
                                         }}
                                         placeholder="Describe what this project is about..."
                                         rows={5}
-                                        className={`w-full resize-none rounded-xl border bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${projectErrors.description
+                                        className={`w - full resize - none rounded - xl border bg - slate - 900 px - 4 py - 3 text - sm text - slate - 100 outline - none transition placeholder: text - slate - 600 ${projectErrors.description
                                             ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
                                             : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            }`}
+                                            } `}
                                     />
 
                                     {projectErrors.description && (
@@ -886,10 +887,10 @@ export default function ProjectsPage() {
                                                         "start_date"
                                                     );
                                                 }}
-                                                className={`h-11 w-full rounded-xl border bg-slate-900 pl-10 pr-3 text-sm text-slate-100 outline-none transition ${projectErrors.start_date
+                                                className={`h - 11 w - full rounded - xl border bg - slate - 900 pl - 10 pr - 3 text - sm text - slate - 100 outline - none transition ${projectErrors.start_date
                                                     ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
                                                     : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                                    }`}
+                                                    } `}
                                             />
                                         </div>
 
@@ -931,10 +932,10 @@ export default function ProjectsPage() {
                                                         "due_date"
                                                     );
                                                 }}
-                                                className={`h-11 w-full rounded-xl border bg-slate-900 pl-10 pr-3 text-sm text-slate-100 outline-none transition ${projectErrors.due_date
+                                                className={`h - 11 w - full rounded - xl border bg - slate - 900 pl - 10 pr - 3 text - sm text - slate - 100 outline - none transition ${projectErrors.due_date
                                                     ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
                                                     : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                                    }`}
+                                                    } `}
                                             />
                                         </div>
 
