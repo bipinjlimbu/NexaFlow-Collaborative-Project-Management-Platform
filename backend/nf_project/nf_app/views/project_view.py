@@ -23,6 +23,8 @@ def projects_view(request):
         name = request.data.get('name')
         description = request.data.get('description')
         workspace_id = request.data.get('workspace_id')
+        status = request.data.get('status', Project.Status.ACTIVE)
+        priority = request.data.get('priority', Project.Priority.MEDIUM)
         start_date = request.data.get('start_date')
         due_date = request.data.get('due_date')
         
@@ -47,7 +49,16 @@ def projects_view(request):
         
         try:
             
-            project = Project(name=name, description=description, workspace=workspace, start_date=start_date, due_date=due_date, created_by=request.user)
+            project = Project(
+                name=name,
+                description=description,
+                workspace=workspace,
+                start_date=start_date,
+                due_date=due_date,
+                created_by=request.user,
+                status=status,
+                priority=priority
+            )
             project.save()
             serializer = ProjectSerializer(project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -70,6 +81,8 @@ def project_detail_view(request, pk):
     if request.method == 'PUT':
         name = request.data.get('name')
         description = request.data.get('description')
+        status = request.data.get('status', project.status)
+        priority = request.data.get('priority', project.priority)
         start_date = request.data.get('start_date')
         due_date = request.data.get('due_date')
         
@@ -86,6 +99,8 @@ def project_detail_view(request, pk):
         
         project.name = name
         project.description = description
+        project.status = status
+        project.priority = priority
         project.start_date = start_date
         project.due_date = due_date
         project.save()
