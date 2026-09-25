@@ -99,3 +99,19 @@ def change_task_status_view(request, pk):
     task.status = new_status
     task.save()
     return Response({"message": "Task status updated successfully."}, status=status.HTTP_200_OK)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def change_task_priority_view(request, pk):
+    try:
+        task = Task.objects.get(pk=pk)
+    except Task.DoesNotExist:
+        return Response({"error": "Task not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    new_priority = request.data.get('priority')
+    if new_priority not in dict(Task.Priority.choices):
+        return Response({"error": "Invalid priority value."}, status=status.HTTP_400_BAD_REQUEST)
+
+    task.priority = new_priority
+    task.save()
+    return Response({"message": "Task priority updated successfully."}, status=status.HTTP_200_OK)
