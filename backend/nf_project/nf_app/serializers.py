@@ -41,6 +41,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     members_count = serializers.SerializerMethodField()
     members = serializers.SerializerMethodField()
     tasks_count = serializers.SerializerMethodField()
+    completed_tasks_count = serializers.SerializerMethodField()
     
     def get_created_by(self, obj):
         return UserSerializer(obj.created_by).data
@@ -57,6 +58,9 @@ class ProjectSerializer(serializers.ModelSerializer):
     
     def get_tasks_count(self, obj):
         return Task.objects.filter(project=obj).count()
+    
+    def get_completed_tasks_count(self, obj):
+        return Task.objects.filter(project=obj, status=Task.Status.DONE).count()
     
     class Meta:
         model = Project
