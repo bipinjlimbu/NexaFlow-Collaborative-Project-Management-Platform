@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getTask } from "@/services/taskService";
-import type { Task } from "@/types/task";
+import { changeTaskStatus, getTask } from "@/services/taskService";
+import type { Task, TaskStatus } from "@/types/task";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -13,6 +13,8 @@ export default function TaskDetailPage() {
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [showStatusMenu, setShowStatusMenu] = useState(false);
+    const [changingStatus, setChangingStatus] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -43,6 +45,30 @@ export default function TaskDetailPage() {
 
         loadTask();
     }, [params.id, router]);
+
+    const handleStatusChange = async (status: TaskStatus) => {
+        if (!task || changingStatus || status === task.status) {
+            setShowStatusMenu(false);
+            return;
+        }
+
+        try {
+            setChangingStatus(true);
+
+            await changeTaskStatus(task.id, status);
+
+            setTask({
+                ...task,
+                status,
+            });
+
+            setShowStatusMenu(false);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setChangingStatus(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -109,6 +135,32 @@ export default function TaskDetailPage() {
                         ? "Backlog"
                         : "Done";
 
+    const statusOptions: {
+        value: TaskStatus;
+        label: string;
+    }[] = [
+            {
+                value: "backlog",
+                label: "Backlog",
+            },
+            {
+                value: "todo",
+                label: "To Do",
+            },
+            {
+                value: "in_progress",
+                label: "In Progress",
+            },
+            {
+                value: "review",
+                label: "In Review",
+            },
+            {
+                value: "done",
+                label: "Done",
+            },
+        ];
+
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50">
             <div className="mx-auto max-w-5xl px-6 py-10">
@@ -162,12 +214,48 @@ export default function TaskDetailPage() {
 
                 <section className="mb-6 rounded-xl border border-slate-800/80 bg-slate-900/30 p-4">
                     <div className="flex flex-col gap-3 sm:flex-row">
-                        <button
-                            type="button"
-                            className="flex-1 rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-sm font-medium text-indigo-400 transition hover:border-indigo-500/40 hover:bg-indigo-500/15 hover:text-indigo-300"
-                        >
-                            Change Status
-                        </button>
+                        <div className="relative flex-1">
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setShowStatusMenu(!showStatusMenu)
+                                }
+                                disabled={changingStatus}
+                                className="w-full rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-4 py-3 text-sm font-medium text-indigo-400 transition hover:border-indigo-500/40 hover:bg-indigo-500/15 hover:text-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {changingStatus
+                                    ? "Changing Status..."
+                                    : "Change Status"}
+                            </button>
+
+                            {showStatusMenu && (
+                                <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-slate-800 bg-slate-900 p-1.5 shadow-xl shadow-black/30">
+                                    {statusOptions.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            type="button"
+                                            onClick={() =>
+                                                handleStatusChange(
+                                                    option.value
+                                                )
+                                            }
+                                            className={`flex w - full items - center justify - between rounded - md px - 3 py - 2.5 text - left text - sm transition ${task.status === option.value
+                                                ? "bg-indigo-500/10 text-indigo-400"
+                                                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                                                } `}
+                                        >
+                                            <span>{option.label}</span>
+
+                                            {task.status === option.value && (
+                                                <span className="text-xs">
+                                                    ✓
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <button
                             type="button"
