@@ -52,6 +52,8 @@ interface ProjectErrors {
     name?: string;
     description?: string;
     workspace_id?: string;
+    status?: string;
+    priority?: string;
     start_date?: string;
     due_date?: string;
     detail?: string;
@@ -380,6 +382,8 @@ export default function ProjectsPage() {
                 name: projectName.trim(),
                 description: projectDescription.trim(),
                 workspace_id: selectedWorkspace.id,
+                status: "active",
+                priority: "medium",
                 start_date: projectStartDate,
                 due_date: projectDueDate,
             });
