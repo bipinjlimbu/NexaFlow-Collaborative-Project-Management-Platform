@@ -67,12 +67,23 @@ export default function TaskEditForm({
         setErrors({});
     }, [task]);
 
-    const getUserName = (user: Task["project"]["members"][number]) => {
+    const getMemberUser = (member: any) => {
+        return member.user || member;
+    };
+
+    const getUserName = (member: any) => {
+        const user = getMemberUser(member);
+
         if (user.first_name || user.last_name) {
             return `${user.first_name || ""} ${user.last_name || ""}`.trim();
         }
 
-        return user.username;
+        return user.username || user.email || `User #${user.id}`;
+    };
+
+    const getUserId = (member: any) => {
+        const user = getMemberUser(member);
+        return user.id;
     };
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -300,14 +311,18 @@ export default function TaskEditForm({
                                         Select member
                                     </option>
 
-                                    {task.project.members.map((member) => (
-                                        <option
-                                            key={member.id}
-                                            value={member.id}
-                                        >
-                                            {getUserName(member)}
-                                        </option>
-                                    ))}
+                                    {task.project.members.map((member) => {
+                                        const userId = getUserId(member);
+
+                                        return (
+                                            <option
+                                                key={userId}
+                                                value={userId}
+                                            >
+                                                {getUserName(member)}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
 
                                 {errors.assigned_to && (
