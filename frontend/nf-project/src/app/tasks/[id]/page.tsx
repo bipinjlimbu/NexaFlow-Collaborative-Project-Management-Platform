@@ -8,6 +8,7 @@ import {
     getTask,
 } from "@/services/taskService";
 import type { Task } from "@/types/task";
+import TaskDetailSkeleton from "@/components/TaskDetailSkeleton";
 
 export default function TaskDetailPage() {
     const params = useParams();
@@ -73,18 +74,7 @@ export default function TaskDetailPage() {
     };
 
     if (loading) {
-        return (
-            <main className="min-h-screen bg-slate-950 text-slate-50">
-                <div className="mx-auto max-w-5xl px-6 py-10">
-                    <div className="animate-pulse">
-                        <div className="h-4 w-32 rounded bg-slate-800" />
-                        <div className="mt-6 h-10 w-80 rounded bg-slate-800" />
-                        <div className="mt-3 h-4 w-96 rounded bg-slate-800" />
-                        <div className="mt-10 h-64 rounded-xl bg-slate-900" />
-                    </div>
-                </div>
-            </main>
-        );
+        return <TaskDetailSkeleton />;
     }
 
     if (error || !task) {
@@ -202,6 +192,13 @@ export default function TaskDetailPage() {
                             className="flex-1 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-400 transition hover:border-amber-500/40 hover:bg-amber-500/15 hover:text-amber-300"
                         >
                             Change Priority
+                        </button>
+
+                        <button
+                            type="button"
+                            className="flex-1 rounded-lg border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm font-medium text-sky-400 transition hover:border-sky-500/40 hover:bg-sky-500/15 hover:text-sky-300"
+                        >
+                            Edit Task
                         </button>
 
                         <button
