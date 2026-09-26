@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, X } from "lucide-react";
+import { Calendar, FolderKanban, X } from "lucide-react";
 import { createProject } from "@/services/projectService";
 import type {
     Project as ProjectData,
@@ -198,31 +198,47 @@ export default function AddProjectForm({
         }
     }
 
+    function inputClasses(
+        hasError: boolean,
+        extra = ""
+    ) {
+        return `w-full border bg-[#0F172A] text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${hasError
+            ? "border-rose-500/50 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/10"
+            : "border-slate-800 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10"
+            } ${extra}`;
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex justify-end">
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                 onClick={closeForm}
             />
 
-            <div className="relative flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-slate-950 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-slate-800 px-6 py-5">
-                    <div>
-                        <h2 className="text-lg font-semibold text-white">
-                            Create project
-                        </h2>
+            <aside className="relative flex h-full w-full max-w-xl flex-col border-l border-slate-800 bg-[#020617] shadow-2xl">
+                <div className="flex shrink-0 items-center justify-between border-b border-slate-800 bg-[#0F172A] px-5 py-5 sm:px-7">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                            <FolderKanban size={19} />
+                        </div>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                            Create a new project inside
-                            a workspace.
-                        </p>
+                        <div>
+                            <h2 className="text-base font-semibold text-slate-50">
+                                Create Project
+                            </h2>
+
+                            <p className="mt-0.5 text-xs text-slate-500">
+                                Add a new project to your workspace.
+                            </p>
+                        </div>
                     </div>
 
                     <button
                         type="button"
                         onClick={closeForm}
                         disabled={creatingProject}
-                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label="Close"
+                        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <X size={19} />
                     </button>
@@ -230,174 +246,94 @@ export default function AddProjectForm({
 
                 <form
                     onSubmit={handleCreateProject}
-                    className="flex flex-1 flex-col overflow-y-auto"
+                    className="flex min-h-0 flex-1 flex-col"
                 >
-                    <div className="flex-1 space-y-6 px-6 py-6">
-                        {projectErrors.detail && (
-                            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                                {projectErrors.detail}
+                    <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-7">
+                        <div className="space-y-6">
+                            {(projectErrors.detail ||
+                                projectErrors.error) && (
+                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3">
+                                        <p className="text-sm leading-5 text-rose-400">
+                                            {projectErrors.detail ||
+                                                projectErrors.error}
+                                        </p>
+                                    </div>
+                                )}
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Project name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    value={projectName}
+                                    onChange={(e) => {
+                                        setProjectName(
+                                            e.target.value
+                                        );
+                                        clearFieldError("name");
+                                    }}
+                                    placeholder="Enter project name"
+                                    className={`${inputClasses(
+                                        !!projectErrors.name
+                                    )} h-11 rounded-xl px-4`}
+                                />
+
+                                {projectErrors.name && (
+                                    <p className="mt-2 text-xs text-rose-400">
+                                        {projectErrors.name}
+                                    </p>
+                                )}
                             </div>
-                        )}
 
-                        {projectErrors.error && (
-                            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                                {projectErrors.error}
-                            </div>
-                        )}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Workspace
+                                </label>
 
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-200">
-                                Project name
-                            </label>
-
-                            <input
-                                type="text"
-                                value={projectName}
-                                onChange={(e) => {
-                                    setProjectName(
-                                        e.target.value
-                                    );
-                                    clearFieldError("name");
-                                }}
-                                placeholder="Enter project name"
-                                className={`h-11 w-full rounded-xl border bg-slate-900 px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${projectErrors.name
-                                        ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                        : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                    }`}
-                            />
-
-                            {projectErrors.name && (
-                                <p className="mt-2 text-xs text-red-400">
-                                    {projectErrors.name}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-200">
-                                Workspace
-                            </label>
-
-                            <select
-                                value={projectWorkspace}
-                                onChange={(e) => {
-                                    setProjectWorkspace(
-                                        e.target.value
-                                    );
-                                    clearFieldError(
-                                        "workspace_id"
-                                    );
-                                }}
-                                className={`h-11 w-full cursor-pointer rounded-xl border bg-slate-900 px-4 text-sm text-slate-100 outline-none transition ${projectErrors.workspace_id
-                                        ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                        : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                    }`}
-                            >
-                                {workspaces.length === 0 ? (
-                                    <option value="">
-                                        No workspace available
-                                    </option>
-                                ) : (
-                                    workspaces.map(
-                                        (workspace) => (
-                                            <option
-                                                key={
-                                                    workspace.id
-                                                }
-                                                value={
-                                                    workspace.id
-                                                }
-                                            >
-                                                {
-                                                    workspace.name
-                                                }
-                                            </option>
+                                <select
+                                    value={projectWorkspace}
+                                    onChange={(e) => {
+                                        setProjectWorkspace(
+                                            e.target.value
+                                        );
+                                        clearFieldError(
+                                            "workspace_id"
+                                        );
+                                    }}
+                                    className={`${inputClasses(
+                                        !!projectErrors.workspace_id
+                                    )} h-11 cursor-pointer rounded-xl px-4`}
+                                >
+                                    {workspaces.length === 0 ? (
+                                        <option value="">
+                                            No workspace available
+                                        </option>
+                                    ) : (
+                                        workspaces.map(
+                                            (workspace) => (
+                                                <option
+                                                    key={
+                                                        workspace.id
+                                                    }
+                                                    value={
+                                                        workspace.id
+                                                    }
+                                                >
+                                                    {
+                                                        workspace.name
+                                                    }
+                                                </option>
+                                            )
                                         )
-                                    )
-                                )}
-                            </select>
-
-                            {projectErrors.workspace_id && (
-                                <p className="mt-2 text-xs text-red-400">
-                                    {
-                                        projectErrors.workspace_id
-                                    }
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-200">
-                                Description
-                            </label>
-
-                            <textarea
-                                value={projectDescription}
-                                onChange={(e) => {
-                                    setProjectDescription(
-                                        e.target.value
-                                    );
-                                    clearFieldError(
-                                        "description"
-                                    );
-                                }}
-                                placeholder="Describe what this project is about..."
-                                rows={5}
-                                className={`w-full resize-none rounded-xl border bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${projectErrors.description
-                                        ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                        : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                    }`}
-                            />
-
-                            {projectErrors.description && (
-                                <p className="mt-2 text-xs text-red-400">
-                                    {
-                                        projectErrors.description
-                                    }
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-slate-200">
-                                    Status
-                                </label>
-
-                                <select
-                                    value={projectStatus}
-                                    onChange={(e) => {
-                                        setProjectStatus(
-                                            e.target
-                                                .value as BackendProjectStatus
-                                        );
-                                        clearFieldError(
-                                            "status"
-                                        );
-                                    }}
-                                    className={`h-11 w-full cursor-pointer rounded-xl border bg-slate-900 px-4 text-sm text-slate-100 outline-none transition ${projectErrors.status
-                                            ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                            : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                        }`}
-                                >
-                                    <option value="planning">
-                                        Planning
-                                    </option>
-                                    <option value="active">
-                                        Active
-                                    </option>
-                                    <option value="inactive">
-                                        Inactive
-                                    </option>
-                                    <option value="archived">
-                                        Archived
-                                    </option>
+                                    )}
                                 </select>
 
-                                {projectErrors.status && (
-                                    <p className="mt-2 text-xs text-red-400">
+                                {projectErrors.workspace_id && (
+                                    <p className="mt-2 text-xs text-rose-400">
                                         {
-                                            projectErrors.status
+                                            projectErrors.workspace_id
                                         }
                                     </p>
                                 )}
@@ -405,158 +341,261 @@ export default function AddProjectForm({
 
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-slate-200">
-                                    Priority
+                                    Description
                                 </label>
 
-                                <select
-                                    value={projectPriority}
+                                <textarea
+                                    value={projectDescription}
                                     onChange={(e) => {
-                                        setProjectPriority(
-                                            e.target
-                                                .value as BackendProjectPriority
+                                        setProjectDescription(
+                                            e.target.value
                                         );
                                         clearFieldError(
-                                            "priority"
+                                            "description"
                                         );
                                     }}
-                                    className={`h-11 w-full cursor-pointer rounded-xl border bg-slate-900 px-4 text-sm text-slate-100 outline-none transition ${projectErrors.priority
-                                            ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                            : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                        }`}
-                                >
-                                    <option value="low">
-                                        Low
-                                    </option>
-                                    <option value="medium">
-                                        Medium
-                                    </option>
-                                    <option value="high">
-                                        High
-                                    </option>
-                                    <option value="urgent">
-                                        Urgent
-                                    </option>
-                                </select>
+                                    placeholder="Describe what this project is about..."
+                                    rows={5}
+                                    className={`${inputClasses(
+                                        !!projectErrors.description
+                                    )} resize-none rounded-xl px-4 py-3 leading-6`}
+                                />
 
-                                {projectErrors.priority && (
-                                    <p className="mt-2 text-xs text-red-400">
+                                {projectErrors.description && (
+                                    <p className="mt-2 text-xs text-rose-400">
                                         {
-                                            projectErrors.priority
-                                        }
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                            <div>
-                                <label className="mb-2 block text-sm font-medium text-slate-200">
-                                    Start date
-                                </label>
-
-                                <div className="relative">
-                                    <Calendar
-                                        size={16}
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-                                    />
-
-                                    <input
-                                        type="date"
-                                        value={
-                                            projectStartDate
-                                        }
-                                        onChange={(e) => {
-                                            setProjectStartDate(
-                                                e.target.value
-                                            );
-                                            clearFieldError(
-                                                "start_date"
-                                            );
-                                        }}
-                                        className={`h-11 w-full rounded-xl border bg-slate-900 pl-10 pr-3 text-sm text-slate-100 outline-none transition ${projectErrors.start_date
-                                                ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                                : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            }`}
-                                    />
-                                </div>
-
-                                {projectErrors.start_date && (
-                                    <p className="mt-2 text-xs text-red-400">
-                                        {
-                                            projectErrors.start_date
+                                            projectErrors.description
                                         }
                                     </p>
                                 )}
                             </div>
 
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-slate-200">
-                                    Due date
-                                </label>
+                                <div className="mb-3">
+                                    <h3 className="text-sm font-medium text-slate-200">
+                                        Project settings
+                                    </h3>
 
-                                <div className="relative">
-                                    <Calendar
-                                        size={16}
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-                                    />
-
-                                    <input
-                                        type="date"
-                                        value={
-                                            projectDueDate
-                                        }
-                                        min={
-                                            projectStartDate ||
-                                            undefined
-                                        }
-                                        onChange={(e) => {
-                                            setProjectDueDate(
-                                                e.target.value
-                                            );
-                                            clearFieldError(
-                                                "due_date"
-                                            );
-                                        }}
-                                        className={`h-11 w-full rounded-xl border bg-slate-900 pl-10 pr-3 text-sm text-slate-100 outline-none transition ${projectErrors.due_date
-                                                ? "border-red-500/50 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30"
-                                                : "border-slate-800 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                                            }`}
-                                    />
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Set the current status and priority.
+                                    </p>
                                 </div>
 
-                                {projectErrors.due_date && (
-                                    <p className="mt-2 text-xs text-red-400">
-                                        {
-                                            projectErrors.due_date
-                                        }
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-2 block text-xs font-medium text-slate-400">
+                                            Status
+                                        </label>
+
+                                        <select
+                                            value={
+                                                projectStatus
+                                            }
+                                            onChange={(e) => {
+                                                setProjectStatus(
+                                                    e.target
+                                                        .value as BackendProjectStatus
+                                                );
+                                                clearFieldError(
+                                                    "status"
+                                                );
+                                            }}
+                                            className={`${inputClasses(
+                                                !!projectErrors.status
+                                            )} h-11 cursor-pointer rounded-xl px-4`}
+                                        >
+                                            <option value="planning">
+                                                Planning
+                                            </option>
+                                            <option value="active">
+                                                Active
+                                            </option>
+                                            <option value="inactive">
+                                                Inactive
+                                            </option>
+                                            <option value="archived">
+                                                Archived
+                                            </option>
+                                        </select>
+
+                                        {projectErrors.status && (
+                                            <p className="mt-2 text-xs text-rose-400">
+                                                {
+                                                    projectErrors.status
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-xs font-medium text-slate-400">
+                                            Priority
+                                        </label>
+
+                                        <select
+                                            value={
+                                                projectPriority
+                                            }
+                                            onChange={(e) => {
+                                                setProjectPriority(
+                                                    e.target
+                                                        .value as BackendProjectPriority
+                                                );
+                                                clearFieldError(
+                                                    "priority"
+                                                );
+                                            }}
+                                            className={`${inputClasses(
+                                                !!projectErrors.priority
+                                            )} h-11 cursor-pointer rounded-xl px-4`}
+                                        >
+                                            <option value="low">
+                                                Low
+                                            </option>
+                                            <option value="medium">
+                                                Medium
+                                            </option>
+                                            <option value="high">
+                                                High
+                                            </option>
+                                            <option value="urgent">
+                                                Urgent
+                                            </option>
+                                        </select>
+
+                                        {projectErrors.priority && (
+                                            <p className="mt-2 text-xs text-rose-400">
+                                                {
+                                                    projectErrors.priority
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="mb-3">
+                                    <h3 className="text-sm font-medium text-slate-200">
+                                        Timeline
+                                    </h3>
+
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Choose when the project starts and ends.
                                     </p>
-                                )}
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-2 block text-xs font-medium text-slate-400">
+                                            Start date
+                                        </label>
+
+                                        <div className="relative">
+                                            <Calendar
+                                                size={16}
+                                                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                                            />
+
+                                            <input
+                                                type="date"
+                                                value={
+                                                    projectStartDate
+                                                }
+                                                onChange={(e) => {
+                                                    setProjectStartDate(
+                                                        e.target.value
+                                                    );
+                                                    clearFieldError(
+                                                        "start_date"
+                                                    );
+                                                }}
+                                                className={`${inputClasses(
+                                                    !!projectErrors.start_date
+                                                )} h-11 rounded-xl pl-10 pr-3`}
+                                            />
+                                        </div>
+
+                                        {projectErrors.start_date && (
+                                            <p className="mt-2 text-xs text-rose-400">
+                                                {
+                                                    projectErrors.start_date
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-xs font-medium text-slate-400">
+                                            Due date
+                                        </label>
+
+                                        <div className="relative">
+                                            <Calendar
+                                                size={16}
+                                                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                                            />
+
+                                            <input
+                                                type="date"
+                                                value={
+                                                    projectDueDate
+                                                }
+                                                min={
+                                                    projectStartDate ||
+                                                    undefined
+                                                }
+                                                onChange={(e) => {
+                                                    setProjectDueDate(
+                                                        e.target.value
+                                                    );
+                                                    clearFieldError(
+                                                        "due_date"
+                                                    );
+                                                }}
+                                                className={`${inputClasses(
+                                                    !!projectErrors.due_date
+                                                )} h-11 rounded-xl pl-10 pr-3`}
+                                            />
+                                        </div>
+
+                                        {projectErrors.due_date && (
+                                            <p className="mt-2 text-xs text-rose-400">
+                                                {
+                                                    projectErrors.due_date
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-5">
-                        <button
-                            type="button"
-                            onClick={closeForm}
-                            disabled={creatingProject}
-                            className="h-10 cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            Cancel
-                        </button>
+                    <div className="shrink-0 border-t border-slate-800 bg-[#0F172A] px-5 py-4 sm:px-7">
+                        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={closeForm}
+                                disabled={creatingProject}
+                                className="h-11 w-full cursor-pointer rounded-xl border border-slate-800 bg-[#111827] px-5 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                            >
+                                Cancel
+                            </button>
 
-                        <button
-                            type="submit"
-                            disabled={creatingProject}
-                            className="h-10 cursor-pointer rounded-xl bg-indigo-600 px-5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {creatingProject
-                                ? "Creating..."
-                                : "Create project"}
-                        </button>
+                            <button
+                                type="submit"
+                                disabled={creatingProject}
+                                className="h-11 w-full cursor-pointer rounded-xl bg-indigo-500 px-5 text-sm font-medium text-white transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                            >
+                                {creatingProject
+                                    ? "Creating..."
+                                    : "Create Project"}
+                            </button>
+                        </div>
                     </div>
                 </form>
-            </div>
+            </aside>
         </div>
     );
 }
