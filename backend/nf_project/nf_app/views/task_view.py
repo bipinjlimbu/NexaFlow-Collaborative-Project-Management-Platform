@@ -132,8 +132,12 @@ def change_task_status_view(request, pk):
     new_status = request.data.get('status')
     if new_status not in dict(Task.Status.choices):
         return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
-
+        
     task.status = new_status
+    if new_status == Task.Status.DONE:
+        task.completed_at = task.updated_at
+    else:
+        task.completed_at = None
     task.save()
     return Response({"message": "Task status updated successfully."}, status=status.HTTP_200_OK)
 
