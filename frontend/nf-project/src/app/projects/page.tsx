@@ -308,246 +308,279 @@ export default function ProjectsPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
-            <div className="mx-auto max-w-7xl px-6 py-10">
-                <div className="mb-8 flex flex-col justify-between gap-6 border-b border-slate-800/80 pb-6 sm:flex-row sm:items-end">
-                    <div>
-                        <span className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-400">
-                            NexaFlow Ecosystem
-                        </span>
+        <main className="min-h-screen bg-[#020617] text-slate-50 selection:bg-indigo-500 selection:text-white">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] px-5 py-6 sm:px-7 sm:py-8 lg:px-8">
+                    <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-indigo-500/5 blur-3xl" />
 
-                        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                            Projects
-                        </h1>
+                    <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-2xl">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-400">
+                                <LayoutList size={13} />
+                                Project workspace
+                            </div>
 
-                        <p className="mt-2 max-w-xl text-sm text-slate-400">
-                            Monitor progress, manage timelines,
-                            and track deliverables across all
-                            workspace teams.
-                        </p>
+                            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+                                Projects
+                            </h1>
+
+                            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400 sm:text-base">
+                                Manage projects, monitor progress,
+                                and keep your workspace work organized.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={openCreatePanel}
+                            className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-medium text-white transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        >
+                            <Plus size={18} />
+                            Create Project
+                        </button>
                     </div>
+                </section>
 
-                    <button
-                        type="button"
-                        onClick={openCreatePanel}
-                        className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                    >
-                        <Plus size={18} />
-                        Create project
-                    </button>
-                </div>
+                <section className="mt-6">
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                        <div className="flex min-h-11 flex-1 items-center rounded-xl border border-slate-800 bg-[#0F172A] px-4 transition focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20">
+                            <Search
+                                size={18}
+                                className="shrink-0 text-slate-500"
+                            />
 
-                <div className="mb-8 flex flex-col gap-4 sm:flex-row">
-                    <div className="flex flex-1 items-center rounded-xl border border-slate-800 bg-slate-900/60 px-4 transition-colors focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/50">
-                        <Search
-                            size={18}
-                            className="text-slate-500"
-                        />
+                            <input
+                                type="text"
+                                placeholder="Search projects..."
+                                value={searchQuery}
+                                onChange={(e) =>
+                                    setSearchQuery(
+                                        e.target.value
+                                    )
+                                }
+                                className="h-11 w-full bg-transparent px-3 text-sm text-slate-100 outline-none placeholder:text-slate-500"
+                            />
+                        </div>
 
-                        <input
-                            type="text"
-                            placeholder="Search projects..."
-                            value={searchQuery}
+                        <select
+                            value={statusFilter}
                             onChange={(e) =>
-                                setSearchQuery(
-                                    e.target.value
-                                )
+                                setStatusFilter(e.target.value)
                             }
-                            className="h-11 w-full bg-transparent px-3 text-sm text-slate-100 outline-none placeholder:text-slate-500"
-                        />
+                            className="h-11 cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-200 outline-none transition focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
+                        >
+                            <option value="All">
+                                All Statuses
+                            </option>
+                            <option value="Active">
+                                Active
+                            </option>
+                            <option value="Planning">
+                                Planning
+                            </option>
+                            <option value="In Review">
+                                In Review
+                            </option>
+                            <option value="Completed">
+                                Completed
+                            </option>
+                        </select>
                     </div>
+                </section>
 
-                    <select
-                        value={statusFilter}
-                        onChange={(e) =>
-                            setStatusFilter(e.target.value)
-                        }
-                        className="h-11 cursor-pointer rounded-xl border border-slate-800 bg-slate-900/60 px-4 text-sm text-slate-100 outline-none transition-colors focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
-                    >
-                        <option value="All">
-                            All Statuses
-                        </option>
-                        <option value="Active">
-                            Active
-                        </option>
-                        <option value="Planning">
-                            Planning
-                        </option>
-                        <option value="In Review">
-                            In Review
-                        </option>
-                        <option value="Completed">
-                            Completed
-                        </option>
-                    </select>
-                </div>
-
-                <section>
-                    <div className="mb-5 flex items-center justify-between">
+                <section className="mt-8">
+                    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-slate-100">
-                                Your projects
+                                Your Projects
                             </h2>
 
-                            <p className="mt-0.5 text-sm text-slate-400">
+                            <p className="mt-1 text-sm text-slate-400">
                                 Projects you are actively involved in.
                             </p>
                         </div>
 
-                        <span className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-400">
+                        <span className="w-fit rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-slate-400">
                             {filteredProjects.length} projects
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredProjects.map((project) => {
-                            const StatusIcon =
-                                statusConfig[
-                                    project.status
-                                ].icon;
+                    {filteredProjects.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/50 px-6 py-16 text-center">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800 bg-[#111827] text-slate-500">
+                                <Search size={22} />
+                            </div>
 
-                            return (
-                                <div
-                                    key={project.id}
-                                    className="group relative flex flex-col justify-between rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-slate-700 hover:bg-slate-900/60 hover:shadow-xl hover:shadow-indigo-500/5"
-                                >
-                                    <div>
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-600/20 text-sm font-semibold text-indigo-400">
-                                                {project.initials}
-                                            </div>
+                            <h3 className="mt-5 text-base font-semibold text-slate-200">
+                                No projects found
+                            </h3>
 
-                                            <button
-                                                type="button"
-                                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
-                                            >
-                                                <MoreHorizontal
-                                                    size={18}
-                                                />
-                                            </button>
-                                        </div>
+                            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                                Try a different search or status filter,
+                                or create a new project.
+                            </p>
 
-                                        <div className="mt-5">
-                                            <div className="flex items-center gap-2.5">
-                                                <h3 className="truncate font-semibold text-slate-100 group-hover:text-white">
-                                                    {
-                                                        project.name
-                                                    }
-                                                </h3>
+                            <button
+                                type="button"
+                                onClick={openCreatePanel}
+                                className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-medium text-white transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            >
+                                <Plus size={16} />
+                                Create Project
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                            {filteredProjects.map((project) => {
+                                const StatusIcon =
+                                    statusConfig[
+                                        project.status
+                                    ].icon;
 
-                                                <span
-                                                    className={`flex shrink-0 items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color}`}
+                                return (
+                                    <div
+                                        key={project.id}
+                                        className="group flex min-h-[320px] flex-col justify-between rounded-2xl border border-slate-800 bg-[#111827] p-5 transition duration-200 hover:border-slate-700 hover:bg-[#151d2d]"
+                                    >
+                                        <div>
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                                    {project.initials}
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
                                                 >
-                                                    <StatusIcon
-                                                        size={10}
+                                                    <MoreHorizontal
+                                                        size={18}
                                                     />
-                                                    {
-                                                        project.status
-                                                    }
-                                                </span>
+                                                </button>
                                             </div>
 
-                                            <p className="mt-2 min-h-[40px] line-clamp-2 text-sm leading-relaxed text-slate-400">
-                                                {
-                                                    project.description
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
+                                            <div className="mt-5">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <h3 className="min-w-0 flex-1 truncate text-base font-semibold text-slate-100 group-hover:text-white">
+                                                        {
+                                                            project.name
+                                                        }
+                                                    </h3>
 
-                                    <div>
-                                        <div className="mt-6 grid grid-cols-2 gap-3">
-                                            <div className="rounded-xl border border-slate-800/60 bg-slate-950/60 p-3">
-                                                <div className="flex items-center justify-between text-slate-400">
+                                                    <span
+                                                        className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color}`}
+                                                    >
+                                                        <StatusIcon
+                                                            size={10}
+                                                        />
+                                                        {
+                                                            project.status
+                                                        }
+                                                    </span>
+                                                </div>
+
+                                                <p className="mt-2 line-clamp-2 min-h-[40px] text-sm leading-5 text-slate-400">
+                                                    {
+                                                        project.description
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-3">
                                                     <div className="flex items-center gap-2">
                                                         <Activity
                                                             size={14}
                                                             className="text-indigo-400"
                                                         />
 
-                                                        <span className="text-xs">
+                                                        <span className="text-xs text-slate-400">
                                                             Priority
                                                         </span>
                                                     </div>
 
-                                                    <span className="text-xs font-semibold text-slate-300">
+                                                    <p className="mt-2 text-sm font-semibold text-slate-200">
                                                         {
                                                             project.priority
                                                         }
-                                                    </span>
+                                                    </p>
+
+                                                    <p className="mt-1 text-[11px] text-slate-500">
+                                                        Project priority
+                                                    </p>
                                                 </div>
 
-                                                <div className="mt-2 text-xs text-slate-500">
-                                                    Project priority
-                                                </div>
-                                            </div>
+                                                <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <LayoutList
+                                                            size={14}
+                                                            className="text-indigo-400"
+                                                        />
 
-                                            <div className="rounded-xl border border-slate-800/60 bg-slate-950/60 p-3">
-                                                <div className="flex items-center gap-2 text-slate-400">
-                                                    <LayoutList
-                                                        size={14}
-                                                        className="text-indigo-400"
-                                                    />
+                                                        <span className="text-xs text-slate-400">
+                                                            Tasks
+                                                        </span>
+                                                    </div>
 
-                                                    <span className="text-xs">
-                                                        Tasks
-                                                    </span>
-                                                </div>
-
-                                                <p className="mt-1 text-base font-semibold text-slate-100">
-                                                    {
-                                                        project.completedTasks
-                                                    }{" "}
-                                                    <span className="text-xs font-medium text-slate-500">
-                                                        /
+                                                    <p className="mt-2 text-sm font-semibold text-slate-100">
                                                         {
-                                                            project.totalTasks
-                                                        }
-                                                    </span>
-                                                </p>
+                                                            project.completedTasks
+                                                        }{" "}
+                                                        <span className="text-xs font-medium text-slate-500">
+                                                            /
+                                                            {
+                                                                project.totalTasks
+                                                            }
+                                                        </span>
+                                                    </p>
+
+                                                    <p className="mt-1 text-[11px] text-slate-500">
+                                                        Completed
+                                                    </p>
+                                                </div>
                                             </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    router.push(
+                                                        `/projects/${project.id}`
+                                                    )
+                                                }
+                                                className="mt-4 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-[#0F172A] text-sm font-medium text-slate-300 transition hover:border-indigo-500/40 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                                            >
+                                                Open Project
+                                                <ArrowRight
+                                                    size={15}
+                                                    className="transition-transform duration-200 group-hover:translate-x-1"
+                                                />
+                                            </button>
                                         </div>
-
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                router.push(
-                                                    `/projects/${project.id}`
-                                                )
-                                            }
-                                            className="mt-5 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-indigo-500/50 hover:bg-indigo-600 hover:text-white"
-                                        >
-                                            Open project
-
-                                            <ArrowRight
-                                                size={15}
-                                                className="transition-transform duration-200 group-hover:translate-x-1"
-                                            />
-                                        </button>
                                     </div>
+                                );
+                            })}
+
+                            <button
+                                type="button"
+                                onClick={openCreatePanel}
+                                className="group flex min-h-[320px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/40 p-6 text-center transition duration-200 hover:border-indigo-500/40 hover:bg-[#0F172A]"
+                            >
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] text-slate-500 transition group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
+                                    <Plus size={20} />
                                 </div>
-                            );
-                        })}
 
-                        <button
-                            type="button"
-                            onClick={openCreatePanel}
-                            className="group flex min-h-[320px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 p-6 text-center transition-all duration-200 hover:border-indigo-500/50 hover:bg-slate-900/40"
-                        >
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 transition-colors duration-200 group-hover:border-indigo-500/40 group-hover:bg-indigo-600/10 group-hover:text-indigo-400">
-                                <Plus size={20} />
-                            </div>
+                                <h3 className="mt-4 text-sm font-semibold text-slate-200 group-hover:text-white">
+                                    Create a Project
+                                </h3>
 
-                            <h3 className="mt-4 text-sm font-semibold text-slate-200 group-hover:text-white">
-                                Create a project
-                            </h3>
-
-                            <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-slate-400">
-                                Start a new project and invite
-                                your team to collaborate.
-                            </p>
-                        </button>
-                    </div>
+                                <p className="mt-1 max-w-[220px] text-xs leading-5 text-slate-500">
+                                    Start a new project and bring your
+                                    team together.
+                                </p>
+                            </button>
+                        </div>
+                    )}
                 </section>
             </div>
 
