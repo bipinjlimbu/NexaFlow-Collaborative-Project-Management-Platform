@@ -35,7 +35,6 @@ import AddTaskForm from "@/components/AddTaskForm";
 function formatDate(date: string | null) {
     if (!date) return "Not set";
 
-
     const parsedDate = new Date(`${date}T00:00:00`);
 
     if (Number.isNaN(parsedDate.getTime())) {
@@ -47,7 +46,6 @@ function formatDate(date: string | null) {
         day: "2-digit",
         year: "numeric",
     });
-
 }
 
 function formatDateTime(date: string) {
@@ -89,7 +87,7 @@ function getPriorityClass(priority: Project["priority"]) {
         case "low":
             return "border-slate-700 bg-slate-800/60 text-slate-300";
         case "high":
-            return "border-orange-500/30 bg-orange-500/10 text-orange-400";
+            return "border-amber-500/30 bg-amber-500/10 text-amber-400";
         case "urgent":
             return "border-rose-500/30 bg-rose-500/10 text-rose-400";
         default:
@@ -132,7 +130,7 @@ function getTaskStatusClass(status: Task["status"]) {
         case "in_progress":
             return "border-amber-500/30 bg-amber-500/10 text-amber-400";
         case "review":
-            return "border-purple-500/30 bg-purple-500/10 text-purple-400";
+            return "border-indigo-500/30 bg-indigo-500/10 text-indigo-300";
         case "done":
             return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
         default:
@@ -158,7 +156,7 @@ function getTaskPriorityClass(priority: Task["priority"]) {
         case "low":
             return "border-slate-700 bg-slate-800/60 text-slate-300";
         case "high":
-            return "border-orange-500/30 bg-orange-500/10 text-orange-400";
+            return "border-amber-500/30 bg-amber-500/10 text-amber-400";
         case "urgent":
             return "border-rose-500/30 bg-rose-500/10 text-rose-400";
         default:
@@ -385,26 +383,33 @@ export default function ProjectDetailPage() {
 
     if (error || !project) {
         return (
-            <main className="min-h-screen bg-slate-950 text-slate-50">
-                <div className="mx-auto max-w-5xl px-6 py-10">
+            <main className="min-h-screen bg-[#020617] text-slate-50">
+                <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
                     <button
                         type="button"
                         onClick={() => router.push("/projects")}
-                        className="group mb-8 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-400 backdrop-blur-sm transition-all duration-200 hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+                        className="group mb-8 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-[#111827] px-4 py-2.5 text-xs font-semibold text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100"
                     >
                         <ArrowLeft
                             size={16}
-                            className="transition-transform duration-200 group-hover:-translate-x-1"
+                            className="transition-transform group-hover:-translate-x-1"
                         />
-                        Back to projects
+                        Back to Projects
                     </button>
 
-                    <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-sm">
-                        <h1 className="text-lg font-semibold text-rose-400">
+                    <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/10">
+                            <FolderKanban
+                                size={19}
+                                className="text-rose-400"
+                            />
+                        </div>
+
+                        <h1 className="mt-5 text-lg font-semibold text-rose-400">
                             Project not found
                         </h1>
 
-                        <p className="mt-2 text-sm text-slate-400">
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
                             {error || "Unable to load this project."}
                         </p>
                     </div>
@@ -414,41 +419,49 @@ export default function ProjectDetailPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
-            <div className="mx-auto max-w-7xl px-6 py-10">
+        <main className="min-h-screen bg-[#020617] text-slate-50 selection:bg-indigo-500 selection:text-white">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
                 <button
                     type="button"
                     onClick={() => router.push("/projects")}
-                    className="group mb-8 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800/80 bg-slate-900/50 px-4 py-2 text-xs font-semibold text-slate-400 backdrop-blur-sm transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/80 hover:text-white"
+                    className="group mb-6 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-[#111827] px-4 py-2.5 text-xs font-semibold text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100"
                 >
                     <ArrowLeft
                         size={16}
-                        className="transition-transform duration-200 group-hover:-translate-x-1"
+                        className="transition-transform group-hover:-translate-x-1"
                     />
-                    Back to projects
+                    Back to Projects
                 </button>
 
-                <div className="mb-8 border-b border-slate-800/80 pb-8">
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3.5">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-600/20 text-indigo-400 shadow-md shadow-indigo-950/20">
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] p-6 sm:p-8">
+                    <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
+
+                    <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0 max-w-3xl">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
                                     <FolderKanban size={22} />
                                 </div>
 
-                                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                                    {project.name}
-                                </h1>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">
+                                        Project #{project.id}
+                                    </p>
+
+                                    <h1 className="mt-1 break-words text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+                                        {project.name}
+                                    </h1>
+                                </div>
                             </div>
 
-                            <p className="max-w-2xl text-sm leading-relaxed text-slate-400">
+                            <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
                                 {project.description ||
                                     "No project description provided."}
                             </p>
 
-                            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                            <div className="mt-5 flex flex-wrap items-center gap-2">
                                 <span
-                                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-sm ${getStatusClass(
+                                    className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${getStatusClass(
                                         project.status
                                     )}`}
                                 >
@@ -456,7 +469,7 @@ export default function ProjectDetailPage() {
                                 </span>
 
                                 <span
-                                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-sm ${getPriorityClass(
+                                    className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${getPriorityClass(
                                         project.priority
                                     )}`}
                                 >
@@ -466,15 +479,15 @@ export default function ProjectDetailPage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2.5 sm:shrink-0">
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row lg:shrink-0">
                             <button
                                 type="button"
                                 onClick={() =>
                                     setShowEditForm(true)
                                 }
-                                className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-300 shadow-sm transition-all duration-200 hover:border-indigo-500/50 hover:bg-indigo-600 hover:text-white active:scale-95"
+                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 text-sm font-medium text-indigo-300 transition hover:border-indigo-500/50 hover:bg-indigo-500 hover:text-white"
                             >
-                                <Pencil size={14} />
+                                <Pencil size={15} />
                                 Edit
                             </button>
 
@@ -482,120 +495,102 @@ export default function ProjectDetailPage() {
                                 type="button"
                                 onClick={handleDelete}
                                 disabled={deleting}
-                                className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-400 shadow-sm transition-all duration-200 hover:border-rose-500/50 hover:bg-rose-600 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-sm font-medium text-rose-400 transition hover:border-rose-500/50 hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                <Trash2 size={14} />
+                                <Trash2 size={15} />
                                 {deleting ? "Deleting..." : "Delete"}
                             </button>
                         </div>
                     </div>
 
                     {deleteError && (
-                        <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
+                        <div className="relative mt-5 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
                             {deleteError}
                         </div>
                     )}
-                </div>
+                </section>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                                <FolderKanban size={18} />
+                <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {[
+                        {
+                            label: "Project ID",
+                            value: `#${project.id}`,
+                            icon: FolderKanban,
+                        },
+                        {
+                            label: "Start date",
+                            value: formatDate(project.start_date),
+                            icon: Calendar,
+                        },
+                        {
+                            label: "Due date",
+                            value: formatDate(project.due_date),
+                            icon: Clock,
+                        },
+                        {
+                            label: "Tasks",
+                            value: tasks.length,
+                            icon: CheckCircle2,
+                        },
+                    ].map((stat) => {
+                        const Icon = stat.icon;
+
+                        return (
+                            <div
+                                key={stat.label}
+                                className="rounded-2xl border border-slate-800 bg-[#111827] p-5"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                        <Icon size={18} />
+                                    </div>
+
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-slate-500">
+                                            {stat.label}
+                                        </p>
+
+                                        <p className="mt-1 truncate text-sm font-semibold text-slate-200">
+                                            {stat.value}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
+                        );
+                    })}
+                </section>
 
-                            <div>
-                                <p className="text-xs text-slate-500">
-                                    Project ID
-                                </p>
-
-                                <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    #{project.id}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                                <Calendar size={18} />
-                            </div>
-
-                            <div>
-                                <p className="text-xs text-slate-500">
-                                    Start date
-                                </p>
-
-                                <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    {formatDate(project.start_date)}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                                <Clock size={18} />
-                            </div>
-
-                            <div>
-                                <p className="text-xs text-slate-500">
-                                    Due date
-                                </p>
-
-                                <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    {formatDate(project.due_date)}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                                <CheckCircle2 size={18} />
-                            </div>
-
-                            <div>
-                                <p className="text-xs text-slate-500">
-                                    Tasks
-                                </p>
-
-                                <p className="mt-1 text-sm font-semibold text-slate-200">
-                                    {tasks.length}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm">
-                    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <section className="mt-6 rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-100">
-                                Tasks
-                            </h2>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-lg font-semibold text-slate-100">
+                                    Tasks
+                                </h2>
+
+                                <span className="rounded-md bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-400">
+                                    {tasks.length}
+                                </span>
+                            </div>
 
                             <p className="mt-1 text-sm text-slate-500">
-                                Manage tasks for this project
+                                Manage tasks for this project.
                             </p>
                         </div>
 
                         <button
                             type="button"
                             onClick={() => setShowAddTaskForm(true)}
-                            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 ring-1 ring-indigo-500/50 transition-all duration-200 hover:bg-indigo-500 hover:shadow-indigo-600/25 active:scale-[0.98]"
+                            className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
                         >
                             <Plus size={17} />
-                            Add task
+                            Add Task
                         </button>
                     </div>
 
                     <div className="mt-5">
                         {tasksLoading ? (
-                            <div className="flex items-center justify-center py-10">
+                            <div className="flex items-center justify-center rounded-xl border border-slate-800 bg-[#0F172A] py-12">
                                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
                             </div>
                         ) : tasksError ? (
@@ -605,8 +600,8 @@ export default function ProjectDetailPage() {
                                 </p>
                             </div>
                         ) : tasks.length === 0 ? (
-                            <div className="rounded-xl border border-dashed border-slate-800/80 bg-slate-950/20 p-8 text-center">
-                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-500">
+                            <div className="rounded-xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-10 text-center">
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] text-slate-500">
                                     <CheckCircle2 size={21} />
                                 </div>
 
@@ -614,7 +609,7 @@ export default function ProjectDetailPage() {
                                     No tasks yet
                                 </p>
 
-                                <p className="mt-1 text-sm text-slate-500">
+                                <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
                                     Add your first task to start working on this
                                     project.
                                 </p>
@@ -634,18 +629,22 @@ export default function ProjectDetailPage() {
                                     return (
                                         <div
                                             key={task.id}
-                                            onClick={() => router.push(`/tasks/${task.id}`)}
-                                            className="cursor-pointer rounded-xl border border-slate-800/80 bg-slate-950/40 p-5 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80"
+                                            onClick={() =>
+                                                router.push(
+                                                    `/tasks/${task.id}`
+                                                )
+                                            }
+                                            className="group cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700 hover:bg-slate-800/50 sm:p-5"
                                         >
-                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                                                 <div className="min-w-0">
                                                     <div className="flex flex-wrap items-center gap-2">
-                                                        <h3 className="truncate text-sm font-semibold text-slate-200">
+                                                        <h3 className="min-w-0 text-sm font-semibold text-slate-200 group-hover:text-white">
                                                             {task.title}
                                                         </h3>
 
                                                         <span
-                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getTaskStatusClass(
+                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getTaskStatusClass(
                                                                 task.status
                                                             )}`}
                                                         >
@@ -655,7 +654,7 @@ export default function ProjectDetailPage() {
                                                         </span>
 
                                                         <span
-                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getTaskPriorityClass(
+                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getTaskPriorityClass(
                                                                 task.priority
                                                             )}`}
                                                         >
@@ -665,14 +664,14 @@ export default function ProjectDetailPage() {
                                                         </span>
                                                     </div>
 
-                                                    <p className="mt-2 text-sm leading-relaxed text-slate-500">
+                                                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">
                                                         {task.description ||
                                                             "No task description provided."}
                                                     </p>
                                                 </div>
 
-                                                <div className="shrink-0 text-left sm:text-right">
-                                                    <p className="text-xs text-slate-500">
+                                                <div className="shrink-0 lg:min-w-28 lg:text-right">
+                                                    <p className="text-xs text-slate-600">
                                                         Due date
                                                     </p>
 
@@ -684,23 +683,23 @@ export default function ProjectDetailPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-800/70 pt-4">
-                                                <div>
-                                                    <p className="text-xs text-slate-600">
+                                            <div className="mt-4 grid grid-cols-1 gap-3 border-t border-slate-800 pt-4 sm:grid-cols-3">
+                                                <div className="min-w-0">
+                                                    <p className="text-[11px] text-slate-600">
                                                         Assigned to
                                                     </p>
 
-                                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                                    <p className="mt-1 truncate text-xs font-medium text-slate-400">
                                                         {assignedName}
                                                     </p>
                                                 </div>
 
-                                                <div>
-                                                    <p className="text-xs text-slate-600">
+                                                <div className="min-w-0">
+                                                    <p className="text-[11px] text-slate-600">
                                                         Created by
                                                     </p>
 
-                                                    <p className="mt-1 text-xs font-medium text-slate-400">
+                                                    <p className="mt-1 truncate text-xs font-medium text-slate-400">
                                                         {task.created_by
                                                             .first_name ||
                                                             task.created_by
@@ -712,7 +711,7 @@ export default function ProjectDetailPage() {
                                                 </div>
 
                                                 <div>
-                                                    <p className="text-xs text-slate-600">
+                                                    <p className="text-[11px] text-slate-600">
                                                         Created
                                                     </p>
 
@@ -729,12 +728,12 @@ export default function ProjectDetailPage() {
                             </div>
                         )}
                     </div>
-                </div>
+                </section>
 
-                <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm">
+                <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
                         <h2 className="text-lg font-semibold text-slate-100">
-                            Project details
+                            Project Details
                         </h2>
 
                         <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -804,13 +803,13 @@ export default function ProjectDetailPage() {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
                         <h2 className="text-lg font-semibold text-slate-100">
-                            Created by
+                            Created By
                         </h2>
 
                         <div className="mt-5 flex items-center gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700/80 bg-indigo-500/10 text-sm font-semibold text-indigo-400 shadow-inner">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
                                 {project.created_by.profile_picture ? (
                                     <img
                                         src={`${MEDIA_URL}${project.created_by.profile_picture}`}
@@ -826,32 +825,38 @@ export default function ProjectDetailPage() {
                                 )}
                             </div>
 
-                            <div>
-                                <p className="text-sm font-semibold text-slate-200">
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-slate-200">
                                     {project.created_by.first_name ||
                                         project.created_by.last_name
                                         ? `${project.created_by.first_name || ""} ${project.created_by.last_name || ""}`.trim()
                                         : project.created_by.username}
                                 </p>
 
-                                <p className="mt-0.5 text-xs text-slate-500">
+                                <p className="mt-0.5 truncate text-xs text-slate-500">
                                     @{project.created_by.username}
                                 </p>
 
-                                <p className="mt-0.5 text-xs text-slate-500">
+                                <p className="mt-0.5 truncate text-xs text-slate-600">
                                     {project.created_by.email}
                                 </p>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div className="mt-6 rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm">
-                    <div className="flex items-center justify-between">
+                <section className="mt-6 rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-100">
-                                Project members
-                            </h2>
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-lg font-semibold text-slate-100">
+                                    Project Members
+                                </h2>
+
+                                <span className="rounded-md bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-400">
+                                    {projectMembers.length}
+                                </span>
+                            </div>
 
                             <p className="mt-1 text-sm text-slate-500">
                                 {projectMembers.length} member
@@ -861,26 +866,19 @@ export default function ProjectDetailPage() {
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <button
-                                type="button"
-                                onClick={handleAddMember}
-                                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 ring-1 ring-indigo-500/50 transition-all duration-200 hover:bg-indigo-500 hover:shadow-indigo-600/25 active:scale-[0.98]"
-                            >
-                                <Plus size={17} />
-                                Add member
-                            </button>
-
-                            <Users
-                                size={20}
-                                className="text-slate-500"
-                            />
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleAddMember}
+                            className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                        >
+                            <Plus size={17} />
+                            Add Member
+                        </button>
                     </div>
 
                     <div className="mt-5">
                         {membersLoading ? (
-                            <div className="flex items-center justify-center py-10">
+                            <div className="flex items-center justify-center rounded-xl border border-slate-800 bg-[#0F172A] py-12">
                                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
                             </div>
                         ) : membersError ? (
@@ -890,7 +888,7 @@ export default function ProjectDetailPage() {
                                 </p>
                             </div>
                         ) : projectMembers.length === 0 ? (
-                            <div className="rounded-xl border border-dashed border-slate-800/80 bg-slate-950/20 p-8 text-center">
+                            <div className="rounded-xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-8 text-center">
                                 <p className="text-sm font-medium text-slate-400">
                                     No project members yet
                                 </p>
@@ -911,9 +909,9 @@ export default function ProjectDetailPage() {
                                     return (
                                         <div
                                             key={member.id}
-                                            className="flex items-center gap-3 rounded-xl border border-slate-800/80 bg-slate-950/40 p-4 backdrop-blur-sm transition-all duration-200 hover:border-slate-700/80"
+                                            className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700"
                                         >
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700/80 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
                                                 {user.profile_picture ? (
                                                     <img
                                                         src={`${MEDIA_URL}${user.profile_picture}`}
@@ -954,20 +952,20 @@ export default function ProjectDetailPage() {
                             </div>
                         )}
                     </div>
-                </div>
+                </section>
             </div>
 
             {showMembers && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
-                    <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-                        <div className="flex items-center justify-between">
-                            <div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6">
+                    <div className="flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] shadow-2xl">
+                        <div className="flex shrink-0 items-center justify-between border-b border-slate-800 p-5 sm:p-6">
+                            <div className="min-w-0">
                                 <h2 className="text-lg font-semibold text-slate-100">
-                                    Workspace members
+                                    Workspace Members
                                 </h2>
 
                                 <p className="mt-1 text-sm text-slate-500">
-                                    Select a member to add to this project
+                                    Select a member to add to this project.
                                 </p>
                             </div>
 
@@ -978,118 +976,124 @@ export default function ProjectDetailPage() {
                                     setAddMemberError("");
                                     setAddMemberSuccess("");
                                 }}
-                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white active:scale-95"
+                                className="ml-4 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-100"
                             >
                                 <X size={19} />
                             </button>
                         </div>
 
-                        {addMemberSuccess && (
-                            <div className="mt-5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-center">
-                                <p className="text-sm text-emerald-400">
-                                    {addMemberSuccess}
-                                </p>
-                            </div>
-                        )}
-
-                        {addMemberError && (
-                            <div className="mt-5 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-center">
-                                <p className="text-sm text-rose-400">
-                                    {addMemberError}
-                                </p>
-                            </div>
-                        )}
-
-                        <div className="mt-5 max-h-96 overflow-y-auto pr-1">
-                            {workspaceMembersLoading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
-                                </div>
-                            ) : workspaceMembersError ? (
-                                <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-center">
-                                    <p className="text-sm text-rose-400">
-                                        {workspaceMembersError}
+                        <div className="overflow-y-auto p-5 sm:p-6">
+                            {addMemberSuccess && (
+                                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                                    <p className="text-sm text-emerald-400">
+                                        {addMemberSuccess}
                                     </p>
-                                </div>
-                            ) : workspaceMembers.length === 0 ? (
-                                <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center">
-                                    <p className="text-sm text-slate-500">
-                                        No workspace members found.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {workspaceMembers.map((member) => {
-                                        const user = member.user;
-
-                                        const fullName =
-                                            `${user.first_name || ""} ${user.last_name || ""}`.trim();
-
-                                        return (
-                                            <div
-                                                key={user.id}
-                                                className="flex items-center justify-between rounded-xl border border-slate-800/80 bg-slate-950/40 p-4"
-                                            >
-                                                <div className="flex min-w-0 items-center gap-3">
-                                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700/80 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
-                                                        {user.profile_picture ? (
-                                                            <img
-                                                                src={`${MEDIA_URL}${user.profile_picture}`}
-                                                                alt={
-                                                                    fullName ||
-                                                                    user.username
-                                                                }
-                                                                className="h-full w-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            (
-                                                                fullName ||
-                                                                user.username ||
-                                                                "U"
-                                                            )
-                                                                .slice(0, 2)
-                                                                .toUpperCase()
-                                                        )}
-                                                    </div>
-
-                                                    <div className="min-w-0">
-                                                        <p className="truncate text-sm font-medium text-slate-200">
-                                                            {fullName ||
-                                                                user.username}
-                                                        </p>
-
-                                                        <p className="truncate text-xs text-slate-500">
-                                                            @{user.username}
-                                                        </p>
-
-                                                        <p className="truncate text-xs text-slate-600">
-                                                            {user.email}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleAddWorkspaceMember(
-                                                            user.id
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        addingMemberId ===
-                                                        user.id
-                                                    }
-                                                    className="ml-4 shrink-0 cursor-pointer rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-950/30 transition-all duration-200 hover:bg-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-                                                >
-                                                    {addingMemberId === user.id
-                                                        ? "Adding..."
-                                                        : "Add"}
-                                                </button>
-                                            </div>
-                                        );
-                                    })}
                                 </div>
                             )}
+
+                            {addMemberError && (
+                                <div className="mt-3 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
+                                    <p className="text-sm text-rose-400">
+                                        {addMemberError}
+                                    </p>
+                                </div>
+                            )}
+
+                            <div className="mt-4">
+                                {workspaceMembersLoading ? (
+                                    <div className="flex items-center justify-center rounded-xl border border-slate-800 bg-[#0F172A] py-12">
+                                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
+                                    </div>
+                                ) : workspaceMembersError ? (
+                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-center">
+                                        <p className="text-sm text-rose-400">
+                                            {workspaceMembersError}
+                                        </p>
+                                    </div>
+                                ) : workspaceMembers.length === 0 ? (
+                                    <div className="rounded-xl border border-dashed border-slate-800 p-6 text-center">
+                                        <p className="text-sm text-slate-500">
+                                            No workspace members found.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {workspaceMembers.map((member) => {
+                                            const user = member.user;
+
+                                            const fullName =
+                                                `${user.first_name || ""} ${user.last_name || ""}`.trim();
+
+                                            return (
+                                                <div
+                                                    key={user.id}
+                                                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-4"
+                                                >
+                                                    <div className="flex min-w-0 items-center gap-3">
+                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                            {user.profile_picture ? (
+                                                                <img
+                                                                    src={`${MEDIA_URL}${user.profile_picture}`}
+                                                                    alt={
+                                                                        fullName ||
+                                                                        user.username
+                                                                    }
+                                                                    className="h-full w-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                (
+                                                                    fullName ||
+                                                                    user.username ||
+                                                                    "U"
+                                                                )
+                                                                    .slice(
+                                                                        0,
+                                                                        2
+                                                                    )
+                                                                    .toUpperCase()
+                                                            )}
+                                                        </div>
+
+                                                        <div className="min-w-0">
+                                                            <p className="truncate text-sm font-medium text-slate-200">
+                                                                {fullName ||
+                                                                    user.username}
+                                                            </p>
+
+                                                            <p className="truncate text-xs text-slate-500">
+                                                                @{user.username}
+                                                            </p>
+
+                                                            <p className="truncate text-xs text-slate-600">
+                                                                {user.email}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleAddWorkspaceMember(
+                                                                user.id
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            addingMemberId ===
+                                                            user.id
+                                                        }
+                                                        className="ml-2 shrink-0 cursor-pointer rounded-lg bg-indigo-500 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {addingMemberId ===
+                                                            user.id
+                                                            ? "Adding..."
+                                                            : "Add"}
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
