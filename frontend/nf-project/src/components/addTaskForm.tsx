@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { createTask } from "@/services/taskService";
 import type {
     Task,
@@ -154,16 +154,23 @@ export default function AddTaskForm({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
-            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-lg font-semibold text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020617]/85 p-3 backdrop-blur-sm sm:p-5">
+            <div className="relative flex max-h-[calc(100vh-24px)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-2xl shadow-black/40 sm:max-h-[calc(100vh-40px)]">
+                <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-800 px-5 py-5 sm:px-7">
+                    <div className="min-w-0">
+                        <div className="mb-2 flex items-center gap-2">
+                            <div className="h-1.5 w-8 rounded-full bg-indigo-500" />
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                Project task
+                            </span>
+                        </div>
+
+                        <h2 className="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
                             Add task
                         </h2>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                            Create a new task for this project
+                        <p className="mt-1.5 text-xs leading-5 text-slate-400 sm:text-sm">
+                            Create a task, set its priority and assign it to a project member.
                         </p>
                     </div>
 
@@ -171,221 +178,268 @@ export default function AddTaskForm({
                         type="button"
                         onClick={onClose}
                         disabled={saving}
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label="Close"
+                        className="shrink-0 rounded-xl border border-slate-800 bg-[#111827] p-2 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <X size={19} />
+                        <X className="h-5 w-5" />
                     </button>
                 </div>
 
-                {generalError && (
-                    <div className="mt-5 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-400">
-                        {generalError}
-                    </div>
-                )}
+                <div className="overflow-y-auto">
+                    {generalError && (
+                        <div className="mx-5 mt-5 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300 sm:mx-7">
+                            {generalError}
+                        </div>
+                    )}
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="mt-5 space-y-5"
-                >
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-slate-400">
-                            Task title
-                        </label>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="space-y-5 px-5 py-5 sm:px-7 sm:py-6"
+                    >
+                        <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-slate-100">
+                                    Task information
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Give the task a clear title and description.
+                                </p>
+                            </div>
 
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={(event) =>
-                                setTitle(event.target.value)
-                            }
-                            className={`w-full rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.title
-                                ? "border-rose-500/50 focus:border-rose-500"
-                                : "border-slate-800 focus:border-indigo-500"
-                                }`}
-                        />
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Task title
+                                    </label>
 
-                        {errors.title && (
-                            <p className="mt-1.5 text-xs text-rose-400">
-                                {errors.title}
-                            </p>
-                        )}
-                    </div>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={(event) =>
+                                            setTitle(event.target.value)
+                                        }
+                                        placeholder="e.g. Design the login page"
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${errors.title
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
 
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-slate-400">
-                            Description
-                        </label>
+                                    {errors.title && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.title}
+                                        </p>
+                                    )}
+                                </div>
 
-                        <textarea
-                            value={description}
-                            onChange={(event) =>
-                                setDescription(
-                                    event.target.value
-                                )
-                            }
-                            rows={4}
-                            className={`w-full resize-none rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.description
-                                ? "border-rose-500/50 focus:border-rose-500"
-                                : "border-slate-800 focus:border-indigo-500"
-                                }`}
-                        />
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Description
+                                    </label>
 
-                        {errors.description && (
-                            <p className="mt-1.5 text-xs text-rose-400">
-                                {errors.description}
-                            </p>
-                        )}
-                    </div>
+                                    <textarea
+                                        value={description}
+                                        onChange={(event) =>
+                                            setDescription(
+                                                event.target.value
+                                            )
+                                        }
+                                        placeholder="Describe what needs to be completed..."
+                                        rows={5}
+                                        className={`w-full resize-none rounded-xl border bg-[#020617] px-3.5 py-3 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 ${errors.description
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-2 block text-xs font-medium text-slate-400">
-                                Status
-                            </label>
-
-                            <select
-                                value={status}
-                                onChange={(event) =>
-                                    setStatus(
-                                        event.target.value as TaskStatus
-                                    )
-                                }
-                                className="w-full cursor-pointer rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-indigo-500"
-                            >
-                                <option value="backlog">
-                                    Backlog
-                                </option>
-                                <option value="todo">
-                                    To Do
-                                </option>
-                                <option value="in_progress">
-                                    In Progress
-                                </option>
-                                <option value="review">
-                                    Review
-                                </option>
-                                <option value="done">
-                                    Done
-                                </option>
-                            </select>
+                                    {errors.description && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.description}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="mb-2 block text-xs font-medium text-slate-400">
-                                Priority
-                            </label>
+                        <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-slate-100">
+                                    Task settings
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Choose the current status and priority.
+                                </p>
+                            </div>
 
-                            <select
-                                value={priority}
-                                onChange={(event) =>
-                                    setPriority(
-                                        event.target.value as TaskPriority
-                                    )
-                                }
-                                className="w-full cursor-pointer rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-indigo-500"
-                            >
-                                <option value="low">
-                                    Low
-                                </option>
-                                <option value="medium">
-                                    Medium
-                                </option>
-                                <option value="high">
-                                    High
-                                </option>
-                                <option value="urgent">
-                                    Urgent
-                                </option>
-                            </select>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Status
+                                    </label>
+
+                                    <select
+                                        value={status}
+                                        onChange={(event) =>
+                                            setStatus(
+                                                event.target.value as TaskStatus
+                                            )
+                                        }
+                                        className="w-full cursor-pointer rounded-xl border border-slate-800 bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 [color-scheme:dark]"
+                                    >
+                                        <option value="backlog">
+                                            Backlog
+                                        </option>
+                                        <option value="todo">
+                                            To Do
+                                        </option>
+                                        <option value="in_progress">
+                                            In Progress
+                                        </option>
+                                        <option value="review">
+                                            Review
+                                        </option>
+                                        <option value="done">
+                                            Done
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Priority
+                                    </label>
+
+                                    <select
+                                        value={priority}
+                                        onChange={(event) =>
+                                            setPriority(
+                                                event.target.value as TaskPriority
+                                            )
+                                        }
+                                        className="w-full cursor-pointer rounded-xl border border-slate-800 bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 [color-scheme:dark]"
+                                    >
+                                        <option value="low">
+                                            Low
+                                        </option>
+                                        <option value="medium">
+                                            Medium
+                                        </option>
+                                        <option value="high">
+                                            High
+                                        </option>
+                                        <option value="urgent">
+                                            Urgent
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-slate-400">
-                            Due date
-                        </label>
+                        <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-slate-100">
+                                    Assignment
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Set the deadline and choose who will handle the task.
+                                </p>
+                            </div>
 
-                        <input
-                            type="date"
-                            value={dueDate}
-                            onChange={(event) =>
-                                setDueDate(event.target.value)
-                            }
-                            className={`w-full rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.due_date
-                                ? "border-rose-500/50 focus:border-rose-500"
-                                : "border-slate-800 focus:border-indigo-500"
-                                }`}
-                        />
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Due date
+                                    </label>
 
-                        {errors.due_date && (
-                            <p className="mt-1.5 text-xs text-rose-400">
-                                {errors.due_date}
-                            </p>
-                        )}
-                    </div>
+                                    <input
+                                        type="date"
+                                        value={dueDate}
+                                        onChange={(event) =>
+                                            setDueDate(event.target.value)
+                                        }
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] ${errors.due_date
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
 
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-slate-400">
-                            Assign to
-                        </label>
+                                    {errors.due_date && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.due_date}
+                                        </p>
+                                    )}
+                                </div>
 
-                        <select
-                            value={assignedTo}
-                            onChange={(event) =>
-                                setAssignedTo(
-                                    event.target.value
-                                )
-                            }
-                            className={`w-full cursor-pointer rounded-xl border bg-slate-950/60 px-4 py-3 text-sm text-slate-200 outline-none transition ${errors.assigned_to
-                                ? "border-rose-500/50 focus:border-rose-500"
-                                : "border-slate-800 focus:border-indigo-500"
-                                }`}
-                        >
-                            <option value="">
-                                Select a project member
-                            </option>
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Assign to
+                                    </label>
 
-                            {projectMembers.map((member) => (
-                                <option
-                                    key={member.id}
-                                    value={member.user.id}
-                                >
-                                    {member.user.first_name ||
-                                        member.user.last_name
-                                        ? `${member.user.first_name} ${member.user.last_name}`.trim()
-                                        : member.user.username}
-                                </option>
-                            ))}
-                        </select>
+                                    <select
+                                        value={assignedTo}
+                                        onChange={(event) =>
+                                            setAssignedTo(
+                                                event.target.value
+                                            )
+                                        }
+                                        className={`w-full cursor-pointer rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] ${errors.assigned_to
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    >
+                                        <option value="">
+                                            Select a project member
+                                        </option>
 
-                        {errors.assigned_to && (
-                            <p className="mt-1.5 text-xs text-rose-400">
-                                {errors.assigned_to}
-                            </p>
-                        )}
-                    </div>
+                                        {projectMembers.map((member) => (
+                                            <option
+                                                key={member.id}
+                                                value={member.user.id}
+                                            >
+                                                {member.user.first_name ||
+                                                    member.user.last_name
+                                                    ? `${member.user.first_name} ${member.user.last_name}`.trim()
+                                                    : member.user.username}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            disabled={saving}
-                            className="cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            Cancel
-                        </button>
+                                    {errors.assigned_to && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.assigned_to}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
 
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="cursor-pointer rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/40 transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {saving
-                                ? "Creating..."
-                                : "Create task"}
-                        </button>
-                    </div>
-                </form>
+                        <div className="flex flex-col-reverse gap-3 border-t border-slate-800 pt-5 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={saving}
+                                className="w-full rounded-xl border border-slate-800 bg-[#111827] px-5 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                            >
+                                {saving ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>Creating...</span>
+                                    </>
+                                ) : (
+                                    "Create task"
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
