@@ -3,6 +3,13 @@
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+    CheckCircle2,
+    Circle,
+    Clock3,
+    ListFilter,
+    Search,
+} from "lucide-react";
 import TasksSkeleton from "@/components/TasksSkeleton";
 import { getTasks } from "@/services/taskService";
 import type { Task as ApiTask } from "@/types/task";
@@ -26,10 +33,10 @@ interface Task {
 }
 
 const statusStyles: Record<TaskStatus, string> = {
-    TODO: "border-slate-700 bg-slate-800/70 text-slate-400",
-    IN_PROGRESS: "border-indigo-500/20 bg-indigo-500/10 text-indigo-400",
-    IN_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-400",
-    DONE: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    TODO: "border-slate-700 bg-slate-800/70 text-slate-300",
+    IN_PROGRESS: "border-indigo-500/20 bg-indigo-500/10 text-indigo-300",
+    IN_REVIEW: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+    DONE: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
 };
 
 const statusLabels: Record<TaskStatus, string> = {
@@ -198,7 +205,8 @@ function getUpdatedLabel(date: string) {
 
 export default function TasksPage() {
     const router = useRouter();
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isAuthenticated, setIsAuthenticated] =
+        useState<boolean | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -223,7 +231,8 @@ export default function TasksPage() {
 
         window.addEventListener("auth-change", checkAuth);
 
-        return () => window.removeEventListener("auth-change", checkAuth);
+        return () =>
+            window.removeEventListener("auth-change", checkAuth);
     }, [router]);
 
     useEffect(() => {
@@ -275,13 +284,16 @@ export default function TasksPage() {
                 task.assignee.toLowerCase().includes(searchValue);
 
             const matchesStatus =
-                statusFilter === "All" || task.status === statusFilter;
+                statusFilter === "All" ||
+                task.status === statusFilter;
 
             const matchesPriority =
-                priorityFilter === "All" || task.priority === priorityFilter;
+                priorityFilter === "All" ||
+                task.priority === priorityFilter;
 
             const matchesProject =
-                projectFilter === "All" || task.project === projectFilter;
+                projectFilter === "All" ||
+                task.project === projectFilter;
 
             return (
                 matchesSearch &&
@@ -290,15 +302,26 @@ export default function TasksPage() {
                 matchesProject
             );
         });
-    }, [tasks, search, statusFilter, priorityFilter, projectFilter]);
+    }, [
+        tasks,
+        search,
+        statusFilter,
+        priorityFilter,
+        projectFilter,
+    ]);
 
-    const todoCount = tasks.filter((task) => task.status === "TODO").length;
+    const todoCount = tasks.filter(
+        (task) => task.status === "TODO"
+    ).length;
+
     const progressCount = tasks.filter(
         (task) => task.status === "IN_PROGRESS"
     ).length;
+
     const reviewCount = tasks.filter(
         (task) => task.status === "IN_REVIEW"
     ).length;
+
     const completedCount = tasks.filter(
         (task) => task.status === "DONE"
     ).length;
@@ -308,137 +331,173 @@ export default function TasksPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-50">
-            <div className="mx-auto max-w-7xl px-6 py-10">
-                <header className="mb-10">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <main className="min-h-screen bg-[#020617] text-slate-50">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+                <header className="mb-8">
+                    <div className="flex flex-col gap-6">
                         <div>
                             <div className="mb-3 flex items-center gap-2">
-                                <span className="rounded-md border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-400">
+                                <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
                                     Task Management
                                 </span>
 
-                                <span className="text-xs text-slate-600">
+                                <span className="text-xs text-slate-700">
                                     /
                                 </span>
 
-                                <span className="font-mono text-[11px] text-slate-500">
-                                    NEXAFLOW
+                                <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-slate-500">
+                                    NexaFlow
                                 </span>
                             </div>
 
-                            <h1 className="text-3xl font-semibold tracking-tight text-white">
+                            <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
                                 Tasks
                             </h1>
 
                             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                                Track assignments, priorities, deadlines, and progress across
-                                your projects.
+                                Keep track of assignments, deadlines, priorities,
+                                and progress across your projects.
                             </p>
                         </div>
                     </div>
                 </header>
 
-                <section className="mb-8 grid grid-cols-2 gap-4 xl:grid-cols-5">
-                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                            Total Tasks
-                        </span>
+                <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Total
+                            </span>
 
-                        <div className="mt-3 text-2xl font-semibold text-white">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                <ListFilter className="h-4 w-4" />
+                            </div>
+                        </div>
+
+                        <div className="mt-4 text-2xl font-semibold text-slate-50">
                             {tasks.length.toString().padStart(2, "0")}
                         </div>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            All tasks
+                        </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 To Do
                             </span>
 
-                            <span className="h-2 w-2 rounded-full bg-slate-500" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-slate-400">
+                                <Circle className="h-4 w-4" />
+                            </div>
                         </div>
 
-                        <div className="mt-3 text-2xl font-semibold text-white">
+                        <div className="mt-4 text-2xl font-semibold text-slate-50">
                             {todoCount.toString().padStart(2, "0")}
                         </div>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            Not started
+                        </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 In Progress
                             </span>
 
-                            <span className="h-2 w-2 rounded-full bg-indigo-400" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+                                <Clock3 className="h-4 w-4" />
+                            </div>
                         </div>
 
-                        <div className="mt-3 text-2xl font-semibold text-white">
+                        <div className="mt-4 text-2xl font-semibold text-slate-50">
                             {progressCount.toString().padStart(2, "0")}
                         </div>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            Currently active
+                        </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-5">
+                    <div className="col-span-2 rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:col-span-2 sm:p-5 lg:col-span-1">
                         <div className="flex items-center justify-between">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                                In Review
-                            </span>
-
-                            <span className="h-2 w-2 rounded-full bg-amber-400" />
-                        </div>
-
-                        <div className="mt-3 text-2xl font-semibold text-white">
-                            {reviewCount.toString().padStart(2, "0")}
-                        </div>
-                    </div>
-
-                    <div className="col-span-2 rounded-xl border border-slate-800/80 bg-slate-900/40 p-5 xl:col-span-1">
-                        <div className="flex items-center justify-between">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Completed
                             </span>
 
-                            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                                <CheckCircle2 className="h-4 w-4" />
+                            </div>
                         </div>
 
-                        <div className="mt-3 text-2xl font-semibold text-white">
+                        <div className="mt-4 text-2xl font-semibold text-slate-50">
                             {completedCount.toString().padStart(2, "0")}
                         </div>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                            Finished tasks
+                        </p>
                     </div>
                 </section>
 
-                <section className="mb-8 rounded-xl border border-slate-800/80 bg-slate-900/30 p-4">
-                    <div className="flex flex-col gap-3 xl:flex-row">
-                        <div className="relative flex-1">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                                ⌕
-                            </span>
+                <section className="mb-8 rounded-2xl border border-slate-800 bg-[#111827] p-3 sm:p-4">
+                    <div className="mb-3 flex items-center gap-2 px-1">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
+                            <ListFilter className="h-3.5 w-3.5" />
+                        </div>
+
+                        <div>
+                            <h2 className="text-xs font-semibold text-slate-200">
+                                Find tasks
+                            </h2>
+
+                            <p className="hidden text-[10px] text-slate-500 sm:block">
+                                Search and filter your task list
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
+                        <div className="relative">
+                            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
 
                             <input
                                 type="text"
                                 placeholder="Search tasks, projects, or assignees..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="h-11 w-full rounded-lg border border-slate-800 bg-slate-950/70 pl-10 pr-4 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-indigo-500/50"
+                                className="h-11 w-full rounded-xl border border-slate-800 bg-[#020617] pl-10 pr-4 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                             />
                         </div>
 
                         <select
                             value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="h-11 rounded-lg border border-slate-800 bg-slate-950 px-4 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
+                            onChange={(e) =>
+                                setStatusFilter(e.target.value)
+                            }
+                            className="h-11 w-full rounded-xl border border-slate-800 bg-[#020617] px-3.5 text-sm text-slate-300 outline-none transition hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 [color-scheme:dark]"
                         >
                             <option value="All">All Status</option>
                             <option value="TODO">To Do</option>
-                            <option value="IN_PROGRESS">In Progress</option>
-                            <option value="IN_REVIEW">In Review</option>
+                            <option value="IN_PROGRESS">
+                                In Progress
+                            </option>
+                            <option value="IN_REVIEW">
+                                In Review
+                            </option>
                             <option value="DONE">Done</option>
                         </select>
 
                         <select
                             value={priorityFilter}
-                            onChange={(e) => setPriorityFilter(e.target.value)}
-                            className="h-11 rounded-lg border border-slate-800 bg-slate-950 px-4 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
+                            onChange={(e) =>
+                                setPriorityFilter(e.target.value)
+                            }
+                            className="h-11 w-full rounded-xl border border-slate-800 bg-[#020617] px-3.5 text-sm text-slate-300 outline-none transition hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 [color-scheme:dark]"
                         >
                             <option value="All">All Priority</option>
                             <option value="URGENT">Urgent</option>
@@ -449,8 +508,10 @@ export default function TasksPage() {
 
                         <select
                             value={projectFilter}
-                            onChange={(e) => setProjectFilter(e.target.value)}
-                            className="h-11 rounded-lg border border-slate-800 bg-slate-950 px-4 text-sm text-slate-300 outline-none focus:border-indigo-500/50"
+                            onChange={(e) =>
+                                setProjectFilter(e.target.value)
+                            }
+                            className="h-11 w-full rounded-xl border border-slate-800 bg-[#020617] px-3.5 text-sm text-slate-300 outline-none transition hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 [color-scheme:dark]"
                         >
                             <option value="All">All Projects</option>
 
@@ -464,91 +525,99 @@ export default function TasksPage() {
                 </section>
 
                 <section>
-                    <div className="mb-5 flex items-center justify-between">
+                    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h2 className="text-lg font-semibold text-white">
-                                Task Stream
+                            <h2 className="text-lg font-semibold text-slate-50">
+                                Task list
                             </h2>
 
                             <p className="mt-1 text-xs text-slate-500">
-                                {filteredTasks.length} tasks matching your filters
+                                {filteredTasks.length}{" "}
+                                {filteredTasks.length === 1
+                                    ? "task"
+                                    : "tasks"}{" "}
+                                matching your filters
                             </p>
                         </div>
 
-                        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">
-                            {filteredTasks.length.toString().padStart(2, "0")} RESULTS
+                        <span className="self-start rounded-lg border border-slate-800 bg-[#111827] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:self-auto">
+                            {filteredTasks.length
+                                .toString()
+                                .padStart(2, "0")}{" "}
+                            Results
                         </span>
                     </div>
 
                     {filteredTasks.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/20 px-6 py-16 text-center">
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-xl text-slate-500">
-                                ⌕
+                        <div className="rounded-2xl border border-dashed border-slate-800 bg-[#111827]/50 px-6 py-16 text-center">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800 bg-[#0F172A] text-slate-500">
+                                <Search className="h-5 w-5" />
                             </div>
 
-                            <h3 className="mt-4 text-sm font-semibold text-white">
+                            <h3 className="mt-5 text-sm font-semibold text-slate-100">
                                 No tasks found
                             </h3>
 
-                            <p className="mt-1 text-xs text-slate-500">
-                                Try changing your search or filters.
+                            <p className="mx-auto mt-1.5 max-w-sm text-xs leading-5 text-slate-500">
+                                Try changing your search terms or filters
+                                to find what you're looking for.
                             </p>
                         </div>
                     ) : (
-                        <div className="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/30">
-                            <div className="hidden border-b border-slate-800/80 px-6 py-3 lg:grid lg:grid-cols-[minmax(280px,1.8fr)_1fr_130px_120px_120px] lg:gap-6">
-                                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#111827]">
+                            <div className="hidden border-b border-slate-800 bg-[#0F172A]/70 px-5 py-3 lg:grid lg:grid-cols-[minmax(280px,1.8fr)_minmax(140px,1fr)_130px_110px_120px] lg:gap-5 xl:px-6">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Task
                                 </span>
 
-                                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Project
                                 </span>
 
-                                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Status
                                 </span>
 
-                                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Priority
                                 </span>
 
-                                <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-slate-600">
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Due
                                 </span>
                             </div>
 
-                            <div className="divide-y divide-slate-800/80">
+                            <div className="divide-y divide-slate-800">
                                 {filteredTasks.map((task) => (
                                     <Link
                                         key={task.id}
                                         href={`/tasks/${task.id}`}
-                                        className="group block px-6 py-5 transition hover:bg-slate-900/70"
+                                        className="group block px-4 py-5 transition hover:bg-[#0F172A]/70 sm:px-5 lg:px-5 xl:px-6"
                                     >
-                                        <div className="grid items-center gap-5 lg:grid-cols-[minmax(280px,1.8fr)_1fr_130px_120px_120px] lg:gap-6">
+                                        <div className="grid gap-4 lg:grid-cols-[minmax(280px,1.8fr)_minmax(140px,1fr)_130px_110px_120px] lg:items-center lg:gap-5">
                                             <div className="min-w-0">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-slate-800 bg-slate-950">
+                                                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-[#020617]">
                                                         <span
                                                             className={`h-2 w-2 rounded-full ${priorityDots[task.priority]}`}
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0">
+                                                    <div className="min-w-0 flex-1">
                                                         <h3 className="truncate text-sm font-semibold text-slate-100 transition group-hover:text-indigo-300">
                                                             {task.title}
                                                         </h3>
 
-                                                        <p className="mt-1 line-clamp-1 text-xs text-slate-500">
+                                                        <p className="mt-1 line-clamp-1 text-xs leading-5 text-slate-500">
                                                             {task.description}
                                                         </p>
 
-                                                        <div className="mt-2 flex items-center gap-2">
-                                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-[9px] font-semibold text-slate-300">
+                                                        <div className="mt-3 flex min-w-0 items-center gap-2">
+                                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[9px] font-semibold text-slate-300">
                                                                 {task.initials}
                                                             </div>
 
-                                                            <span className="text-[11px] text-slate-500">
+                                                            <span className="max-w-[150px] truncate text-[11px] text-slate-400">
                                                                 {task.assignee}
                                                             </span>
 
@@ -556,7 +625,7 @@ export default function TasksPage() {
                                                                 •
                                                             </span>
 
-                                                            <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-slate-600">
+                                                            <span className="max-w-[140px] truncate text-[10px] uppercase tracking-[0.06em] text-slate-600">
                                                                 {task.workspace}
                                                             </span>
                                                         </div>
@@ -564,17 +633,21 @@ export default function TasksPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="hidden min-w-0 lg:block">
-                                                <p className="truncate text-xs font-medium text-slate-300">
-                                                    {task.project}
-                                                </p>
-
-                                                <p className="mt-1 text-[10px] text-slate-600">
+                                            <div className="flex items-center justify-between border-t border-slate-800 pt-3 lg:block lg:border-0 lg:pt-0">
+                                                <span className="text-[10px] uppercase tracking-[0.1em] text-slate-600 lg:hidden">
                                                     Project
+                                                </span>
+
+                                                <p className="max-w-[180px] truncate text-xs font-medium text-slate-300 lg:max-w-none">
+                                                    {task.project}
                                                 </p>
                                             </div>
 
-                                            <div>
+                                            <div className="flex items-center justify-between lg:block">
+                                                <span className="text-[10px] uppercase tracking-[0.1em] text-slate-600 lg:hidden">
+                                                    Status
+                                                </span>
+
                                                 <span
                                                     className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-medium ${statusStyles[task.status]}`}
                                                 >
@@ -582,34 +655,49 @@ export default function TasksPage() {
                                                 </span>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
-                                                <span
-                                                    className={`h-1.5 w-1.5 rounded-full ${priorityDots[task.priority]}`}
-                                                />
-
-                                                <span
-                                                    className={`text-xs font-medium ${priorityStyles[task.priority]}`}
-                                                >
-                                                    {task.priority.charAt(0) +
-                                                        task.priority
-                                                            .slice(1)
-                                                            .toLowerCase()}
+                                            <div className="flex items-center justify-between lg:block">
+                                                <span className="text-[10px] uppercase tracking-[0.1em] text-slate-600 lg:hidden">
+                                                    Priority
                                                 </span>
+
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`h-1.5 w-1.5 rounded-full ${priorityDots[task.priority]}`}
+                                                    />
+
+                                                    <span
+                                                        className={`text-xs font-medium ${priorityStyles[task.priority]}`}
+                                                    >
+                                                        {task.priority
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                            task.priority
+                                                                .slice(1)
+                                                                .toLowerCase()}
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            <div>
-                                                <p
-                                                    className={`text-xs font-medium ${task.dueLabel === "Today"
-                                                        ? "text-rose-400"
-                                                        : "text-slate-300"
-                                                        }`}
-                                                >
-                                                    {task.dueLabel}
-                                                </p>
+                                            <div className="flex items-center justify-between lg:block">
+                                                <span className="text-[10px] uppercase tracking-[0.1em] text-slate-600 lg:hidden">
+                                                    Due
+                                                </span>
 
-                                                <p className="mt-1 text-[10px] text-slate-600">
-                                                    {task.dueDate}
-                                                </p>
+                                                <div className="text-right lg:text-left">
+                                                    <p
+                                                        className={`text-xs font-medium ${task.dueLabel ===
+                                                            "Today"
+                                                            ? "text-rose-400"
+                                                            : "text-slate-300"
+                                                            }`}
+                                                    >
+                                                        {task.dueLabel}
+                                                    </p>
+
+                                                    <p className="mt-1 text-[10px] text-slate-600">
+                                                        {task.dueDate}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </Link>
