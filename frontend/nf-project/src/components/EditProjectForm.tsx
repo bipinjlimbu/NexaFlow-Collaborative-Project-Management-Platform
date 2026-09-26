@@ -139,15 +139,24 @@ export default function EditProjectForm({
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md transition-all">
-            <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/95 p-6 shadow-2xl shadow-indigo-950/20 transition-all">
-                <div className="flex items-start justify-between border-b border-slate-800/60 pb-4">
-                    <div>
-                        <h2 className="text-xl font-semibold tracking-tight text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020617]/85 p-3 sm:p-5 backdrop-blur-sm">
+            <div className="relative flex max-h-[calc(100vh-24px)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-2xl shadow-black/40 sm:max-h-[calc(100vh-40px)]">
+                <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-800 px-5 py-5 sm:px-7">
+                    <div className="min-w-0">
+                        <div className="mb-2 flex items-center gap-2">
+                            <div className="h-1.5 w-8 rounded-full bg-indigo-500" />
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                Project settings
+                            </span>
+                        </div>
+
+                        <h2 className="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">
                             Edit project
                         </h2>
-                        <p className="mt-1 text-xs text-slate-400">
-                            Update your project preferences and schedule details.
+
+                        <p className="mt-1.5 max-w-xl text-xs leading-5 text-slate-400 sm:text-sm">
+                            Update the project details, schedule,
+                            status, and priority.
                         </p>
                     </div>
 
@@ -155,214 +164,266 @@ export default function EditProjectForm({
                         type="button"
                         onClick={onClose}
                         disabled={saving}
-                        className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-800 hover:text-slate-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label="Close"
+                        className="shrink-0 rounded-xl border border-slate-800 bg-[#111827] p-2 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <X size={18} />
+                        <X className="h-5 w-5" />
                     </button>
                 </div>
 
-                {generalError && (
-                    <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-xs font-medium text-rose-400">
-                        {generalError}
-                    </div>
-                )}
+                <div className="overflow-y-auto">
+                    {generalError && (
+                        <div className="mx-5 mt-5 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300 sm:mx-7">
+                            {generalError}
+                        </div>
+                    )}
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="mt-5 space-y-4"
-                >
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                            Project name
-                        </label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(event) =>
-                                setName(event.target.value)
-                            }
-                            placeholder="e.g. Website Redesign"
-                            className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 transition-all focus:outline-none focus:ring-2 ${errors.name
-                                ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
-                                : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
-                                }`}
-                        />
-                        {errors.name && (
-                            <p className="mt-1 text-xs text-rose-400">
-                                {errors.name}
-                            </p>
-                        )}
-                    </div>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="space-y-5 px-5 py-5 sm:px-7 sm:py-6"
+                    >
+                        <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-slate-100">
+                                    Basic information
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Set the name and purpose of the project.
+                                </p>
+                            </div>
 
-                    <div>
-                        <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                            Description
-                        </label>
-                        <textarea
-                            value={description}
-                            onChange={(event) =>
-                                setDescription(event.target.value)
-                            }
-                            placeholder="Describe project objectives and scope..."
-                            rows={4}
-                            className={`w-full resize-none rounded-xl border bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 transition-all focus:outline-none focus:ring-2 ${errors.description
-                                ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
-                                : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
-                                }`}
-                        />
-                        {errors.description && (
-                            <p className="mt-1 text-xs text-rose-400">
-                                {errors.description}
-                            </p>
-                        )}
-                    </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Project name
+                                    </label>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                                Status
-                            </label>
-                            <select
-                                value={status}
-                                onChange={(event) =>
-                                    setStatus(
-                                        event.target.value as ProjectStatus
-                                    )
-                                }
-                                className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 transition-all focus:outline-none focus:ring-2 [color-scheme:dark] ${errors.status
-                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
-                                    : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
-                                    }`}
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(event) =>
+                                            setName(event.target.value)
+                                        }
+                                        placeholder="e.g. Website Redesign"
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 ${errors.name
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
+
+                                    {errors.name && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.name}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Description
+                                    </label>
+
+                                    <textarea
+                                        value={description}
+                                        onChange={(event) =>
+                                            setDescription(
+                                                event.target.value
+                                            )
+                                        }
+                                        placeholder="Describe project objectives and scope..."
+                                        rows={5}
+                                        className={`w-full resize-none rounded-xl border bg-[#020617] px-3.5 py-3 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 ${errors.description
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
+
+                                    {errors.description && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.description}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-slate-100">
+                                    Project settings
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Control the current state and priority.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Status
+                                    </label>
+
+                                    <select
+                                        value={status}
+                                        onChange={(event) =>
+                                            setStatus(
+                                                event.target.value as ProjectStatus
+                                            )
+                                        }
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] ${errors.status
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    >
+                                        <option value="planning">
+                                            Planning
+                                        </option>
+                                        <option value="active">
+                                            Active
+                                        </option>
+                                        <option value="inactive">
+                                            Inactive
+                                        </option>
+                                        <option value="archived">
+                                            Archived
+                                        </option>
+                                    </select>
+
+                                    {errors.status && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.status}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Priority
+                                    </label>
+
+                                    <select
+                                        value={priority}
+                                        onChange={(event) =>
+                                            setPriority(
+                                                event.target.value as ProjectPriority
+                                            )
+                                        }
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] ${errors.priority
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    >
+                                        <option value="low">
+                                            Low
+                                        </option>
+                                        <option value="medium">
+                                            Medium
+                                        </option>
+                                        <option value="high">
+                                            High
+                                        </option>
+                                        <option value="urgent">
+                                            Urgent
+                                        </option>
+                                    </select>
+
+                                    {errors.priority && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.priority}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-slate-100">
+                                    Schedule
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Set optional project start and due dates.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Start date
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(event) =>
+                                            setStartDate(event.target.value)
+                                        }
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] ${errors.start_date
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
+
+                                    {errors.start_date && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.start_date}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-xs font-medium text-slate-300">
+                                        Due date
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        value={dueDate}
+                                        onChange={(event) =>
+                                            setDueDate(event.target.value)
+                                        }
+                                        className={`w-full rounded-xl border bg-[#020617] px-3.5 py-3 text-sm text-slate-100 outline-none transition [color-scheme:dark] ${errors.due_date
+                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                                            : "border-slate-800 hover:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                                            }`}
+                                    />
+
+                                    {errors.due_date && (
+                                        <p className="mt-1.5 text-xs text-rose-400">
+                                            {errors.due_date}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col-reverse gap-3 border-t border-slate-800 pt-5 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                disabled={saving}
+                                className="w-full rounded-xl border border-slate-800 bg-[#111827] px-5 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
-                                <option value="planning">
-                                    Planning
-                                </option>
-                                <option value="active">
-                                    Active
-                                </option>
-                                <option value="inactive">
-                                    Inactive
-                                </option>
-                                <option value="archived">
-                                    Archived
-                                </option>
-                            </select>
-                            {errors.status && (
-                                <p className="mt-1 text-xs text-rose-400">
-                                    {errors.status}
-                                </p>
-                            )}
-                        </div>
+                                Cancel
+                            </button>
 
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                                Priority
-                            </label>
-                            <select
-                                value={priority}
-                                onChange={(event) =>
-                                    setPriority(
-                                        event.target.value as ProjectPriority
-                                    )
-                                }
-                                className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 transition-all focus:outline-none focus:ring-2 [color-scheme:dark] ${errors.priority
-                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
-                                    : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
-                                    }`}
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
-                                <option value="low">
-                                    Low
-                                </option>
-                                <option value="medium">
-                                    Medium
-                                </option>
-                                <option value="high">
-                                    High
-                                </option>
-                                <option value="urgent">
-                                    Urgent
-                                </option>
-                            </select>
-                            {errors.priority && (
-                                <p className="mt-1 text-xs text-rose-400">
-                                    {errors.priority}
-                                </p>
-                            )}
+                                {saving ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    "Save changes"
+                                )}
+                            </button>
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                                Start date
-                            </label>
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(event) =>
-                                    setStartDate(event.target.value)
-                                }
-                                className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2 text-sm text-slate-100 transition-all focus:outline-none focus:ring-2 [color-scheme:dark] ${errors.start_date
-                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
-                                    : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
-                                    }`}
-                            />
-                            {errors.start_date && (
-                                <p className="mt-1 text-xs text-rose-400">
-                                    {errors.start_date}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="mb-1.5 block text-xs font-medium text-slate-300">
-                                Due date
-                            </label>
-                            <input
-                                type="date"
-                                value={dueDate}
-                                onChange={(event) =>
-                                    setDueDate(event.target.value)
-                                }
-                                className={`w-full rounded-xl border bg-slate-950/60 px-3.5 py-2 text-sm text-slate-100 transition-all focus:outline-none focus:ring-2 [color-scheme:dark] ${errors.due_date
-                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/20"
-                                    : "border-slate-800 focus:border-indigo-500 focus:ring-indigo-500/20 hover:border-slate-700"
-                                    }`}
-                            />
-                            {errors.due_date && (
-                                <p className="mt-1 text-xs text-rose-400">
-                                    {errors.due_date}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-3 border-t border-slate-800/60 pt-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            disabled={saving}
-                            className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-xs font-semibold text-slate-300 transition-all hover:bg-slate-800 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {saving ? (
-                                <>
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                    <span>Saving...</span>
-                                </>
-                            ) : (
-                                "Save changes"
-                            )}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     );
