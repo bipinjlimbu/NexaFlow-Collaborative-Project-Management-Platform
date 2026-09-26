@@ -235,77 +235,83 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500 selection:text-white">
-            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col space-y-10 px-6 py-12">
-                <section className="flex flex-col justify-between gap-6 border-b border-slate-800 pb-6 md:flex-row md:items-center">
-                    <div>
-                        <div className="mb-2 flex items-center gap-3">
-                            <span className="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 font-mono text-xs font-semibold uppercase tracking-wider text-indigo-400">
-                                Dashboard
-                            </span>
+        <div className="min-h-screen overflow-x-hidden bg-[#020617] text-[#F8FAFC] selection:bg-indigo-500 selection:text-white">
+            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] px-5 py-6 shadow-2xl shadow-black/10 sm:px-7 sm:py-7 lg:px-8">
+                    <div className="pointer-events-none absolute -right-24 -top-32 h-72 w-72 rounded-full bg-indigo-500/[0.06] blur-3xl" />
 
-                            <span className="font-mono text-xs text-slate-500">
-                                NEXAFLOW
-                            </span>
+                    <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                        <div className="max-w-2xl">
+                            <div className="mb-4 flex flex-wrap items-center gap-2">
+                                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                                    Dashboard
+                                </span>
+
+                                <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-600">
+                                    NexaFlow
+                                </span>
+                            </div>
+
+                            <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
+                                Workspace Dashboard
+                            </h1>
+
+                            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400 sm:text-base">
+                                A quick overview of your workspaces, projects,
+                                and tasks.
+                            </p>
                         </div>
 
-                        <h1 className="text-3xl font-extrabold tracking-tight text-slate-100 sm:text-4xl">
-                            Workspace Dashboard
-                        </h1>
+                        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                            <Link
+                                href="/workspaces"
+                                className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-4 text-sm font-medium text-slate-300 transition-all hover:border-indigo-500/30 hover:bg-slate-900 hover:text-white active:scale-[0.98]"
+                            >
+                                New Workspace
+                            </Link>
 
-                        <p className="mt-2 text-sm text-slate-400">
-                            Overview of your workspaces, projects, and tasks.
-                        </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <Link
-                            href="/workspaces"
-                            className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:border-slate-700 hover:text-white"
-                        >
-                            + New Workspace
-                        </Link>
-
-                        <Link
-                            href="/projects"
-                            className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-95"
-                        >
-                            + Create Project
-                        </Link>
+                            <Link
+                                href="/projects"
+                                className="inline-flex h-11 items-center justify-center rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all hover:bg-indigo-400 active:scale-[0.98]"
+                            >
+                                Create Project
+                            </Link>
+                        </div>
                     </div>
                 </section>
 
-                <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Link
                         href="/workspaces"
-                        className="group rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5 transition-all hover:border-indigo-500/40 hover:bg-slate-900/70"
+                        className="group rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/30 hover:bg-[#151d2d]"
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-start justify-between gap-4">
                             <div>
-                                <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
+                                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Workspace
                                 </span>
 
-                                <h3 className="mt-1 text-lg font-bold text-slate-100">
+                                <h3 className="mt-1.5 text-base font-semibold text-slate-50">
                                     Workspaces
                                 </h3>
 
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1.5 text-xs leading-5 text-slate-500">
                                     Manage your teams and workspaces
                                 </p>
                             </div>
 
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 transition-all group-hover:bg-indigo-500/20">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm text-indigo-400 transition-all group-hover:border-indigo-500/30 group-hover:bg-indigo-500/15">
                                 →
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <span className="font-mono text-xs text-slate-400">
+                        <div className="mt-5 flex items-center justify-between border-t border-slate-800/70 pt-4">
+                            <span className="text-xs text-slate-400">
                                 {workspaceCount} Total
                             </span>
 
-                            <span className="font-mono text-xs text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
+                            <span className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
                                 Open →
                             </span>
                         </div>
@@ -313,34 +319,34 @@ export default function DashboardPage() {
 
                     <Link
                         href="/projects"
-                        className="group rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5 transition-all hover:border-indigo-500/40 hover:bg-slate-900/70"
+                        className="group rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/30 hover:bg-[#151d2d]"
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-start justify-between gap-4">
                             <div>
-                                <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
+                                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Projects
                                 </span>
 
-                                <h3 className="mt-1 text-lg font-bold text-slate-100">
+                                <h3 className="mt-1.5 text-base font-semibold text-slate-50">
                                     Projects
                                 </h3>
 
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1.5 text-xs leading-5 text-slate-500">
                                     Track and manage your projects
                                 </p>
                             </div>
 
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-400 transition-all group-hover:bg-sky-500/20">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sm text-sky-400 transition-all group-hover:border-sky-500/30 group-hover:bg-sky-500/15">
                                 →
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <span className="font-mono text-xs text-slate-400">
+                        <div className="mt-5 flex items-center justify-between border-t border-slate-800/70 pt-4">
+                            <span className="text-xs text-slate-400">
                                 {projectCount} Total
                             </span>
 
-                            <span className="font-mono text-xs text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
+                            <span className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
                                 Open →
                             </span>
                         </div>
@@ -348,132 +354,165 @@ export default function DashboardPage() {
 
                     <Link
                         href="/tasks"
-                        className="group rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5 transition-all hover:border-indigo-500/40 hover:bg-slate-900/70"
+                        className="group rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/30 hover:bg-[#151d2d]"
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-start justify-between gap-4">
                             <div>
-                                <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
+                                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                     Tasks
                                 </span>
 
-                                <h3 className="mt-1 text-lg font-bold text-slate-100">
+                                <h3 className="mt-1.5 text-base font-semibold text-slate-50">
                                     Tasks
                                 </h3>
 
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1.5 text-xs leading-5 text-slate-500">
                                     View and manage your tasks
                                 </p>
                             </div>
 
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 transition-all group-hover:bg-emerald-500/20">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-sm text-emerald-400 transition-all group-hover:border-emerald-500/30 group-hover:bg-emerald-500/15">
                                 →
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                            <span className="font-mono text-xs text-slate-400">
+                        <div className="mt-5 flex items-center justify-between border-t border-slate-800/70 pt-4">
+                            <span className="text-xs text-slate-400">
                                 {pendingTasks} Pending
                             </span>
 
-                            <span className="font-mono text-xs text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
+                            <span className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
                                 Open →
                             </span>
                         </div>
                     </Link>
                 </section>
 
-                <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
-                            Workspaces
-                        </span>
+                <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Workspaces
+                            </span>
 
-                        <div className="mt-2 flex items-baseline justify-between">
-                            <span className="text-3xl font-extrabold text-white">
+                            <span className="h-2 w-2 rounded-full bg-indigo-400" />
+                        </div>
+
+                        <div className="mt-4 flex items-end justify-between">
+                            <span className="text-3xl font-semibold tracking-tight text-slate-50">
                                 {workspaceCount}
                             </span>
 
-                            <span className="rounded border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-mono text-xs text-indigo-400">
+                            <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-[11px] font-medium text-indigo-400">
                                 Total
                             </span>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
-                            Projects
-                        </span>
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Projects
+                            </span>
 
-                        <div className="mt-2 flex items-baseline justify-between">
-                            <span className="text-3xl font-extrabold text-white">
+                            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                        </div>
+
+                        <div className="mt-4 flex items-end justify-between">
+                            <span className="text-3xl font-semibold tracking-tight text-slate-50">
                                 {projectCount}
                             </span>
 
-                            <span className="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-xs text-emerald-400">
+                            <span className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-400">
                                 Active {activeProjects.length}
                             </span>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
-                            Pending Tasks
-                        </span>
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Pending Tasks
+                            </span>
 
-                        <div className="mt-2 flex items-baseline justify-between">
-                            <span className="text-3xl font-extrabold text-white">
+                            <span className="h-2 w-2 rounded-full bg-amber-400" />
+                        </div>
+
+                        <div className="mt-4 flex items-end justify-between">
+                            <span className="text-3xl font-semibold tracking-tight text-slate-50">
                                 {pendingTasks}
                             </span>
 
-                            <span className="rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 font-mono text-xs text-amber-400">
+                            <span className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-400">
                                 Open
                             </span>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5">
-                        <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
-                            Completion
-                        </span>
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
+                        <div className="flex items-center justify-between gap-4">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Completion
+                            </span>
 
-                        <div className="mt-2 flex items-baseline justify-between">
-                            <span className="text-3xl font-extrabold text-white">
+                            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                        </div>
+
+                        <div className="mt-4 flex items-end justify-between">
+                            <span className="text-3xl font-semibold tracking-tight text-slate-50">
                                 {overallCompletion}%
                             </span>
 
-                            <span className="font-mono text-xs text-emerald-400">
+                            <span className="text-xs font-medium text-emerald-400">
                                 {completedTasks} Done
                             </span>
                         </div>
                     </div>
                 </section>
 
-                <section className="grid gap-8 lg:grid-cols-3">
-                    <div className="space-y-5 lg:col-span-2">
-                        <div className="flex items-center justify-between">
-                            <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
-                                <span className="h-2 w-2 rounded-full bg-indigo-400" />
-                                Active Projects
-                            </h2>
+                <section className="mt-8 grid gap-6 lg:grid-cols-3">
+                    <div className="min-w-0 space-y-5 lg:col-span-2">
+                        <div className="flex items-end justify-between gap-4">
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-indigo-400" />
+
+                                    <h2 className="text-lg font-semibold tracking-tight text-slate-50">
+                                        Active Projects
+                                    </h2>
+                                </div>
+
+                                <p className="mt-1.5 text-xs text-slate-500">
+                                    Projects that currently need attention
+                                </p>
+                            </div>
 
                             <Link
                                 href="/projects"
-                                className="font-mono text-xs text-indigo-400 hover:underline"
+                                className="shrink-0 text-xs font-medium text-indigo-400 transition-colors hover:text-indigo-300"
                             >
-                                View All Projects →
+                                View all
                             </Link>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {activeProjects.length === 0 ? (
-                                <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-8 text-center">
-                                    <p className="text-sm text-slate-400">
-                                        No active projects.
+                                <div className="rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-8 text-center">
+                                    <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500">
+                                        —
+                                    </div>
+
+                                    <p className="mt-4 text-sm font-medium text-slate-300">
+                                        No active projects
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Your active projects will appear here.
                                     </p>
 
                                     <Link
                                         href="/projects"
-                                        className="mt-3 inline-block text-sm font-medium text-indigo-400 hover:text-indigo-300"
+                                        className="mt-4 inline-flex text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
                                     >
                                         View Projects →
                                     </Link>
@@ -493,42 +532,47 @@ export default function DashboardPage() {
                                         <Link
                                             href={`/projects/${project.id}`}
                                             key={project.id}
-                                            className="block space-y-4 rounded-2xl border border-slate-800/80 bg-slate-900/40 p-5 transition-colors hover:border-slate-700 hover:bg-slate-900/60"
+                                            className="group block rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-[#151d2d]"
                                         >
-                                            <div className="flex items-start justify-between gap-4">
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-mono text-xs font-bold text-indigo-400">
+                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                                <div className="min-w-0">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className="max-w-full truncate text-xs font-medium text-indigo-400">
                                                             {project.workspace}
                                                         </span>
 
-                                                        <span className="text-slate-600">
+                                                        <span className="text-slate-700">
                                                             •
                                                         </span>
 
-                                                        <span className="text-xs text-slate-400">
+                                                        <span className="text-xs text-slate-500">
                                                             {project.status}
                                                         </span>
                                                     </div>
 
-                                                    <h3 className="mt-1 text-base font-bold text-slate-100">
+                                                    <h3 className="mt-1.5 truncate text-base font-semibold text-slate-100">
                                                         {project.name}
                                                     </h3>
                                                 </div>
 
-                                                <span className="shrink-0 rounded-lg bg-slate-800 px-2.5 py-1 font-mono text-xs text-slate-400">
+                                                <span className="w-fit shrink-0 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-400">
                                                     {project.completedTasks}/
                                                     {project.totalTasks} Tasks
                                                 </span>
                                             </div>
 
-                                            <div className="space-y-1.5">
-                                                <div className="flex justify-between font-mono text-xs text-slate-400">
-                                                    <span>Progress</span>
-                                                    <span>{percent}%</span>
+                                            <div className="mt-5 space-y-2">
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-slate-500">
+                                                        Progress
+                                                    </span>
+
+                                                    <span className="font-medium text-slate-300">
+                                                        {percent}%
+                                                    </span>
                                                 </div>
 
-                                                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
                                                     <div
                                                         className="h-full rounded-full bg-indigo-500 transition-all duration-500"
                                                         style={{
@@ -544,45 +588,62 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-5">
-                        <div className="flex items-center justify-between">
-                            <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-white">
-                                <span className="h-2 w-2 rounded-full bg-sky-400" />
-                                Recent Tasks
-                            </h2>
+                    <div className="min-w-0 space-y-5">
+                        <div className="flex items-end justify-between gap-4">
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-sky-400" />
+
+                                    <h2 className="text-lg font-semibold tracking-tight text-slate-50">
+                                        Recent Tasks
+                                    </h2>
+                                </div>
+
+                                <p className="mt-1.5 text-xs text-slate-500">
+                                    Your latest task activity
+                                </p>
+                            </div>
 
                             <Link
                                 href="/tasks"
-                                className="font-mono text-xs text-indigo-400 hover:underline"
+                                className="shrink-0 text-xs font-medium text-indigo-400 transition-colors hover:text-indigo-300"
                             >
-                                View All →
+                                View all
                             </Link>
                         </div>
 
-                        <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40">
+                        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#111827]">
                             {recentTasks.length === 0 ? (
                                 <div className="p-8 text-center">
-                                    <p className="text-sm text-slate-400">
-                                        No tasks available.
+                                    <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500">
+                                        —
+                                    </div>
+
+                                    <p className="mt-4 text-sm font-medium text-slate-300">
+                                        No tasks yet
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Your recent tasks will appear here.
                                     </p>
 
                                     <Link
                                         href="/tasks"
-                                        className="mt-3 inline-block text-sm font-medium text-indigo-400 hover:text-indigo-300"
+                                        className="mt-4 inline-flex text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
                                     >
                                         View Tasks →
                                     </Link>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-slate-800/60">
+                                <div className="divide-y divide-slate-800/70">
                                     {recentTasks.map((task) => (
                                         <div
                                             key={task.id}
-                                            className="p-4 transition-colors hover:bg-slate-900/70"
+                                            className="p-4 transition-colors hover:bg-slate-900/50 sm:p-5"
                                         >
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-mono text-[11px] text-indigo-400">
+                                            <div className="min-w-0">
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    <span className="max-w-[45%] truncate text-[11px] font-medium text-indigo-400">
                                                         {task.workspace}
                                                     </span>
 
@@ -590,17 +651,17 @@ export default function DashboardPage() {
                                                         •
                                                     </span>
 
-                                                    <span className="truncate text-[11px] text-slate-500">
+                                                    <span className="min-w-0 truncate text-[11px] text-slate-500">
                                                         {task.project}
                                                     </span>
                                                 </div>
 
-                                                <p className="text-sm font-semibold text-slate-200">
+                                                <p className="mt-2 truncate text-sm font-semibold text-slate-200">
                                                     {task.title}
                                                 </p>
 
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <span className="font-mono text-[11px] text-slate-500">
+                                                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                                                    <span className="text-[11px] text-slate-500">
                                                         Due: {task.dueDate}
                                                     </span>
 
