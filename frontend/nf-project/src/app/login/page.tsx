@@ -11,7 +11,7 @@ function FieldError({ error }: { error?: string | string[] }) {
 
     const message = Array.isArray(error) ? error[0] : error;
 
-    return <p className="text-xs text-rose-400 mt-1">{message}</p>;
+    return <p className="mt-1.5 text-xs text-rose-400">{message}</p>;
 }
 
 export default function LoginPage() {
@@ -126,79 +126,155 @@ export default function LoginPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-50 flex items-center justify-center px-6 py-12 selection:bg-indigo-500 selection:text-white">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-md space-y-5 rounded-2xl border border-slate-800/80 bg-slate-900/50 p-8 shadow-xl backdrop-blur-sm"
-            >
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-md shadow-indigo-600/30">
-                            N
+        <main className="min-h-screen bg-[#020617] px-4 py-8 text-slate-50 selection:bg-indigo-500 selection:text-white sm:px-6 sm:py-12">
+            <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl items-center justify-center">
+                <div className="grid w-full overflow-hidden rounded-3xl border border-slate-800 bg-[#111827] shadow-2xl shadow-black/20 lg:grid-cols-[1fr_1fr]">
+                    <div className="relative hidden overflow-hidden border-r border-slate-800 bg-[#0F172A] p-8 lg:flex lg:flex-col lg:justify-between xl:p-10">
+                        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
+                        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-sky-500/5 blur-3xl" />
+
+                        <div className="relative">
+                            <Link
+                                href="/"
+                                className="inline-flex items-center gap-3"
+                            >
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
+                                    N
+                                </div>
+
+                                <span className="text-lg font-bold tracking-tight text-white">
+                                    NexaFlow
+                                </span>
+                            </Link>
+
+                            <div className="mt-24 max-w-sm">
+                                <div className="mb-4 inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                    Welcome back
+                                </div>
+
+                                <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white">
+                                    Keep your work
+                                    <span className="block text-slate-400">
+                                        moving forward.
+                                    </span>
+                                </h1>
+
+                                <p className="mt-5 text-sm leading-7 text-slate-400">
+                                    Sign in to access your workspaces, projects,
+                                    and tasks from one focused workspace.
+                                </p>
+                            </div>
                         </div>
 
-                        <span className="font-bold text-lg tracking-tight text-white">
-                            NexaFlow
-                        </span>
+                        <div className="relative border-t border-slate-800 pt-5">
+                            <p className="text-xs leading-5 text-slate-500">
+                                Simple workspace management for organized,
+                                productive work.
+                            </p>
+                        </div>
                     </div>
 
-                    <h1 className="text-2xl font-bold tracking-tight text-white pt-2">
-                        Sign In
-                    </h1>
-
-                    <p className="text-sm text-slate-400">
-                        Sign in to your NexaFlow account
-                    </p>
-                </div>
-
-                {error && (
-                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400">
-                        {error}
-                    </div>
-                )}
-
-                <div>
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={handleUsernameChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-
-                    <FieldError error={fieldErrors.username} />
-                </div>
-
-                <div>
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={handlePasswordChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-
-                    <FieldError error={fieldErrors.password} />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {loading ? "Signing in..." : "Sign In"}
-                </button>
-
-                <p className="text-center text-xs text-slate-400 pt-2">
-                    Don&apos;t have an account?{" "}
-                    <Link
-                        href="/register"
-                        className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                    <form
+                        onSubmit={handleSubmit}
+                        className="p-5 sm:p-8 lg:p-10 xl:p-12"
                     >
-                        Create account
-                    </Link>
-                </p>
-            </form>
+                        <div className="mb-8">
+                            <div className="flex items-center gap-3 lg:hidden">
+                                <Link
+                                    href="/"
+                                    className="flex items-center gap-3"
+                                >
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
+                                        N
+                                    </div>
+
+                                    <span className="text-lg font-bold tracking-tight text-white">
+                                        NexaFlow
+                                    </span>
+                                </Link>
+                            </div>
+
+                            <div className="mt-8 lg:mt-0">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                    Account access
+                                </p>
+
+                                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                                    Sign in
+                                </h2>
+
+                                <p className="mt-2 text-sm leading-6 text-slate-400">
+                                    Enter your credentials to continue.
+                                </p>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="mb-5 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-5">
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Username
+                                </label>
+
+                                <input
+                                    type="text"
+                                    placeholder="Enter your username"
+                                    value={username}
+                                    onChange={handleUsernameChange}
+                                    className={`h-12 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.username
+                                        ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                        }`}
+                                />
+
+                                <FieldError error={fieldErrors.username} />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Password
+                                </label>
+
+                                <input
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onChange={handlePasswordChange}
+                                    className={`h-12 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.password
+                                        ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                        }`}
+                                />
+
+                                <FieldError error={fieldErrors.password} />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="h-12 w-full rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:bg-indigo-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {loading ? "Signing in..." : "Sign In"}
+                            </button>
+                        </div>
+
+                        <p className="mt-7 text-center text-sm text-slate-500">
+                            Don&apos;t have an account?{" "}
+                            <Link
+                                href="/register"
+                                className="font-medium text-indigo-400 transition hover:text-indigo-300"
+                            >
+                                Create account
+                            </Link>
+                        </p>
+                    </form>
+                </div>
+            </div>
         </main>
     );
 }
