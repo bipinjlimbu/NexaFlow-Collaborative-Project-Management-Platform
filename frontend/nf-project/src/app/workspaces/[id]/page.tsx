@@ -21,6 +21,25 @@ import type {
 import type { ProjectStatus, ProjectPriority } from "@/types/project";
 import type { User } from "@/types/user";
 import WorkspaceDetailSkeleton from "@/components/WorkspaceDetailSkeleton";
+import {
+    Archive,
+    ArrowLeft,
+    ArrowRight,
+    CalendarDays,
+    Check,
+    ChevronDown,
+    CircleAlert,
+    FolderKanban,
+    Mail,
+    Pencil,
+    Plus,
+    Search,
+    Shield,
+    Trash2,
+    UserPlus,
+    Users,
+    X,
+} from "lucide-react";
 
 export default function WorkspaceDetailPage() {
     const params = useParams();
@@ -72,7 +91,8 @@ export default function WorkspaceDetailPage() {
     const [projectStartDate, setProjectStartDate] = useState("");
     const [projectDueDate, setProjectDueDate] = useState("");
     const [projectStatus, setProjectStatus] = useState<ProjectStatus>("active");
-    const [projectPriority, setProjectPriority] = useState<ProjectPriority>("medium");
+    const [projectPriority, setProjectPriority] =
+        useState<ProjectPriority>("medium");
     const [creatingProject, setCreatingProject] = useState(false);
     const [projectError, setProjectError] = useState("");
 
@@ -701,18 +721,22 @@ export default function WorkspaceDetailPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-[#020617] text-slate-50">
-                <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 sm:px-6">
-                    <div className="w-full max-w-md rounded-3xl border border-rose-500/20 bg-[#111827] p-8 text-center shadow-2xl">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/10 text-xl font-semibold text-rose-400">
-                            !
+            <main className="min-h-screen bg-[#020617] px-4 text-slate-50 sm:px-6">
+                <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center">
+                    <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-[#111827] p-7 text-center shadow-2xl shadow-black/20 sm:p-9">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400">
+                            <CircleAlert size={25} />
                         </div>
 
-                        <h1 className="mt-5 text-xl font-semibold text-slate-50">
+                        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-400">
+                            Workspace error
+                        </p>
+
+                        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-50">
                             Unable to load workspace
                         </h1>
 
-                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                        <p className="mt-3 text-sm leading-6 text-slate-400">
                             {error}
                         </p>
 
@@ -721,13 +745,14 @@ export default function WorkspaceDetailPage() {
                             onClick={() =>
                                 router.push("/workspaces")
                             }
-                            className="mt-6 w-full cursor-pointer rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                            className="mt-7 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:bg-indigo-400"
                         >
+                            <ArrowLeft size={16} />
                             Back to Workspaces
                         </button>
                     </div>
                 </div>
-            </div>
+            </main>
         );
     }
 
@@ -736,30 +761,32 @@ export default function WorkspaceDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#020617] text-slate-50">
-            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+        <main className="min-h-screen overflow-x-hidden bg-[#020617] text-slate-50">
+            <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <button
                         type="button"
                         onClick={() =>
                             router.push("/workspaces")
                         }
-                        className="group flex w-fit cursor-pointer items-center gap-2 text-sm font-medium text-slate-400 transition hover:text-slate-50"
+                        className="group inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg text-sm font-medium text-slate-400 transition hover:text-slate-50"
                     >
-                        <span className="transition group-hover:-translate-x-0.5">
-                            ←
-                        </span>
+                        <ArrowLeft
+                            size={16}
+                            className="transition-transform group-hover:-translate-x-0.5"
+                        />
                         Workspaces
                     </button>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {canManageWorkspace && (
                             <button
                                 type="button"
                                 onClick={handleOpenEditPanel}
-                                className="cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-[#111827] hover:text-white"
+                                className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm font-medium text-slate-300 transition hover:border-slate-700 hover:bg-[#111827] hover:text-white"
                             >
-                                Edit workspace
+                                <Pencil size={15} />
+                                Edit
                             </button>
                         )}
 
@@ -770,42 +797,45 @@ export default function WorkspaceDetailPage() {
                                     setDeleteError("");
                                     setShowDeleteModal(true);
                                 }}
-                                className="cursor-pointer rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-2.5 text-sm font-medium text-rose-400 transition hover:bg-rose-500/15"
+                                className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 text-sm font-medium text-rose-400 transition hover:bg-rose-500/15"
                             >
+                                <Trash2 size={15} />
                                 Delete
                             </button>
                         )}
                     </div>
                 </div>
 
-                <div className="relative mt-7 overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] p-6 sm:p-8">
-                    <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl" />
+                <section className="relative mt-6 overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-2xl shadow-black/10 sm:mt-7">
+                    <div className="pointer-events-none absolute -right-28 -top-32 h-72 w-72 rounded-full bg-indigo-500/[0.07] blur-3xl" />
 
-                    <div className="relative">
-                        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                            <div className="min-w-0">
-                                <div className="mb-3 flex flex-wrap items-center gap-2">
-                                    <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400">
+                    <div className="relative p-6 sm:p-8 lg:p-9">
+                        <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+                            <div className="min-w-0 max-w-3xl">
+                                <div className="mb-4 flex flex-wrap items-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-400">
+                                        <FolderKanban size={13} />
                                         Workspace
                                     </span>
 
                                     <span
-                                        className={`rounded-full px-3 py-1 text-xs font-semibold ${workspace.is_archived
-                                            ? "bg-amber-500/10 text-amber-400"
-                                            : "bg-emerald-500/10 text-emerald-400"
+                                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold ${workspace.is_archived
+                                                ? "bg-amber-500/10 text-amber-400"
+                                                : "bg-emerald-500/10 text-emerald-400"
                                             }`}
                                     >
+                                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
                                         {workspace.is_archived
                                             ? "Archived"
                                             : "Active"}
                                     </span>
                                 </div>
 
-                                <h1 className="break-words text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+                                <h1 className="break-words text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
                                     {workspace.name}
                                 </h1>
 
-                                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
+                                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
                                     {workspace.description ||
                                         "No workspace description provided."}
                                 </p>
@@ -817,92 +847,90 @@ export default function WorkspaceDetailPage() {
                                     onClick={
                                         handleOpenProjectPanel
                                     }
-                                    className="w-full shrink-0 cursor-pointer rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                                    className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/20 transition hover:bg-indigo-400 active:scale-[0.99] sm:w-auto"
                                 >
+                                    <Plus size={17} />
                                     Create project
                                 </button>
                             )}
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                <section className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-4">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                            <Users size={14} />
                             Members
-                        </p>
-
-                        <p className="mt-3 text-2xl font-bold text-slate-50">
+                        </div>
+                        <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-50">
                             {workspace.members_count}
                         </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                            <FolderKanban size={14} />
                             Projects
-                        </p>
-
-                        <p className="mt-3 text-2xl font-bold text-slate-50">
+                        </div>
+                        <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-50">
                             {workspace.projects_count}
                         </p>
                     </div>
 
-                    <div className="min-w-0 rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                    <div className="min-w-0 rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                            <UserPlus size={14} />
                             Created by
-                        </p>
-
+                        </div>
                         <p className="mt-3 truncate text-sm font-semibold text-slate-200">
-                            {owner?.user.username ||
-                                "Unknown"}
+                            {owner?.user.username || "Unknown"}
                         </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-4 sm:p-5">
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                            <Shield size={14} />
                             Your role
-                        </p>
-
+                        </div>
                         <p className="mt-3 text-sm font-semibold capitalize text-indigo-400">
                             {currentRole}
                         </p>
                     </div>
-                </div>
+                </section>
 
-                <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-6 lg:col-span-2">
+                <section className="mt-5 grid gap-5 lg:mt-6 lg:grid-cols-3">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6 lg:col-span-2">
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-semibold text-slate-50">
+                                <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                     Workspace information
                                 </h2>
-
                                 <p className="mt-1 text-sm text-slate-500">
                                     Key details and current status.
                                 </p>
                             </div>
 
-                            <div className="hidden h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 sm:flex">
-                                #
+                            <div className="hidden h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 sm:flex">
+                                <FolderKanban size={18} />
                             </div>
                         </div>
 
-                        <div className="mt-6 divide-y divide-slate-800">
+                        <div className="mt-5 divide-y divide-slate-800">
                             <div className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                                 <span className="text-sm text-slate-500">
                                     Workspace ID
                                 </span>
-
                                 <span className="font-mono text-sm text-slate-300">
                                     #{workspace.id}
                                 </span>
                             </div>
 
                             <div className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                                <span className="text-sm text-slate-500">
+                                <span className="flex items-center gap-2 text-sm text-slate-500">
+                                    <CalendarDays size={14} />
                                     Created
                                 </span>
-
                                 <span className="text-sm text-slate-300">
                                     {new Date(
                                         workspace.created_at
@@ -911,10 +939,10 @@ export default function WorkspaceDetailPage() {
                             </div>
 
                             <div className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                                <span className="text-sm text-slate-500">
+                                <span className="flex items-center gap-2 text-sm text-slate-500">
+                                    <CalendarDays size={14} />
                                     Last updated
                                 </span>
-
                                 <span className="text-sm text-slate-300">
                                     {new Date(
                                         workspace.updated_at
@@ -929,8 +957,8 @@ export default function WorkspaceDetailPage() {
 
                                 <span
                                     className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${workspace.is_archived
-                                        ? "bg-amber-500/10 text-amber-400"
-                                        : "bg-emerald-500/10 text-emerald-400"
+                                            ? "bg-amber-500/10 text-amber-400"
+                                            : "bg-emerald-500/10 text-emerald-400"
                                         }`}
                                 >
                                     {workspace.is_archived
@@ -941,12 +969,11 @@ export default function WorkspaceDetailPage() {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-6">
+                    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-50">
+                            <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                 Workspace owner
                             </h2>
-
                             <p className="mt-1 text-sm text-slate-500">
                                 The person who created this workspace.
                             </p>
@@ -967,13 +994,11 @@ export default function WorkspaceDetailPage() {
                                                         ""
                                                     )}${owner.user.profile_picture}`
                                             }
-                                            alt={
-                                                owner.user.username
-                                            }
+                                            alt={owner.user.username}
                                             className="h-12 w-12 shrink-0 rounded-2xl object-cover ring-1 ring-slate-700"
                                         />
                                     ) : (
-                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/10 text-sm font-bold text-indigo-400 ring-1 ring-indigo-500/10">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold text-indigo-400">
                                             {owner.user.username
                                                 .charAt(0)
                                                 .toUpperCase()}
@@ -985,7 +1010,6 @@ export default function WorkspaceDetailPage() {
                                             {owner.user.first_name ||
                                                 owner.user.username}
                                         </p>
-
                                         <p className="mt-0.5 truncate text-sm text-slate-500">
                                             @{owner.user.username}
                                         </p>
@@ -994,10 +1018,9 @@ export default function WorkspaceDetailPage() {
 
                                 <div className="mt-6 space-y-4">
                                     <div>
-                                        <p className="text-xs font-medium uppercase tracking-wider text-slate-600">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">
                                             Email
                                         </p>
-
                                         <p className="mt-1 break-all text-sm text-slate-300">
                                             {owner.user.email}
                                         </p>
@@ -1005,10 +1028,9 @@ export default function WorkspaceDetailPage() {
 
                                     {owner.user.phone_number && (
                                         <div>
-                                            <p className="text-xs font-medium uppercase tracking-wider text-slate-600">
+                                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">
                                                 Phone
                                             </p>
-
                                             <p className="mt-1 text-sm text-slate-300">
                                                 {
                                                     owner.user
@@ -1025,21 +1047,19 @@ export default function WorkspaceDetailPage() {
                             </p>
                         )}
                     </div>
-                </div>
+                </section>
 
-                <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-[#111827]">
+                <section className="mt-5 overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] sm:mt-6">
                     <div className="flex flex-col gap-4 border-b border-slate-800 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <div>
                             <div className="flex items-center gap-3">
-                                <h2 className="text-lg font-semibold text-slate-50">
+                                <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                     Members
                                 </h2>
-
                                 <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-400">
                                     {workspace.members_count}
                                 </span>
                             </div>
-
                             <p className="mt-1 text-sm text-slate-500">
                                 People who belong to this workspace.
                             </p>
@@ -1049,16 +1069,18 @@ export default function WorkspaceDetailPage() {
                             <button
                                 type="button"
                                 onClick={handleOpenInvitePanel}
-                                className="w-full cursor-pointer rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                                className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
                             >
+                                <UserPlus size={16} />
                                 Invite member
                             </button>
                         )}
                     </div>
 
                     {memberActionError && (
-                        <div className="border-b border-rose-500/20 bg-rose-500/10 px-5 py-3 text-sm text-rose-400 sm:px-6">
-                            {memberActionError}
+                        <div className="flex items-start gap-3 border-b border-rose-500/20 bg-rose-500/10 px-5 py-3 text-sm text-rose-400 sm:px-6">
+                            <CircleAlert size={17} className="mt-0.5 shrink-0" />
+                            <span>{memberActionError}</span>
                         </div>
                     )}
 
@@ -1066,14 +1088,12 @@ export default function WorkspaceDetailPage() {
                         {workspace.members.length > 0 ? (
                             workspace.members.map((member) => {
                                 const canManage =
-                                    canManageMember(
-                                        member.role
-                                    );
+                                    canManageMember(member.role);
 
                                 return (
                                     <div
                                         key={member.id}
-                                        className="flex flex-col gap-4 px-5 py-4 sm:px-6 md:flex-row md:items-center md:justify-between"
+                                        className="flex flex-col gap-4 px-5 py-4 transition hover:bg-slate-900/30 sm:px-6 md:flex-row md:items-center md:justify-between"
                                     >
                                         <div className="flex min-w-0 items-center gap-3">
                                             {member.user.profile_picture ? (
@@ -1091,18 +1111,14 @@ export default function WorkspaceDetailPage() {
                                                             )}${member.user.profile_picture}`
                                                     }
                                                     alt={
-                                                        member
-                                                            .user
-                                                            .username
+                                                        member.user.username
                                                     }
                                                     className="h-11 w-11 shrink-0 rounded-xl object-cover ring-1 ring-slate-800"
                                                 />
                                             ) : (
-                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-sm font-bold text-slate-300">
+                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-sm font-bold text-slate-300">
                                                     {member.user.username
-                                                        .charAt(
-                                                            0
-                                                        )
+                                                        .charAt(0)
                                                         .toUpperCase()}
                                                 </div>
                                             )}
@@ -1118,20 +1134,9 @@ export default function WorkspaceDetailPage() {
                                                         ? ` ${member.user.last_name}`
                                                         : ""}
                                                 </p>
-
                                                 <p className="mt-0.5 truncate text-xs text-slate-500">
-                                                    @
-                                                    {
-                                                        member
-                                                            .user
-                                                            .username
-                                                    }{" "}
-                                                    ·{" "}
-                                                    {
-                                                        member
-                                                            .user
-                                                            .email
-                                                    }
+                                                    @{member.user.username}{" "}
+                                                    · {member.user.email}
                                                 </p>
                                             </div>
                                         </div>
@@ -1146,8 +1151,7 @@ export default function WorkspaceDetailPage() {
                                                         type="button"
                                                         onClick={() =>
                                                             handlePromoteMember(
-                                                                member
-                                                                    .user
+                                                                member.user
                                                                     .id
                                                             )
                                                         }
@@ -1161,14 +1165,17 @@ export default function WorkspaceDetailPage() {
                                                                 .user
                                                                 .id
                                                         }
-                                                        className="cursor-pointer rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-400 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-50"
                                                     >
                                                         {promotingUserId ===
-                                                            member
-                                                                .user
-                                                                .id
-                                                            ? "Promoting..."
-                                                            : "Promote"}
+                                                            member.user.id ? (
+                                                            <>
+                                                                <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-400/30 border-t-emerald-400" />
+                                                                Promoting...
+                                                            </>
+                                                        ) : (
+                                                            "Promote"
+                                                        )}
                                                     </button>
                                                 )}
 
@@ -1181,8 +1188,7 @@ export default function WorkspaceDetailPage() {
                                                         type="button"
                                                         onClick={() =>
                                                             handleDemoteMember(
-                                                                member
-                                                                    .user
+                                                                member.user
                                                                     .id
                                                             )
                                                         }
@@ -1199,9 +1205,7 @@ export default function WorkspaceDetailPage() {
                                                         className="cursor-pointer rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-semibold text-amber-400 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-50"
                                                     >
                                                         {demotingUserId ===
-                                                            member
-                                                                .user
-                                                                .id
+                                                            member.user.id
                                                             ? "Demoting..."
                                                             : "Demote"}
                                                     </button>
@@ -1212,31 +1216,24 @@ export default function WorkspaceDetailPage() {
                                                     type="button"
                                                     onClick={() =>
                                                         handleRemoveMember(
-                                                            member
-                                                                .user
-                                                                .id
+                                                            member.user.id
                                                         )
                                                     }
                                                     disabled={
                                                         removingUserId ===
-                                                        member
-                                                            .user
+                                                        member.user
                                                             .id ||
                                                         promotingUserId ===
-                                                        member
-                                                            .user
+                                                        member.user
                                                             .id ||
                                                         demotingUserId ===
-                                                        member
-                                                            .user
+                                                        member.user
                                                             .id
                                                     }
                                                     className="cursor-pointer rounded-lg bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-400 transition hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     {removingUserId ===
-                                                        member
-                                                            .user
-                                                            .id
+                                                        member.user.id
                                                         ? "Removing..."
                                                         : "Remove"}
                                                 </button>
@@ -1244,12 +1241,12 @@ export default function WorkspaceDetailPage() {
 
                                             <span
                                                 className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${member.role ===
-                                                    "owner"
-                                                    ? "bg-indigo-500/10 text-indigo-400"
-                                                    : member.role ===
-                                                        "admin"
-                                                        ? "bg-amber-500/10 text-amber-400"
-                                                        : "bg-slate-800 text-slate-400"
+                                                        "owner"
+                                                        ? "bg-indigo-500/10 text-indigo-400"
+                                                        : member.role ===
+                                                            "admin"
+                                                            ? "bg-amber-500/10 text-amber-400"
+                                                            : "bg-slate-800 text-slate-400"
                                                     }`}
                                             >
                                                 {member.role}
@@ -1260,27 +1257,29 @@ export default function WorkspaceDetailPage() {
                             })
                         ) : (
                             <div className="px-6 py-14 text-center">
-                                <p className="text-sm text-slate-500">
+                                <Users
+                                    size={22}
+                                    className="mx-auto text-slate-600"
+                                />
+                                <p className="mt-3 text-sm text-slate-500">
                                     No members found.
                                 </p>
                             </div>
                         )}
                     </div>
-                </div>
+                </section>
 
-                <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-[#111827]">
+                <section className="mt-5 overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] sm:mt-6">
                     <div className="flex flex-col gap-4 border-b border-slate-800 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <div>
                             <div className="flex items-center gap-3">
-                                <h2 className="text-lg font-semibold text-slate-50">
+                                <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                     Projects
                                 </h2>
-
                                 <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-400">
                                     {workspace.projects_count}
                                 </span>
                             </div>
-
                             <p className="mt-1 text-sm text-slate-500">
                                 Projects associated with this workspace.
                             </p>
@@ -1289,11 +1288,10 @@ export default function WorkspaceDetailPage() {
                         {canCreateProject && (
                             <button
                                 type="button"
-                                onClick={
-                                    handleOpenProjectPanel
-                                }
-                                className="w-full cursor-pointer rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                                onClick={handleOpenProjectPanel}
+                                className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
                             >
+                                <Plus size={16} />
                                 Create project
                             </button>
                         )}
@@ -1307,25 +1305,22 @@ export default function WorkspaceDetailPage() {
                                         key={item}
                                         className="animate-pulse rounded-2xl border border-slate-800 bg-[#0F172A] p-5"
                                     >
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="w-full">
-                                                <div className="h-5 w-2/3 rounded bg-slate-800" />
-                                                <div className="mt-3 h-4 w-full rounded bg-slate-800" />
-                                                <div className="mt-2 h-4 w-4/5 rounded bg-slate-800" />
-                                            </div>
-
-                                            <div className="h-8 w-8 rounded-lg bg-slate-800" />
-                                        </div>
-
-                                        <div className="mt-6 flex gap-4">
-                                            <div className="h-3 w-24 rounded bg-slate-800" />
-                                            <div className="h-3 w-24 rounded bg-slate-800" />
+                                        <div className="h-5 w-2/3 rounded bg-slate-800" />
+                                        <div className="mt-3 h-3 w-full rounded bg-slate-900" />
+                                        <div className="mt-2 h-3 w-4/5 rounded bg-slate-900" />
+                                        <div className="mt-6 flex gap-3">
+                                            <div className="h-7 w-24 rounded-lg bg-slate-800" />
+                                            <div className="h-7 w-24 rounded-lg bg-slate-800" />
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : projectsError ? (
-                            <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-5 py-4">
+                            <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-5 py-4">
+                                <CircleAlert
+                                    size={17}
+                                    className="mt-0.5 shrink-0 text-rose-400"
+                                />
                                 <p className="text-sm text-rose-400">
                                     {projectsError}
                                 </p>
@@ -1341,13 +1336,12 @@ export default function WorkspaceDetailPage() {
                                                 `/projects/${project.id}`
                                             )
                                         }
-                                        className="group cursor-pointer rounded-2xl border border-slate-800 bg-[#0F172A] p-5 text-left transition hover:-translate-y-0.5 hover:border-indigo-500/30 hover:bg-[#111827]"
+                                        className="group cursor-pointer rounded-2xl border border-slate-800 bg-[#0F172A] p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/30 hover:bg-[#111827]"
                                     >
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="min-w-0">
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex min-w-0 items-center gap-2">
                                                     <span className="h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
-
                                                     <h3 className="truncate text-base font-semibold text-slate-50 transition group-hover:text-indigo-400">
                                                         {project.name}
                                                     </h3>
@@ -1359,12 +1353,16 @@ export default function WorkspaceDetailPage() {
                                             </div>
 
                                             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-500 transition group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
-                                                →
+                                                <ArrowRight
+                                                    size={16}
+                                                    className="transition-transform group-hover:translate-x-0.5"
+                                                />
                                             </span>
                                         </div>
 
-                                        <div className="mt-6 flex flex-wrap gap-3">
-                                            <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
+                                        <div className="mt-6 flex flex-wrap gap-2">
+                                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
+                                                <CalendarDays size={13} />
                                                 Start:{" "}
                                                 {project.start_date
                                                     ? new Date(
@@ -1373,7 +1371,8 @@ export default function WorkspaceDetailPage() {
                                                     : "Not set"}
                                             </span>
 
-                                            <span className="rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
+                                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 px-2.5 py-1.5 text-xs text-slate-400">
+                                                <CalendarDays size={13} />
                                                 Due:{" "}
                                                 {project.due_date
                                                     ? new Date(
@@ -1387,11 +1386,11 @@ export default function WorkspaceDetailPage() {
                             </div>
                         ) : (
                             <div className="rounded-2xl border border-dashed border-slate-800 px-6 py-14 text-center">
-                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-slate-500">
-                                    +
+                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-slate-500">
+                                    <FolderKanban size={20} />
                                 </div>
 
-                                <p className="mt-4 text-sm font-medium text-slate-300">
+                                <p className="mt-4 text-sm font-semibold text-slate-300">
                                     No projects yet
                                 </p>
 
@@ -1405,32 +1404,37 @@ export default function WorkspaceDetailPage() {
                                         onClick={
                                             handleOpenProjectPanel
                                         }
-                                        className="mt-5 cursor-pointer rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                                        className="mt-5 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
                                     >
+                                        <Plus size={16} />
                                         Create your first project
                                     </button>
                                 )}
                             </div>
                         )}
                     </div>
-                </div>
+                </section>
             </div>
 
             {showEditPanel && canManageWorkspace && (
-                <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm">
-                    <div className="h-full w-full max-w-lg overflow-y-auto border-l border-slate-800 bg-[#020617] shadow-2xl">
-                        <div className="sticky top-0 z-10 border-b border-slate-800 bg-[#020617]/95 px-5 py-5 backdrop-blur sm:px-6">
-                            <div className="flex items-start justify-between gap-4">
+                <div className="fixed inset-0 z-50">
+                    <div
+                        className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+                        onClick={() => setShowEditPanel(false)}
+                    />
+
+                    <div className="absolute right-0 top-0 h-full w-full max-w-lg border-l border-slate-800 bg-[#020617] shadow-2xl shadow-black/50">
+                        <div className="flex h-full flex-col">
+                            <div className="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-5 sm:px-6">
                                 <div>
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                        <Pencil size={12} />
                                         Workspace settings
                                     </span>
-
-                                    <h2 className="mt-1 text-xl font-semibold text-slate-50">
+                                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-50">
                                         Edit workspace
                                     </h2>
-
-                                    <p className="mt-1 text-sm text-slate-500">
+                                    <p className="mt-1 text-sm leading-5 text-slate-500">
                                         Update workspace details and status.
                                     </p>
                                 </div>
@@ -1440,126 +1444,154 @@ export default function WorkspaceDetailPage() {
                                     onClick={() =>
                                         setShowEditPanel(false)
                                     }
-                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
                                 >
-                                    ×
+                                    <X size={18} />
                                 </button>
                             </div>
-                        </div>
 
-                        <div className="space-y-6 px-5 py-6 sm:px-6">
-                            <div>
-                                <label className="text-sm font-medium text-slate-300">
-                                    Name
-                                </label>
+                            <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-6">
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-300">
+                                            Name
+                                        </label>
+                                        <input
+                                            value={name}
+                                            onChange={(event) =>
+                                                setName(
+                                                    event.target.value
+                                                )
+                                            }
+                                            className="mt-2 h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
+                                        />
+                                    </div>
 
-                                <input
-                                    value={name}
-                                    onChange={(event) =>
-                                        setName(
-                                            event.target.value
-                                        )
-                                    }
-                                    className="mt-2 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
-                                />
+                                    <div>
+                                        <label className="text-sm font-medium text-slate-300">
+                                            Description
+                                        </label>
+                                        <textarea
+                                            value={description}
+                                            onChange={(event) =>
+                                                setDescription(
+                                                    event.target.value
+                                                )
+                                            }
+                                            rows={5}
+                                            className="mt-2 w-full resize-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-6 text-slate-100 outline-none transition focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
+                                        />
+                                    </div>
+
+                                    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-[#0F172A] p-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                                                <Archive size={17} />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-200">
+                                                    Archive workspace
+                                                </p>
+                                                <p className="mt-1 text-xs leading-5 text-slate-500">
+                                                    Archived workspaces are no
+                                                    longer active.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <input
+                                            type="checkbox"
+                                            checked={isArchived}
+                                            onChange={(event) =>
+                                                setIsArchived(
+                                                    event.target.checked
+                                                )
+                                            }
+                                            className="h-5 w-5 cursor-pointer accent-indigo-500"
+                                        />
+                                    </label>
+
+                                    {saveError && (
+                                        <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
+                                            <CircleAlert
+                                                size={17}
+                                                className="mt-0.5 shrink-0"
+                                            />
+                                            <span>{saveError}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="text-sm font-medium text-slate-300">
-                                    Description
-                                </label>
-
-                                <textarea
-                                    value={description}
-                                    onChange={(event) =>
-                                        setDescription(
-                                            event.target.value
-                                        )
+                            <div className="border-t border-slate-800 px-5 py-5 sm:px-6">
+                                <button
+                                    type="button"
+                                    onClick={
+                                        handleUpdateWorkspace
                                     }
-                                    rows={5}
-                                    className="mt-2 w-full resize-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
-                                />
+                                    disabled={saving}
+                                    className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Check size={16} />
+                                            Save changes
+                                        </>
+                                    )}
+                                </button>
                             </div>
-
-                            <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-[#0F172A] p-4">
-                                <div>
-                                    <p className="text-sm font-semibold text-slate-200">
-                                        Archive workspace
-                                    </p>
-
-                                    <p className="mt-1 text-xs leading-5 text-slate-500">
-                                        Archived workspaces are no longer active.
-                                    </p>
-                                </div>
-
-                                <input
-                                    type="checkbox"
-                                    checked={isArchived}
-                                    onChange={(event) =>
-                                        setIsArchived(
-                                            event.target.checked
-                                        )
-                                    }
-                                    className="h-5 w-5 cursor-pointer accent-indigo-500"
-                                />
-                            </label>
-
-                            {saveError && (
-                                <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
-                                    {saveError}
-                                </div>
-                            )}
-
-                            <button
-                                type="button"
-                                onClick={
-                                    handleUpdateWorkspace
-                                }
-                                disabled={saving}
-                                className="w-full cursor-pointer rounded-xl bg-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {saving
-                                    ? "Saving..."
-                                    : "Save changes"}
-                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
             {showInvitePanel && canInviteMembers && (
-                <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm">
-                    <div className="flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-[#020617] shadow-2xl">
+                <div className="fixed inset-0 z-50">
+                    <div
+                        className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+                        onClick={() =>
+                            setShowInvitePanel(false)
+                        }
+                    />
+
+                    <div className="absolute right-0 top-0 flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-[#020617] shadow-2xl shadow-black/50">
                         <div className="border-b border-slate-800 px-5 py-5 sm:px-6">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                        <Users size={12} />
                                         Members
                                     </span>
-
-                                    <h2 className="mt-1 text-xl font-semibold text-slate-50">
+                                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-50">
                                         Invite member
                                     </h2>
-
                                     <p className="mt-1 text-sm text-slate-500">
-                                        Find a user and send a workspace invitation.
+                                        Find a user and send a workspace
+                                        invitation.
                                     </p>
                                 </div>
 
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        setShowInvitePanel(
-                                            false
-                                        )
+                                        setShowInvitePanel(false)
                                     }
-                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
                                 >
-                                    ×
+                                    <X size={18} />
                                 </button>
                             </div>
 
-                            <div className="mt-6">
+                            <div className="relative mt-6">
+                                <Search
+                                    size={16}
+                                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                                />
                                 <input
                                     value={userSearch}
                                     onChange={(event) =>
@@ -1568,172 +1600,184 @@ export default function WorkspaceDetailPage() {
                                         )
                                     }
                                     placeholder="Search username, name or email..."
-                                    className="w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                                    className="h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] pl-11 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
                                 />
                             </div>
 
                             <div className="mt-4">
-                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                                     Invitation role
                                 </label>
 
-                                <select
-                                    value={inviteRole}
-                                    onChange={(event) =>
-                                        setInviteRole(
-                                            event.target
-                                                .value as
-                                            | "admin"
-                                            | "member"
-                                        )
-                                    }
-                                    className="mt-2 w-full cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
-                                >
-                                    <option value="member">
-                                        Member
-                                    </option>
-
-                                    <option value="admin">
-                                        Admin
-                                    </option>
-                                </select>
+                                <div className="relative mt-2">
+                                    <select
+                                        value={inviteRole}
+                                        onChange={(event) =>
+                                            setInviteRole(
+                                                event.target
+                                                    .value as
+                                                | "admin"
+                                                | "member"
+                                            )
+                                        }
+                                        className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 pr-10 text-sm text-slate-100 outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
+                                    >
+                                        <option value="member">
+                                            Member
+                                        </option>
+                                        <option value="admin">
+                                            Admin
+                                        </option>
+                                    </select>
+                                    <ChevronDown
+                                        size={16}
+                                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
                             {inviteError && (
-                                <div className="mb-4 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                                    {inviteError}
+                                <div className="mb-4 flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                                    <CircleAlert
+                                        size={16}
+                                        className="mt-0.5 shrink-0"
+                                    />
+                                    <span>{inviteError}</span>
                                 </div>
                             )}
 
                             {usersError && (
-                                <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                                    {usersError}
+                                <div className="mb-4 flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                                    <CircleAlert
+                                        size={16}
+                                        className="mt-0.5 shrink-0"
+                                    />
+                                    <span>{usersError}</span>
                                 </div>
                             )}
 
                             {loadingUsers ? (
                                 <div className="space-y-3">
-                                    {[1, 2, 3, 4].map(
-                                        (item) => (
-                                            <div
-                                                key={item}
-                                                className="animate-pulse rounded-2xl border border-slate-800 bg-[#0F172A] p-4"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-11 w-11 rounded-xl bg-slate-800" />
-
-                                                    <div className="flex-1">
-                                                        <div className="h-4 w-32 rounded bg-slate-800" />
-                                                        <div className="mt-2 h-3 w-24 rounded bg-slate-800" />
-                                                    </div>
-
-                                                    <div className="h-9 w-16 rounded-lg bg-slate-800" />
+                                    {[1, 2, 3, 4].map((item) => (
+                                        <div
+                                            key={item}
+                                            className="animate-pulse rounded-2xl border border-slate-800 bg-[#0F172A] p-4"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-11 w-11 rounded-xl bg-slate-800" />
+                                                <div className="flex-1">
+                                                    <div className="h-4 w-32 rounded bg-slate-800" />
+                                                    <div className="mt-2 h-3 w-24 rounded bg-slate-900" />
                                                 </div>
+                                                <div className="h-9 w-16 rounded-lg bg-slate-800" />
                                             </div>
-                                        )
-                                    )}
+                                        </div>
+                                    ))}
                                 </div>
                             ) : filteredUsers.length > 0 ? (
                                 <div className="space-y-3">
-                                    {filteredUsers.map(
-                                        (user) => {
-                                            const invited =
-                                                invitedUserIds.includes(
-                                                    user.id
-                                                );
+                                    {filteredUsers.map((user) => {
+                                        const invited =
+                                            invitedUserIds.includes(
+                                                user.id
+                                            );
 
-                                            const fullName =
-                                                `${user.first_name} ${user.last_name}`.trim();
+                                        const fullName =
+                                            `${user.first_name} ${user.last_name}`.trim();
 
-                                            return (
-                                                <div
-                                                    key={
+                                        return (
+                                            <div
+                                                key={user.id}
+                                                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700"
+                                            >
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    {user.profile_picture ? (
+                                                        <img
+                                                            src={
+                                                                user.profile_picture.startsWith(
+                                                                    "http"
+                                                                )
+                                                                    ? user.profile_picture
+                                                                    : `${process.env.NEXT_PUBLIC_API_URL?.replace(
+                                                                        "/api",
+                                                                        ""
+                                                                    )}${user.profile_picture}`
+                                                            }
+                                                            alt={
+                                                                user.username
+                                                            }
+                                                            className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold text-indigo-400">
+                                                            {user.username
+                                                                .charAt(
+                                                                    0
+                                                                )
+                                                                .toUpperCase()}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-semibold text-slate-50">
+                                                            {fullName ||
+                                                                user.username}
+                                                        </p>
+                                                        <p className="mt-0.5 truncate text-xs text-slate-500">
+                                                            @{user.username}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleInviteUser(
+                                                            user.id
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        invited ||
+                                                        invitingUserId ===
                                                         user.id
                                                     }
-                                                    className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700"
-                                                >
-                                                    <div className="flex min-w-0 items-center gap-3">
-                                                        {user.profile_picture ? (
-                                                            <img
-                                                                src={
-                                                                    user.profile_picture.startsWith(
-                                                                        "http"
-                                                                    )
-                                                                        ? user.profile_picture
-                                                                        : `${process.env.NEXT_PUBLIC_API_URL?.replace(
-                                                                            "/api",
-                                                                            ""
-                                                                        )}${user.profile_picture}`
-                                                                }
-                                                                alt={
-                                                                    user.username
-                                                                }
-                                                                className="h-11 w-11 shrink-0 rounded-xl object-cover"
-                                                            />
-                                                        ) : (
-                                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-bold text-indigo-400">
-                                                                {user.username
-                                                                    .charAt(
-                                                                        0
-                                                                    )
-                                                                    .toUpperCase()}
-                                                            </div>
-                                                        )}
-
-                                                        <div className="min-w-0">
-                                                            <p className="truncate text-sm font-semibold text-slate-50">
-                                                                {fullName ||
-                                                                    user.username}
-                                                            </p>
-
-                                                            <p className="mt-0.5 truncate text-xs text-slate-500">
-                                                                @
-                                                                {
-                                                                    user.username
-                                                                }
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            handleInviteUser(
-                                                                user.id
-                                                            )
-                                                        }
-                                                        disabled={
-                                                            invited ||
-                                                            invitingUserId ===
-                                                            user.id
-                                                        }
-                                                        className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition ${invited
+                                                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${invited
                                                             ? "cursor-default bg-emerald-500/10 text-emerald-400"
                                                             : "cursor-pointer bg-indigo-500 text-white hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
-                                                            }`}
-                                                    >
-                                                        {invitingUserId ===
-                                                            user.id
-                                                            ? "Sending..."
-                                                            : invited
-                                                                ? "Invited"
-                                                                : "Invite"}
-                                                    </button>
-                                                </div>
-                                            );
-                                        }
-                                    )}
+                                                        }`}
+                                                >
+                                                    {invitingUserId ===
+                                                        user.id ? (
+                                                        <>
+                                                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                                            Sending...
+                                                        </>
+                                                    ) : invited ? (
+                                                        <>
+                                                            <Check size={13} />
+                                                            Invited
+                                                        </>
+                                                    ) : (
+                                                        "Invite"
+                                                    )}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="rounded-2xl border border-dashed border-slate-800 px-5 py-12 text-center">
-                                    <p className="text-sm font-medium text-slate-300">
+                                    <Search
+                                        size={21}
+                                        className="mx-auto text-slate-600"
+                                    />
+                                    <p className="mt-4 text-sm font-medium text-slate-300">
                                         {userSearch
                                             ? "No matching users"
                                             : "No users available"}
                                     </p>
-
                                     <p className="mt-1 text-sm text-slate-500">
                                         {userSearch
                                             ? "Try a different search."
@@ -1747,19 +1791,25 @@ export default function WorkspaceDetailPage() {
             )}
 
             {showProjectPanel && canCreateProject && (
-                <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm">
-                    <div className="flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-[#020617] shadow-2xl">
+                <div className="fixed inset-0 z-50">
+                    <div
+                        className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+                        onClick={() =>
+                            setShowProjectPanel(false)
+                        }
+                    />
+
+                    <div className="absolute right-0 top-0 flex h-full w-full max-w-lg flex-col border-l border-slate-800 bg-[#020617] shadow-2xl shadow-black/50">
                         <div className="border-b border-slate-800 px-5 py-5 sm:px-6">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                        <FolderKanban size={12} />
                                         Projects
                                     </span>
-
-                                    <h2 className="mt-1 text-xl font-semibold text-slate-50">
+                                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-50">
                                         Create project
                                     </h2>
-
                                     <p className="mt-1 text-sm text-slate-500">
                                         Add a new project to this workspace.
                                     </p>
@@ -1772,9 +1822,9 @@ export default function WorkspaceDetailPage() {
                                             false
                                         )
                                     }
-                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-xl text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
                                 >
-                                    ×
+                                    <X size={18} />
                                 </button>
                             </div>
                         </div>
@@ -1785,18 +1835,16 @@ export default function WorkspaceDetailPage() {
                                     <label className="text-sm font-medium text-slate-300">
                                         Project name
                                     </label>
-
                                     <input
                                         type="text"
                                         value={projectName}
                                         onChange={(event) =>
                                             setProjectName(
-                                                event.target
-                                                    .value
+                                                event.target.value
                                             )
                                         }
                                         placeholder="Enter project name"
-                                        className="mt-2 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                                        className="mt-2 h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
                                     />
                                 </div>
 
@@ -1804,20 +1852,18 @@ export default function WorkspaceDetailPage() {
                                     <label className="text-sm font-medium text-slate-300">
                                         Description
                                     </label>
-
                                     <textarea
                                         value={
                                             projectDescription
                                         }
                                         onChange={(event) =>
                                             setProjectDescription(
-                                                event.target
-                                                    .value
+                                                event.target.value
                                             )
                                         }
                                         placeholder="Enter project description"
                                         rows={5}
-                                        className="mt-2 w-full resize-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                                        className="mt-2 w-full resize-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
                                     />
                                 </div>
 
@@ -1826,64 +1872,74 @@ export default function WorkspaceDetailPage() {
                                         <label className="text-sm font-medium text-slate-300">
                                             Status
                                         </label>
-
-                                        <select
-                                            value={projectStatus}
-                                            onChange={(event) =>
-                                                setProjectStatus(
-                                                    event.target.value as ProjectStatus
-                                                )
-                                            }
-                                            className="mt-2 w-full cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
-                                        >
-                                            <option value="planning">
-                                                Planning
-                                            </option>
-
-                                            <option value="active">
-                                                Active
-                                            </option>
-
-                                            <option value="inactive">
-                                                Inactive
-                                            </option>
-
-                                            <option value="archived">
-                                                Archived
-                                            </option>
-                                        </select>
+                                        <div className="relative mt-2">
+                                            <select
+                                                value={
+                                                    projectStatus
+                                                }
+                                                onChange={(event) =>
+                                                    setProjectStatus(
+                                                        event.target
+                                                            .value as ProjectStatus
+                                                    )
+                                                }
+                                                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 pr-10 text-sm text-slate-100 outline-none transition focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
+                                            >
+                                                <option value="planning">
+                                                    Planning
+                                                </option>
+                                                <option value="active">
+                                                    Active
+                                                </option>
+                                                <option value="inactive">
+                                                    Inactive
+                                                </option>
+                                                <option value="archived">
+                                                    Archived
+                                                </option>
+                                            </select>
+                                            <ChevronDown
+                                                size={16}
+                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div>
                                         <label className="text-sm font-medium text-slate-300">
                                             Priority
                                         </label>
-
-                                        <select
-                                            value={projectPriority}
-                                            onChange={(event) =>
-                                                setProjectPriority(
-                                                    event.target.value as ProjectPriority
-                                                )
-                                            }
-                                            className="mt-2 w-full cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
-                                        >
-                                            <option value="low">
-                                                Low
-                                            </option>
-
-                                            <option value="medium">
-                                                Medium
-                                            </option>
-
-                                            <option value="high">
-                                                High
-                                            </option>
-
-                                            <option value="urgent">
-                                                Urgent
-                                            </option>
-                                        </select>
+                                        <div className="relative mt-2">
+                                            <select
+                                                value={
+                                                    projectPriority
+                                                }
+                                                onChange={(event) =>
+                                                    setProjectPriority(
+                                                        event.target
+                                                            .value as ProjectPriority
+                                                    )
+                                                }
+                                                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 pr-10 text-sm text-slate-100 outline-none transition focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
+                                            >
+                                                <option value="low">
+                                                    Low
+                                                </option>
+                                                <option value="medium">
+                                                    Medium
+                                                </option>
+                                                <option value="high">
+                                                    High
+                                                </option>
+                                                <option value="urgent">
+                                                    Urgent
+                                                </option>
+                                            </select>
+                                            <ChevronDown
+                                                size={16}
+                                                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1892,7 +1948,6 @@ export default function WorkspaceDetailPage() {
                                         <label className="text-sm font-medium text-slate-300">
                                             Start date
                                         </label>
-
                                         <input
                                             type="date"
                                             value={
@@ -1900,11 +1955,10 @@ export default function WorkspaceDetailPage() {
                                             }
                                             onChange={(event) =>
                                                 setProjectStartDate(
-                                                    event.target
-                                                        .value
+                                                    event.target.value
                                                 )
                                             }
-                                            className="mt-2 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                                            className="mt-2 h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
                                         />
                                     </div>
 
@@ -1912,57 +1966,69 @@ export default function WorkspaceDetailPage() {
                                         <label className="text-sm font-medium text-slate-300">
                                             Due date
                                         </label>
-
                                         <input
                                             type="date"
                                             value={projectDueDate}
                                             onChange={(event) =>
                                                 setProjectDueDate(
-                                                    event.target
-                                                        .value
+                                                    event.target.value
                                                 )
                                             }
-                                            className="mt-2 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm text-white outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10"
+                                            className="mt-2 h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20"
                                         />
                                     </div>
                                 </div>
 
                                 {projectError && (
-                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
-                                        {projectError}
+                                    <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
+                                        <CircleAlert
+                                            size={17}
+                                            className="mt-0.5 shrink-0"
+                                        />
+                                        <span>{projectError}</span>
                                     </div>
                                 )}
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        handleCreateProject
-                                    }
-                                    disabled={
-                                        creatingProject ||
-                                        !projectName.trim() ||
-                                        !projectDescription.trim()
-                                    }
-                                    className="w-full cursor-pointer rounded-xl bg-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    {creatingProject
-                                        ? "Creating..."
-                                        : "Create project"}
-                                </button>
                             </div>
+                        </div>
+
+                        <div className="border-t border-slate-800 px-5 py-5 sm:px-6">
+                            <button
+                                type="button"
+                                onClick={
+                                    handleCreateProject
+                                }
+                                disabled={
+                                    creatingProject ||
+                                    !projectName.trim() ||
+                                    !projectDescription.trim()
+                                }
+                                className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {creatingProject ? (
+                                    <>
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Plus size={16} />
+                                        Create project
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
             {showDeleteModal && canDeleteWorkspace && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-[#111827] p-6 shadow-2xl sm:p-7">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/10 text-xl font-semibold text-rose-400">
-                            !
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-[#111827] p-6 shadow-2xl shadow-black/40 sm:p-7">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-500/20 bg-rose-500/10 text-rose-400">
+                            <Trash2 size={23} />
                         </div>
 
-                        <h2 className="mt-5 text-xl font-semibold text-slate-50">
+                        <h2 className="mt-5 text-xl font-semibold tracking-tight text-slate-50">
                             Delete workspace?
                         </h2>
 
@@ -1975,8 +2041,12 @@ export default function WorkspaceDetailPage() {
                         </p>
 
                         {deleteError && (
-                            <div className="mt-5 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                                {deleteError}
+                            <div className="mt-5 flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                                <CircleAlert
+                                    size={17}
+                                    className="mt-0.5 shrink-0"
+                                />
+                                <span>{deleteError}</span>
                             </div>
                         )}
 
@@ -1989,7 +2059,7 @@ export default function WorkspaceDetailPage() {
                                     )
                                 }
                                 disabled={deleting}
-                                className="w-full cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                                className="h-10 w-full cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
                                 Cancel
                             </button>
@@ -2000,16 +2070,24 @@ export default function WorkspaceDetailPage() {
                                     handleDeleteWorkspace
                                 }
                                 disabled={deleting}
-                                className="w-full cursor-pointer rounded-xl bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                                className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-rose-500 px-4 text-sm font-semibold text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
-                                {deleting
-                                    ? "Deleting..."
-                                    : "Delete workspace"}
+                                {deleting ? (
+                                    <>
+                                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 size={15} />
+                                        Delete workspace
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-        </div>
+        </main>
     );
 }
