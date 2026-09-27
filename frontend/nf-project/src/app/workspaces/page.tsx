@@ -167,82 +167,96 @@ export default function WorkspacesPage() {
     };
 
     return (
-        <main className="min-h-screen overflow-x-hidden bg-[#020617] text-[#F8FAFC] selection:bg-indigo-500 selection:text-white">
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-                <div className="mb-8 flex flex-col justify-between gap-6 border-b border-slate-800/70 pb-7 sm:flex-row sm:items-end">
-                    <div className="max-w-2xl">
-                        <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                            Workspace Management
-                        </span>
+        <main className="min-h-screen overflow-x-hidden bg-[#020617] text-slate-50 selection:bg-indigo-500 selection:text-white">
+            <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-2xl shadow-black/10">
+                    <div className="pointer-events-none absolute -right-24 -top-32 h-72 w-72 rounded-full bg-indigo-500/[0.06] blur-3xl" />
 
-                        <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
-                            Workspaces
-                        </h1>
-
-                        <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400 sm:text-base">
-                            Organize your projects, teams, and work in dedicated
-                            workspaces.
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => {
-                            setCreateError("");
-                            setShowCreateForm(true);
-                        }}
-                        className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all duration-200 hover:bg-indigo-400 active:scale-[0.98] sm:w-auto"
-                    >
-                        <Plus size={17} />
-                        Create Workspace
-                    </button>
-                </div>
-
-                <div className="mb-8 flex h-12 items-center rounded-xl border border-slate-800 bg-[#0F172A] px-4 transition-colors focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/30">
-                    <Search size={18} className="shrink-0 text-slate-500" />
-
-                    <input
-                        type="text"
-                        placeholder="Search workspaces..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-full w-full bg-transparent px-3 text-sm text-slate-100 outline-none placeholder:text-slate-500"
-                    />
-                </div>
-
-                {error && (
-                    <div className="mb-8 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                        {error}
-                    </div>
-                )}
-
-                <section>
-                    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-indigo-400" />
-                                <h2 className="text-lg font-semibold tracking-tight text-slate-50">
-                                    Your Workspaces
-                                </h2>
+                    <div className="relative flex flex-col gap-7 p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between lg:p-8">
+                        <div className="max-w-2xl">
+                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
+                                <Users size={13} />
+                                Workspace Management
                             </div>
 
-                            <p className="mt-1.5 text-sm text-slate-500">
-                                Workspaces you currently belong to.
+                            <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
+                                Workspaces
+                            </h1>
+
+                            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400 sm:text-base">
+                                Organize your projects, teams, and work in dedicated
+                                workspaces.
                             </p>
                         </div>
 
-                        <span className="w-fit rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-slate-400">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setCreateError("");
+                                setShowCreateForm(true);
+                            }}
+                            className="inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all duration-200 hover:bg-indigo-400 active:scale-[0.98] sm:w-auto"
+                        >
+                            <Plus size={17} />
+                            Create Workspace
+                        </button>
+                    </div>
+                </section>
+
+                <section className="mt-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="relative w-full sm:max-w-md lg:max-w-lg">
+                            <Search
+                                size={17}
+                                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                            />
+
+                            <input
+                                type="text"
+                                placeholder="Search workspaces..."
+                                value={searchQuery}
+                                onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                }
+                                className="h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] pl-11 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
                             {filteredWorkspaces.length}{" "}
                             {filteredWorkspaces.length === 1
                                 ? "workspace"
                                 : "workspaces"}
-                        </span>
+                        </div>
+                    </div>
+                </section>
+
+                {error && (
+                    <div className="mt-5 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                        {error}
+                    </div>
+                )}
+
+                <section className="mt-8">
+                    <div className="mb-5">
+                        <h2 className="text-lg font-semibold tracking-tight text-slate-50">
+                            Your Workspaces
+                        </h2>
+
+                        <p className="mt-1.5 text-sm text-slate-500">
+                            Workspaces you currently belong to.
+                        </p>
                     </div>
 
                     {filteredWorkspaces.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/60 px-6 py-16 text-center">
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500">
-                                <FolderKanban size={20} />
+                                {searchQuery ? (
+                                    <Search size={20} />
+                                ) : (
+                                    <FolderKanban size={20} />
+                                )}
                             </div>
 
                             <h3 className="mt-4 text-sm font-semibold text-slate-200">
@@ -259,6 +273,7 @@ export default function WorkspacesPage() {
 
                             {!searchQuery && (
                                 <button
+                                    type="button"
                                     onClick={() => {
                                         setCreateError("");
                                         setShowCreateForm(true);
@@ -275,21 +290,26 @@ export default function WorkspacesPage() {
                             {filteredWorkspaces.map((workspace) => (
                                 <div
                                     key={workspace.id}
-                                    className="group relative flex min-h-[320px] flex-col justify-between rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-[#151d2d]"
+                                    className="group relative flex min-h-[330px] flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-[#151d2d]"
                                 >
-                                    <div>
+                                    <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-indigo-500/[0.035] blur-2xl" />
+
+                                    <div className="relative">
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
                                                 {getInitials(workspace.name)}
                                             </div>
 
-                                            <button className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200">
+                                            <button
+                                                type="button"
+                                                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
+                                            >
                                                 <MoreHorizontal size={18} />
                                             </button>
                                         </div>
 
                                         <div className="mt-5">
-                                            <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex min-w-0 flex-wrap items-center gap-2">
                                                 <h3 className="max-w-full truncate font-semibold text-slate-100 group-hover:text-white">
                                                     {workspace.name}
                                                 </h3>
@@ -314,9 +334,9 @@ export default function WorkspacesPage() {
                                         </div>
                                     </div>
 
-                                    <div>
+                                    <div className="relative">
                                         <div className="mt-6 grid grid-cols-2 gap-3">
-                                            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
                                                 <div className="flex items-center gap-2 text-slate-500">
                                                     <Users
                                                         size={14}
@@ -332,7 +352,7 @@ export default function WorkspacesPage() {
                                                 </p>
                                             </div>
 
-                                            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                                            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5">
                                                 <div className="flex items-center gap-2 text-slate-500">
                                                     <FolderKanban
                                                         size={14}
@@ -350,10 +370,11 @@ export default function WorkspacesPage() {
                                         </div>
 
                                         <button
+                                            type="button"
                                             onClick={() =>
                                                 openWorkspace(workspace.id)
                                             }
-                                            className="mt-5 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-indigo-500/40 hover:bg-indigo-500 hover:text-white"
+                                            className="mt-4 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-indigo-500/40 hover:bg-indigo-500 hover:text-white"
                                         >
                                             Open Workspace
                                             <ArrowRight
@@ -366,11 +387,12 @@ export default function WorkspacesPage() {
                             ))}
 
                             <button
+                                type="button"
                                 onClick={() => {
                                     setCreateError("");
                                     setShowCreateForm(true);
                                 }}
-                                className="group flex min-h-[320px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-6 text-center transition-all duration-200 hover:border-indigo-500/40 hover:bg-[#111827]"
+                                className="group flex min-h-[330px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-6 text-center transition-all duration-200 hover:border-indigo-500/40 hover:bg-[#111827]"
                             >
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500 transition-colors duration-200 group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
                                     <Plus size={20} />
@@ -393,15 +415,20 @@ export default function WorkspacesPage() {
             {showCreateForm && (
                 <div className="fixed inset-0 z-50">
                     <div
-                        className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
+                        className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
                         onClick={closeCreateForm}
                     />
 
-                    <div className="absolute right-0 top-0 h-full w-full max-w-md border-l border-slate-800 bg-[#020617] shadow-2xl shadow-black/40">
+                    <div className="absolute right-0 top-0 h-full w-full max-w-md border-l border-slate-800 bg-[#020617] shadow-2xl shadow-black/50">
                         <div className="flex h-full flex-col">
                             <div className="flex items-center justify-between gap-4 border-b border-slate-800 px-5 py-5 sm:px-6">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-slate-50">
+                                    <div className="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                        <Plus size={13} />
+                                        New Workspace
+                                    </div>
+
+                                    <h2 className="text-xl font-semibold tracking-tight text-slate-50">
                                         Create Workspace
                                     </h2>
 
@@ -412,9 +439,10 @@ export default function WorkspacesPage() {
                                 </div>
 
                                 <button
+                                    type="button"
                                     onClick={closeCreateForm}
                                     disabled={creating}
-                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-transparent text-slate-500 transition hover:border-slate-800 hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <X size={18} />
                                 </button>
@@ -426,7 +454,7 @@ export default function WorkspacesPage() {
                             >
                                 <div className="flex-1 space-y-6 overflow-y-auto px-5 py-6 sm:px-6">
                                     {createError && (
-                                        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+                                        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
                                             {createError}
                                         </div>
                                     )}
@@ -445,7 +473,7 @@ export default function WorkspacesPage() {
                                             placeholder="e.g. ApexStriker Core"
                                             disabled={creating}
                                             autoFocus
-                                            className="h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="h-11 w-full rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                         />
                                     </div>
 
@@ -464,17 +492,17 @@ export default function WorkspacesPage() {
                                             placeholder="Describe what this workspace is used for..."
                                             disabled={creating}
                                             rows={5}
-                                            className="w-full resize-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-relaxed text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="w-full resize-none rounded-xl border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-relaxed text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-end gap-3 border-t border-slate-800 px-5 py-5 sm:px-6">
+                                <div className="flex flex-col-reverse gap-3 border-t border-slate-800 px-5 py-5 sm:flex-row sm:items-center sm:justify-end sm:px-6">
                                     <button
                                         type="button"
                                         onClick={closeCreateForm}
                                         disabled={creating}
-                                        className="h-10 cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-4 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="h-10 w-full cursor-pointer rounded-xl border border-slate-800 bg-slate-900 px-4 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                                     >
                                         Cancel
                                     </button>
@@ -484,11 +512,19 @@ export default function WorkspacesPage() {
                                         disabled={
                                             creating || !workspaceName.trim()
                                         }
-                                        className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                                     >
-                                        {creating
-                                            ? "Creating..."
-                                            : "Create Workspace"}
+                                        {creating ? (
+                                            <>
+                                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                                Creating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Plus size={16} />
+                                                Create Workspace
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </form>
