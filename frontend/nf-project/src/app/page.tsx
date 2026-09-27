@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import LandingSkeleton from "@/components/LandingSkeleton";
+import NFLOGO from "@/images/NFLOGO.png";
+import NFBM from "@/images/NFBM.png";
 
 export default function LandingPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -29,84 +32,141 @@ export default function LandingPage() {
     <div className="min-h-screen overflow-x-hidden bg-[#020617] text-[#F8FAFC] selection:bg-indigo-500 selection:text-white">
       <main className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
         <div className="flex flex-1 flex-col">
-          <section className="relative flex flex-1 items-center justify-center py-16 sm:py-20 lg:py-24">
+          <section className="relative flex flex-1 items-center py-14 sm:py-20 lg:py-24">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute left-1/2 top-20 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-500/[0.07] blur-3xl" />
-              <div className="absolute bottom-10 left-1/4 h-40 w-40 rounded-full bg-indigo-500/[0.04] blur-3xl" />
+              <div className="absolute left-1/4 top-20 h-72 w-72 rounded-full bg-indigo-500/[0.06] blur-3xl" />
+              <div className="absolute bottom-20 right-1/4 h-64 w-64 rounded-full bg-indigo-500/[0.04] blur-3xl" />
             </div>
 
-            <div className="relative mx-auto w-full max-w-4xl text-center">
-              {isAuthenticated ? (
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  Session active
-                </div>
-              ) : (
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-medium text-indigo-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                  Simple project management
-                </div>
-              )}
+            <div className="relative grid w-full items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.9fr)] lg:gap-16">
+              <div className="max-w-2xl">
+                <div className="mb-7 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-[#111827] p-2.5 shadow-xl shadow-black/10">
+                    <Image
+                      src={NFLOGO}
+                      alt="NexaFlow"
+                      className="h-full w-full object-contain"
+                      priority
+                    />
+                  </div>
 
-              <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.03em] text-slate-50 sm:text-5xl md:text-6xl lg:text-7xl">
+                  <div>
+                    <p className="text-base font-semibold tracking-tight text-slate-100">
+                      NexaFlow
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Simple project management
+                    </p>
+                  </div>
+                </div>
+
                 {isAuthenticated ? (
-                  <>
-                    Welcome back.
-                    <span className="mt-2 block text-indigo-400">
-                      Keep the work moving.
-                    </span>
-                  </>
+                  <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Session active
+                  </div>
                 ) : (
-                  <>
-                    Plan your work.
-                    <span className="mt-2 block text-indigo-400">
-                      Get more done.
-                    </span>
-                  </>
+                  <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-medium text-indigo-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                    Simple project management
+                  </div>
                 )}
-              </h1>
 
-              <p className="mx-auto mt-6 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base sm:leading-7 lg:text-lg">
-                {isAuthenticated
-                  ? "Manage your workspaces, projects, and tasks from one place."
-                  : "Keep your workspaces, projects, and tasks organized in one simple place."}
-              </p>
+                <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.035em] text-slate-50 sm:text-5xl lg:text-6xl xl:text-7xl">
+                  {isAuthenticated ? (
+                    <>
+                      Welcome back.
+                      <span className="mt-2 block text-indigo-400">
+                        Keep the work moving.
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Plan your work.
+                      <span className="mt-2 block text-indigo-400">
+                        Get more done.
+                      </span>
+                    </>
+                  )}
+                </h1>
 
-              <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-                <Link
-                  href={isAuthenticated ? "/dashboard" : "/register"}
-                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all duration-200 hover:bg-indigo-400 hover:shadow-indigo-500/10 active:scale-[0.98]"
-                >
-                  {isAuthenticated ? "Go to Dashboard" : "Get Started"}
-                  <span
-                    aria-hidden="true"
-                    className="transition-transform duration-200 group-hover:translate-x-0.5"
+                <p className="mt-6 max-w-xl text-sm leading-7 text-slate-400 sm:text-base lg:text-lg">
+                  {isAuthenticated
+                    ? "Manage your workspaces, projects, and tasks from one place."
+                    : "Keep your workspaces, projects, and tasks organized in one simple place."}
+                </p>
+
+                <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href={isAuthenticated ? "/dashboard" : "/register"}
+                    className="group inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all duration-200 hover:bg-indigo-400 hover:shadow-indigo-500/10 active:scale-[0.98]"
                   >
-                    →
-                  </span>
-                </Link>
+                    {isAuthenticated ? "Go to Dashboard" : "Get Started"}
+                    <span
+                      aria-hidden="true"
+                      className="transition-transform duration-200 group-hover:translate-x-0.5"
+                    >
+                      →
+                    </span>
+                  </Link>
 
-                <Link
-                  href={isAuthenticated ? "/workspaces" : "/login"}
-                  className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/70 px-6 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-slate-700 hover:bg-slate-900 hover:text-white active:scale-[0.98]"
-                >
-                  {isAuthenticated ? "View Workspaces" : "Sign In"}
-                </Link>
+                  <Link
+                    href={isAuthenticated ? "/workspaces" : "/login"}
+                    className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-800 bg-[#0F172A] px-6 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-slate-700 hover:bg-slate-900 hover:text-white active:scale-[0.98]"
+                  >
+                    {isAuthenticated ? "View Workspaces" : "Sign In"}
+                  </Link>
+                </div>
+
+                <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-slate-500">
+                  <span className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                    Workspaces
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                    Projects
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                    Tasks
+                  </span>
+                </div>
               </div>
 
-              <div className="mx-auto mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-slate-500">
-                <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                  Workspaces
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                  Projects
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                  Tasks
-                </span>
+              <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
+                <div className="absolute -inset-5 rounded-[2rem] bg-indigo-500/[0.035] blur-2xl" />
+
+                <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#111827] p-3 shadow-2xl shadow-black/30">
+                  <div className="flex items-center justify-between border-b border-slate-800 px-3 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <Image
+                        src={NFLOGO}
+                        alt="NexaFlow"
+                        className="h-7 w-7 object-contain"
+                      />
+                      <div>
+                        <div className="h-2.5 w-20 rounded-full bg-slate-700" />
+                        <div className="mt-1.5 h-1.5 w-12 rounded-full bg-slate-800" />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-slate-700" />
+                      <span className="h-2 w-2 rounded-full bg-slate-700" />
+                      <span className="h-2 w-2 rounded-full bg-slate-700" />
+                    </div>
+                  </div>
+
+                  <div className="p-2">
+                    <Image
+                      src={NFBM}
+                      alt="NexaFlow workspace preview"
+                      className="h-auto w-full rounded-2xl object-cover"
+                      priority
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </section>
