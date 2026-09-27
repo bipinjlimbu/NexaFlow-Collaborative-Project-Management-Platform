@@ -1,25 +1,40 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
+import NFLOGO from "@/images/NFLOGO.png";
 
 export default function Footer() {
     return (
         <footer className="border-t border-slate-800/80 bg-[#020617] px-4 py-12 text-slate-400 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
-                <div className="grid grid-cols-1 gap-10 pb-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-                    <div className="sm:col-span-2 lg:col-span-1">
+                <div className="grid grid-cols-1 gap-10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:gap-12">
+                    <div>
                         <Link
                             href="/"
-                            className="group inline-flex items-center gap-2.5"
+                            className="group inline-flex items-center gap-3"
                         >
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-base font-bold text-white shadow-lg shadow-indigo-500/20 transition group-hover:bg-indigo-400">
-                                N
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] p-2 transition group-hover:border-indigo-500/30 group-hover:bg-[#151d2d]">
+                                <Image
+                                    src={NFLOGO}
+                                    alt="NexaFlow"
+                                    width={32}
+                                    height={32}
+                                    className="h-full w-full object-contain"
+                                />
                             </div>
 
-                            <span className="text-lg font-semibold tracking-tight text-slate-50">
-                                NexaFlow
-                            </span>
+                            <div>
+                                <span className="block text-lg font-semibold tracking-tight text-slate-50">
+                                    NexaFlow
+                                </span>
+                                <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">
+                                    Work management
+                                </span>
+                            </div>
                         </Link>
 
-                        <p className="mt-4 max-w-sm text-sm leading-6 text-slate-400">
+                        <p className="mt-5 max-w-sm text-sm leading-6 text-slate-400">
                             Collaborative project management for modern teams,
                             workspaces, and projects.
                         </p>
@@ -90,7 +105,7 @@ export default function Footer() {
                                     href="#hierarchy"
                                     className="transition-colors hover:text-slate-50"
                                 >
-                                    Hierarchy
+                                    Structure
                                 </a>
                             </li>
                             <li>
