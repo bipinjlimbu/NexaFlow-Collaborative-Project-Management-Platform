@@ -13,9 +13,9 @@ import InvitationsSkeleton from "@/components/InvitationsSkeleton";
 function getRoleStyle(role: string) {
     switch (role.toLowerCase()) {
         case "admin":
-            return "border-indigo-400/20 bg-indigo-500/10 text-indigo-300";
+            return "border-indigo-500/20 bg-indigo-500/10 text-indigo-400";
         case "member":
-            return "border-sky-400/20 bg-sky-500/10 text-sky-300";
+            return "border-sky-500/20 bg-sky-500/10 text-sky-400";
         default:
             return "border-slate-700 bg-slate-800/70 text-slate-400";
     }
@@ -24,11 +24,11 @@ function getRoleStyle(role: string) {
 function getStatusStyle(status: string) {
     switch (status.toLowerCase()) {
         case "pending":
-            return "border-amber-400/20 bg-amber-500/10 text-amber-300";
+            return "border-amber-500/20 bg-amber-500/10 text-amber-400";
         case "accepted":
-            return "border-emerald-400/20 bg-emerald-500/10 text-emerald-300";
+            return "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
         case "declined":
-            return "border-red-400/20 bg-red-500/10 text-red-300";
+            return "border-rose-500/20 bg-rose-500/10 text-rose-400";
         case "expired":
             return "border-slate-700 bg-slate-800/70 text-slate-500";
         default:
@@ -210,44 +210,96 @@ export default function InvitationsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white">
-            <div className="mx-auto max-w-5xl px-6 py-8">
-                <div className="mb-8">
-                    <button
-                        onClick={() => router.back()}
-                        className="mb-7 flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-200"
+        <main className="min-h-screen bg-[#020617] text-slate-50">
+            <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+                <button
+                    onClick={() => router.back()}
+                    className="mb-7 inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-200"
+                >
+                    <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                     >
-                        <span className="text-base">←</span>
-                        Back
-                    </button>
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M15 19l-7-7 7-7"
+                        />
+                    </svg>
+                    Back
+                </button>
 
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight text-white">
-                            Invitations
-                        </h1>
+                <section className="mb-8 rounded-3xl border border-slate-800 bg-[#111827] p-6 shadow-2xl shadow-black/20 sm:p-7">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                                Workspace access
+                            </div>
+
+                            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                                Invitations
+                            </h1>
+
+                            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">
+                                Manage workspace invitations sent to
+                                you.
+                            </p>
+                        </div>
 
                         {invitations.length > 0 && (
-                            <span className="flex h-7 min-w-7 items-center justify-center rounded-full border border-indigo-400/20 bg-indigo-500/10 px-2 text-xs font-semibold text-indigo-300">
-                                {invitations.length}
-                            </span>
+                            <div className="flex h-10 w-fit items-center gap-2 rounded-xl border border-slate-800 bg-[#0F172A] px-3.5 text-sm font-medium text-slate-300">
+                                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-500/10 px-1.5 text-xs font-semibold text-indigo-400">
+                                    {invitations.length}
+                                </span>
+                                {invitations.length === 1
+                                    ? "Invitation"
+                                    : "Invitations"}
+                            </div>
                         )}
                     </div>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                        Manage workspace invitations sent to you.
-                    </p>
-                </div>
+                </section>
 
                 {error && (
-                    <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/[0.06] px-5 py-4 text-sm text-red-400">
-                        {error}
+                    <div className="mb-6 rounded-2xl border border-rose-500/20 bg-rose-500/[0.05] px-5 py-4">
+                        <div className="flex items-start gap-3 text-sm text-rose-400">
+                            <svg
+                                className="mt-0.5 h-4 w-4 shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M12 9v3.5m0 3h.01M10.29 3.86l-7.17 12a2 2 0 001.71 3h14.34a2 2 0 001.71-3l-7.17-12a2 2 0 00-3.42 0z"
+                                />
+                            </svg>
+                            <span>{error}</span>
+                        </div>
                     </div>
                 )}
 
                 {!error && invitations.length === 0 && (
-                    <div className="rounded-2xl border border-slate-800/80 bg-slate-900/30 px-6 py-20 text-center shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-xl text-slate-500">
-                            ✉
+                    <section className="rounded-3xl border border-slate-800 bg-[#111827] px-6 py-20 text-center shadow-2xl shadow-black/10">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800 bg-[#0F172A] text-slate-500">
+                            <svg
+                                className="h-7 w-7"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="1.8"
+                                    d="M3 8l9 6 9-6M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                />
+                            </svg>
                         </div>
 
                         <h2 className="mt-5 text-lg font-semibold text-slate-200">
@@ -255,10 +307,10 @@ export default function InvitationsPage() {
                         </h2>
 
                         <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                            You don&apos;t have any workspace invitations
-                            right now.
+                            You don&apos;t have any workspace
+                            invitations right now.
                         </p>
-                    </div>
+                    </section>
                 )}
 
                 {invitations.length > 0 && (
@@ -277,24 +329,24 @@ export default function InvitationsPage() {
                                 isAccepting || isDeclining;
 
                             return (
-                                <div
+                                <article
                                     key={invitation.id}
-                                    className="group relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 shadow-[0_12px_40px_rgba(0,0,0,0.12)] transition-all duration-200 hover:-translate-y-[1px] hover:border-slate-700 hover:bg-slate-900/60 hover:shadow-[0_18px_50px_rgba(0,0,0,0.2)]"
+                                    className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] transition duration-200 hover:border-slate-700 hover:bg-[#151e2f]"
                                 >
-                                    <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-indigo-500/70 via-indigo-500/20 to-transparent opacity-70 transition-opacity group-hover:opacity-100" />
+                                    <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-500/70 opacity-60 transition-opacity group-hover:opacity-100" />
 
                                     <div className="p-5 sm:p-6">
-                                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                                        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                                             <div className="flex min-w-0 gap-4">
-                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 text-base font-bold text-indigo-300 shadow-inner shadow-indigo-500/5">
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-base font-bold text-indigo-400">
                                                     {invitation.workspace.name
                                                         .slice(0, 1)
                                                         .toUpperCase()}
                                                 </div>
 
-                                                <div className="min-w-0 flex-1">
+                                                <div className="min-w-0">
                                                     <div className="flex flex-wrap items-center gap-2.5">
-                                                        <h2 className="truncate text-lg font-semibold tracking-tight text-white">
+                                                        <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                                             {
                                                                 invitation
                                                                     .workspace
@@ -315,7 +367,7 @@ export default function InvitationsPage() {
 
                                                     {invitation.workspace
                                                         .description && (
-                                                            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                                                            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
                                                                 {
                                                                     invitation
                                                                         .workspace
@@ -324,21 +376,41 @@ export default function InvitationsPage() {
                                                             </p>
                                                         )}
 
-                                                    <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-600">
-                                                        <span className="flex items-center gap-1.5">
-                                                            <span className="text-slate-700">
-                                                                ◷
-                                                            </span>
+                                                    <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-500">
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <svg
+                                                                className="h-3.5 w-3.5 text-slate-600"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth="1.8"
+                                                                    d="M12 8v4l2.5 2.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                />
+                                                            </svg>
                                                             Invited{" "}
                                                             {formatRelativeDate(
                                                                 invitation.created_at
                                                             )}
                                                         </span>
 
-                                                        <span className="flex items-center gap-1.5">
-                                                            <span className="text-slate-700">
-                                                                ⌛
-                                                            </span>
+                                                        <span className="inline-flex items-center gap-1.5">
+                                                            <svg
+                                                                className="h-3.5 w-3.5 text-slate-600"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth="1.8"
+                                                                    d="M12 8v4l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                />
+                                                            </svg>
                                                             Expires{" "}
                                                             {formatDate(
                                                                 invitation.expires_at
@@ -349,7 +421,7 @@ export default function InvitationsPage() {
                                             </div>
 
                                             <span
-                                                className={`self-start rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize ${getRoleStyle(
+                                                className={`w-fit rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize ${getRoleStyle(
                                                     invitation.role
                                                 )}`}
                                             >
@@ -372,7 +444,7 @@ export default function InvitationsPage() {
                                                         className="h-9 w-9 shrink-0 rounded-full border border-slate-700 object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-indigo-400/20 bg-indigo-600 text-xs font-semibold text-white">
+                                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-indigo-500/20 bg-indigo-500 text-xs font-semibold text-white">
                                                         {inviter.first_name?.[0]?.toUpperCase() ||
                                                             inviter.username?.[0]?.toUpperCase() ||
                                                             "U"}
@@ -380,7 +452,7 @@ export default function InvitationsPage() {
                                                 )}
 
                                                 <div className="min-w-0">
-                                                    <p className="text-[11px] font-medium uppercase tracking-wider text-slate-600">
+                                                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">
                                                         Invited by
                                                     </p>
 
@@ -393,7 +465,7 @@ export default function InvitationsPage() {
                                                 </div>
                                             </div>
 
-                                            <span className="hidden text-xs text-slate-700 sm:ml-auto sm:block">
+                                            <span className="text-xs text-slate-600 sm:ml-auto">
                                                 @{inviter.username}
                                             </span>
                                         </div>
@@ -411,7 +483,7 @@ export default function InvitationsPage() {
                                                                 invitation.id
                                                             )
                                                         }
-                                                        className="cursor-pointer rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-2.5 text-sm font-medium text-slate-400 transition-all hover:border-red-500/30 hover:bg-red-500/[0.06] hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        className="cursor-pointer rounded-xl border border-slate-700 bg-[#0F172A] px-4 py-2.5 text-sm font-medium text-slate-400 transition hover:border-rose-500/30 hover:bg-rose-500/[0.06] hover:text-rose-400 disabled:cursor-not-allowed disabled:opacity-50"
                                                     >
                                                         {isDeclining
                                                             ? "Declining..."
@@ -428,7 +500,7 @@ export default function InvitationsPage() {
                                                                 invitation.id
                                                             )
                                                         }
-                                                        className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                                                        className="cursor-pointer rounded-xl bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/15 transition hover:bg-indigo-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                                                     >
                                                         {isAccepting
                                                             ? "Accepting..."
@@ -437,12 +509,12 @@ export default function InvitationsPage() {
                                                 </div>
                                             )}
                                     </div>
-                                </div>
+                                </article>
                             );
                         })}
                     </div>
                 )}
             </div>
-        </div>
+        </main>
     );
 }
