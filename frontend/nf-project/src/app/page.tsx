@@ -178,6 +178,108 @@ export default function LandingPage() {
             </div>
           </section>
 
+          {!isAuthenticated && (
+            <section
+              id="hierarchy"
+              className="border-t border-slate-800/70 py-16 sm:py-20"
+            >
+              <div className="mb-10 max-w-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                  How it works
+                </p>
+
+                <h2 className="mt-2.5 text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">
+                  A simple work structure
+                </h2>
+
+                <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
+                  Keep your work organized from the bigger picture down to
+                  individual tasks.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="relative rounded-2xl border border-slate-800 bg-[#111827] p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
+                      01
+                    </span>
+                    <span className="text-xs font-medium text-slate-500">
+                      Foundation
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-lg font-semibold text-slate-50">
+                    Workspace
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Create a space for a team, department, or area of work.
+                  </p>
+                </div>
+
+                <div className="relative rounded-2xl border border-slate-800 bg-[#111827] p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
+                      02
+                    </span>
+                    <span className="text-xs font-medium text-slate-500">
+                      Organization
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-lg font-semibold text-slate-50">
+                    Project
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Group related work into projects with clear goals and
+                    progress.
+                  </p>
+                </div>
+
+                <div className="relative rounded-2xl border border-slate-800 bg-[#111827] p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-sm font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
+                      03
+                    </span>
+                    <span className="text-xs font-medium text-slate-500">
+                      Action
+                    </span>
+                  </div>
+
+                  <h3 className="mt-6 text-lg font-semibold text-slate-50">
+                    Task
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Break projects into actionable tasks and keep track of
+                    progress.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-indigo-500/15 bg-indigo-500/[0.04] p-5 sm:p-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-200">
+                      Workspace → Project → Task
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      One clear hierarchy for keeping work easy to manage.
+                    </p>
+                  </div>
+
+                  <div className="hidden items-center gap-2 text-indigo-400 sm:flex">
+                    <span className="h-px w-8 bg-indigo-500/30" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                    <span className="h-px w-8 bg-indigo-500/30" />
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
           <section
             id="about"
             className="mb-8 rounded-2xl border border-slate-800 bg-[#0F172A] p-6 shadow-sm sm:p-8 lg:flex lg:items-center lg:justify-between lg:gap-10"
