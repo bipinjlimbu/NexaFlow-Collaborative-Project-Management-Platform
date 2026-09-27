@@ -9,7 +9,7 @@ import RegisterSkeleton from "@/components/RegisterSkeleton";
 function FieldError({ error }: { error?: string | string[] }) {
     if (!error) return null;
     const message = Array.isArray(error) ? error[0] : error;
-    return <p className="text-xs text-rose-400 mt-1">{message}</p>;
+    return <p className="mt-1.5 text-xs text-rose-400">{message}</p>;
 }
 
 export default function RegisterPage() {
@@ -29,11 +29,14 @@ export default function RegisterPage() {
     });
 
     const [error, setError] = useState<string | null>(null);
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string | string[]>>({});
+    const [fieldErrors, setFieldErrors] = useState<
+        Record<string, string | string[]>
+    >({});
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("access");
+
         if (token) {
             alert("You are already logged in.");
             router.replace("/dashboard");
@@ -62,6 +65,14 @@ export default function RegisterPage() {
             ...formData,
             profile_picture: e.target.files?.[0] || null,
         });
+
+        if (fieldErrors.profile_picture) {
+            setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next.profile_picture;
+                return next;
+            });
+        }
     }
 
     async function handleSubmit(e: React.FormEvent) {
@@ -103,162 +114,336 @@ export default function RegisterPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-950 text-slate-50 flex items-center justify-center px-6 py-12 selection:bg-indigo-500 selection:text-white">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-2xl space-y-5 rounded-2xl border border-slate-800/80 bg-slate-900/50 p-8 shadow-xl backdrop-blur-sm"
-            >
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-md shadow-indigo-600/30">
-                            N
+        <main className="min-h-screen bg-[#020617] px-4 py-8 text-slate-50 selection:bg-indigo-500 selection:text-white sm:px-6 sm:py-12">
+            <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
+                <div className="grid w-full overflow-hidden rounded-3xl border border-slate-800 bg-[#111827] shadow-2xl shadow-black/20 lg:grid-cols-[0.82fr_1.18fr]">
+                    <div className="relative hidden overflow-hidden border-r border-slate-800 bg-[#0F172A] p-8 lg:flex lg:flex-col lg:justify-between xl:p-10">
+                        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
+                        <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-sky-500/5 blur-3xl" />
+
+                        <div className="relative">
+                            <Link
+                                href="/"
+                                className="inline-flex items-center gap-3"
+                            >
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
+                                    N
+                                </div>
+
+                                <span className="text-lg font-bold tracking-tight text-white">
+                                    NexaFlow
+                                </span>
+                            </Link>
+
+                            <div className="mt-20 max-w-sm">
+                                <div className="mb-4 inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                    Get started
+                                </div>
+
+                                <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white">
+                                    Build your workspace.
+                                    <span className="block text-slate-400">
+                                        Keep everything moving.
+                                    </span>
+                                </h1>
+
+                                <p className="mt-5 text-sm leading-7 text-slate-400">
+                                    Create your NexaFlow account and bring your
+                                    workspaces, projects, and tasks together in
+                                    one place.
+                                </p>
+                            </div>
                         </div>
-                        <span className="font-bold text-lg tracking-tight text-white">
-                            NexaFlow
-                        </span>
-                    </div>
-                    <h1 className="text-2xl font-bold tracking-tight text-white pt-2">Create Account</h1>
-                    <p className="text-sm text-slate-400">
-                        Create your NexaFlow account to manage your workspace
-                    </p>
-                </div>
 
-                {error && (
-                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-400">
-                        {error}
-                    </div>
-                )}
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <input
-                            name="first_name"
-                            type="text"
-                            placeholder="First Name"
-                            value={formData.first_name}
-                            onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        />
-                        <FieldError error={fieldErrors.first_name} />
+                        <div className="relative border-t border-slate-800 pt-5">
+                            <p className="text-xs leading-5 text-slate-500">
+                                A focused workspace for organizing work and
+                                keeping your team aligned.
+                            </p>
+                        </div>
                     </div>
 
-                    <div>
-                        <input
-                            name="last_name"
-                            type="text"
-                            placeholder="Last Name"
-                            value={formData.last_name}
-                            onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        />
-                        <FieldError error={fieldErrors.last_name} />
-                    </div>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="p-5 sm:p-7 lg:p-9 xl:p-10"
+                    >
+                        <div className="mb-7">
+                            <div className="flex items-center gap-3 lg:hidden">
+                                <Link
+                                    href="/"
+                                    className="flex items-center gap-3"
+                                >
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
+                                        N
+                                    </div>
+
+                                    <span className="text-lg font-bold tracking-tight text-white">
+                                        NexaFlow
+                                    </span>
+                                </Link>
+                            </div>
+
+                            <div className="mt-7 lg:mt-0">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                    Create account
+                                </p>
+
+                                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                                    Welcome to NexaFlow
+                                </h2>
+
+                                <p className="mt-2 text-sm leading-6 text-slate-400">
+                                    Enter your details to create your account.
+                                </p>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <div className="mb-5 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm leading-5 text-rose-400">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-5">
+                            <div>
+                                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                    Personal details
+                                </p>
+
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            First Name
+                                        </label>
+
+                                        <input
+                                            name="first_name"
+                                            type="text"
+                                            placeholder="Enter first name"
+                                            value={formData.first_name}
+                                            onChange={handleChange}
+                                            className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.first_name
+                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                }`}
+                                        />
+
+                                        <FieldError
+                                            error={fieldErrors.first_name}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Last Name
+                                        </label>
+
+                                        <input
+                                            name="last_name"
+                                            type="text"
+                                            placeholder="Enter last name"
+                                            value={formData.last_name}
+                                            onChange={handleChange}
+                                            className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.last_name
+                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                }`}
+                                        />
+
+                                        <FieldError
+                                            error={fieldErrors.last_name}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Username
+                                </label>
+
+                                <input
+                                    name="username"
+                                    type="text"
+                                    placeholder="Choose a username"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.username
+                                        ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                        }`}
+                                />
+
+                                <FieldError error={fieldErrors.username} />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Email
+                                </label>
+
+                                <input
+                                    name="email"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.email
+                                        ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                        }`}
+                                />
+
+                                <FieldError error={fieldErrors.email} />
+                            </div>
+
+                            <div>
+                                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                    Password
+                                </p>
+
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Password
+                                        </label>
+
+                                        <input
+                                            name="password"
+                                            type="password"
+                                            placeholder="Create a password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.password
+                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                }`}
+                                        />
+
+                                        <FieldError
+                                            error={fieldErrors.password}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Confirm Password
+                                        </label>
+
+                                        <input
+                                            name="confirm_password"
+                                            type="password"
+                                            placeholder="Repeat your password"
+                                            value={formData.confirm_password}
+                                            onChange={handleChange}
+                                            className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.confirm_password
+                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                }`}
+                                        />
+
+                                        <FieldError
+                                            error={
+                                                fieldErrors.confirm_password
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                    Contact
+                                </p>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Phone Number
+                                        </label>
+
+                                        <input
+                                            name="phone_number"
+                                            type="tel"
+                                            placeholder="Enter phone number"
+                                            value={formData.phone_number}
+                                            onChange={handleChange}
+                                            className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.phone_number
+                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                }`}
+                                        />
+
+                                        <FieldError
+                                            error={fieldErrors.phone_number}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">
+                                            Address
+                                        </label>
+
+                                        <input
+                                            name="address"
+                                            type="text"
+                                            placeholder="Enter your address"
+                                            value={formData.address}
+                                            onChange={handleChange}
+                                            className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${fieldErrors.address
+                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                }`}
+                                        />
+
+                                        <FieldError
+                                            error={fieldErrors.address}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-200">
+                                    Profile Picture
+                                </label>
+
+                                <input
+                                    name="profile_picture"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="block w-full cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] text-sm text-slate-400 file:mr-4 file:cursor-pointer file:border-0 file:border-r file:border-slate-800 file:bg-slate-800 file:px-4 file:py-3 file:text-xs file:font-semibold file:text-indigo-400 hover:file:bg-slate-700"
+                                />
+
+                                <FieldError
+                                    error={fieldErrors.profile_picture}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="h-11 w-full rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-500/10 transition hover:bg-indigo-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {loading
+                                    ? "Creating Account..."
+                                    : "Create Account"}
+                            </button>
+
+                            <p className="pt-1 text-center text-sm text-slate-500">
+                                Already have an account?{" "}
+                                <Link
+                                    href="/login"
+                                    className="font-medium text-indigo-400 transition hover:text-indigo-300"
+                                >
+                                    Sign in
+                                </Link>
+                            </p>
+                        </div>
+                    </form>
                 </div>
-
-                <div>
-                    <input
-                        name="username"
-                        type="text"
-                        placeholder="Username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <FieldError error={fieldErrors.username} />
-                </div>
-
-                <div>
-                    <input
-                        name="email"
-                        type="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <FieldError error={fieldErrors.email} />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <input
-                            name="password"
-                            type="password"
-                            placeholder="Password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        />
-                        <FieldError error={fieldErrors.password} />
-                    </div>
-
-                    <div>
-                        <input
-                            name="confirm_password"
-                            type="password"
-                            placeholder="Confirm Password"
-                            value={formData.confirm_password}
-                            onChange={handleChange}
-                            className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                        />
-                        <FieldError error={fieldErrors.confirm_password} />
-                    </div>
-                </div>
-
-                <div>
-                    <input
-                        name="phone_number"
-                        type="tel"
-                        placeholder="Phone Number"
-                        value={formData.phone_number}
-                        onChange={handleChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <FieldError error={fieldErrors.phone_number} />
-                </div>
-
-                <div>
-                    <input
-                        name="address"
-                        type="text"
-                        placeholder="Address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <FieldError error={fieldErrors.address} />
-                </div>
-
-                <div className="space-y-2">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        Profile Picture
-                    </label>
-
-                    <input
-                        name="profile_picture"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-400 hover:file:bg-indigo-600/20 cursor-pointer"
-                    />
-                    <FieldError error={fieldErrors.profile_picture} />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {loading ? "Creating Account..." : "Create Account"}
-                </button>
-
-                <p className="text-center text-xs text-slate-400 pt-2">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
-                        Sign in
-                    </Link>
-                </p>
-            </form>
+            </div>
         </main>
     );
 }
