@@ -30,17 +30,17 @@ function getNotificationRoute(type: string) {
 function getNotificationTypeStyle(type: string) {
     switch (type.toUpperCase()) {
         case "INVITATION":
-            return "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
+            return "border-indigo-500/20 bg-indigo-500/10 text-indigo-400";
         case "WORKSPACES":
-            return "bg-sky-500/10 text-sky-400 border-sky-500/20";
+            return "border-sky-500/20 bg-sky-500/10 text-sky-400";
         case "PROJECTS":
-            return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+            return "border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
         case "TASKS":
-            return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+            return "border-amber-500/20 bg-amber-500/10 text-amber-400";
         case "DASHBOARD":
-            return "bg-violet-500/10 text-violet-400 border-violet-500/20";
+            return "border-violet-500/20 bg-violet-500/10 text-violet-400";
         default:
-            return "bg-slate-800/70 text-slate-400 border-slate-700";
+            return "border-slate-700 bg-slate-800/70 text-slate-400";
     }
 }
 
@@ -191,7 +191,9 @@ export default function NotificationsPage() {
                     "Unable to delete notification."
                 );
             } else {
-                setError("Unable to delete notification.");
+                setError(
+                    "Unable to delete notification."
+                );
             }
         } finally {
             setDeletingId(null);
@@ -203,181 +205,248 @@ export default function NotificationsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white">
-            <div className="mx-auto max-w-5xl px-6 py-8">
-                <div>
-                    <button
-                        onClick={() => router.back()}
-                        className="mb-6 cursor-pointer text-sm font-medium text-slate-500 transition hover:text-slate-200"
+        <main className="min-h-screen bg-[#020617] text-slate-50">
+            <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+                <button
+                    onClick={() => router.back()}
+                    className="mb-7 inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-200"
+                >
+                    <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                     >
-                        ← Back
-                    </button>
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M15 19l-7-7 7-7"
+                        />
+                    </svg>
+                    Back
+                </button>
 
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Notifications
-                        </h1>
+                <section className="overflow-hidden rounded-3xl border border-slate-800 bg-[#111827] shadow-2xl shadow-black/20">
+                    <div className="border-b border-slate-800 px-5 py-6 sm:px-7 sm:py-7">
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                                    Activity
+                                </div>
 
-                        {unreadCount > 0 && (
-                            <span className="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-indigo-400">
-                                {unreadCount} unread
-                            </span>
-                        )}
-                    </div>
+                                <h1 className="text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">
+                                    Notifications
+                                </h1>
 
-                    <p className="mt-2 text-sm text-slate-500">
-                        Stay updated with activity across NexaFlow.
-                    </p>
-                </div>
+                                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">
+                                    Stay updated with activity across
+                                    NexaFlow.
+                                </p>
+                            </div>
 
-                {error && (
-                    <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/[0.06] px-5 py-4 text-sm text-red-400">
-                        {error}
-                    </div>
-                )}
-
-                {!error && notifications.length === 0 && (
-                    <div className="mt-8 rounded-2xl border border-slate-800/80 bg-slate-900/30 px-6 py-20 text-center">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-xl text-slate-500 shadow-lg">
-                            ✓
+                            {unreadCount > 0 && (
+                                <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-2.5 text-sm font-medium text-indigo-400">
+                                    <span className="h-2 w-2 rounded-full bg-indigo-400" />
+                                    {unreadCount} unread
+                                </div>
+                            )}
                         </div>
-
-                        <h2 className="mt-5 text-lg font-semibold text-slate-200">
-                            You&apos;re all caught up
-                        </h2>
-
-                        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                            You don&apos;t have any notifications right now.
-                        </p>
                     </div>
-                )}
 
-                {notifications.length > 0 && (
-                    <div className="mt-8 space-y-3">
-                        {notifications.map((notification) => {
-                            const route =
-                                getNotificationRoute(
-                                    notification.type
-                                );
-
-                            const isDeleting =
-                                deletingId === notification.id;
-
-                            return (
-                                <div
-                                    key={notification.id}
-                                    onClick={() =>
-                                        handleNotificationClick(
-                                            notification
-                                        )
-                                    }
-                                    className={`group relative overflow-hidden rounded-2xl border transition-all duration-200 ${notification.is_read
-                                        ? "border-slate-800/80 bg-slate-900/30 hover:border-slate-700 hover:bg-slate-900/60"
-                                        : "border-indigo-500/20 bg-slate-900/60 shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:border-indigo-500/30 hover:bg-slate-900/80"
-                                        } ${route
-                                            ? "cursor-pointer"
-                                            : "cursor-default"
-                                        }`}
+                    {error && (
+                        <div className="border-b border-rose-500/20 bg-rose-500/[0.05] px-5 py-4 sm:px-7">
+                            <div className="flex items-start gap-3 text-sm text-rose-400">
+                                <svg
+                                    className="mt-0.5 h-4 w-4 shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    {!notification.is_read && (
-                                        <div className="absolute inset-y-0 left-0 w-1 bg-indigo-500" />
-                                    )}
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M12 9v3.5m0 3h.01M10.29 3.86l-7.17 12a2 2 0 001.71 3h14.34a2 2 0 001.71-3l-7.17-12a2 2 0 00-3.42 0z"
+                                    />
+                                </svg>
+                                <span>{error}</span>
+                            </div>
+                        </div>
+                    )}
 
-                                    <div className="flex items-start gap-4 p-5 sm:p-6">
-                                        <div
-                                            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border text-xs font-bold uppercase tracking-wide ${getNotificationTypeStyle(
-                                                notification.type
-                                            )}`}
-                                        >
-                                            {notification.type
-                                                .slice(0, 3)
-                                                .toUpperCase()}
-                                        </div>
+                    {!error && notifications.length === 0 && (
+                        <div className="px-5 py-20 text-center sm:px-7">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800 bg-[#0F172A] text-emerald-400">
+                                <svg
+                                    className="h-7 w-7"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="1.8"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </div>
 
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-start justify-between gap-4">
-                                                <div className="flex min-w-0 items-center gap-2.5">
-                                                    <h2
-                                                        className={`truncate text-[15px] font-semibold ${notification.is_read
-                                                            ? "text-slate-300"
-                                                            : "text-white"
-                                                            }`}
-                                                    >
-                                                        {
-                                                            notification.title
-                                                        }
-                                                    </h2>
+                            <h2 className="mt-5 text-lg font-semibold text-slate-200">
+                                You&apos;re all caught up
+                            </h2>
 
-                                                    {!notification.is_read && (
-                                                        <span className="h-2 w-2 shrink-0 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.65)]" />
-                                                    )}
-                                                </div>
+                            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                                You don&apos;t have any notifications
+                                right now.
+                            </p>
+                        </div>
+                    )}
 
-                                                <span className="shrink-0 pt-0.5 text-xs font-medium text-slate-600">
-                                                    {formatNotificationDate(
-                                                        notification.created_at
-                                                    )}
-                                                </span>
+                    {notifications.length > 0 && (
+                        <div className="divide-y divide-slate-800/70">
+                            {notifications.map((notification) => {
+                                const route =
+                                    getNotificationRoute(
+                                        notification.type
+                                    );
+
+                                const isDeleting =
+                                    deletingId ===
+                                    notification.id;
+
+                                return (
+                                    <div
+                                        key={notification.id}
+                                        onClick={() =>
+                                            handleNotificationClick(
+                                                notification
+                                            )
+                                        }
+                                        className={`group relative transition-colors ${notification.is_read
+                                                ? "bg-[#111827] hover:bg-[#0F172A]"
+                                                : "bg-indigo-500/[0.035] hover:bg-indigo-500/[0.06]"
+                                            } ${route
+                                                ? "cursor-pointer"
+                                                : "cursor-default"
+                                            }`}
+                                    >
+                                        {!notification.is_read && (
+                                            <div className="absolute inset-y-0 left-0 w-0.5 bg-indigo-500" />
+                                        )}
+
+                                        <div className="flex items-start gap-4 px-5 py-5 sm:gap-5 sm:px-7">
+                                            <div
+                                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-[10px] font-bold uppercase tracking-wider sm:h-12 sm:w-12 ${getNotificationTypeStyle(
+                                                    notification.type
+                                                )}`}
+                                            >
+                                                {notification.type
+                                                    .slice(0, 3)
+                                                    .toUpperCase()}
                                             </div>
 
-                                            <p
-                                                className={`mt-2 max-w-3xl text-sm leading-6 ${notification.is_read
-                                                    ? "text-slate-500"
-                                                    : "text-slate-400"
-                                                    }`}
-                                            >
-                                                {
-                                                    notification.message
-                                                }
-                                            </p>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+                                                    <div className="flex min-w-0 items-center gap-2.5">
+                                                        <h2
+                                                            className={`min-w-0 truncate text-sm font-semibold sm:text-[15px] ${notification.is_read
+                                                                    ? "text-slate-300"
+                                                                    : "text-slate-50"
+                                                                }`}
+                                                        >
+                                                            {
+                                                                notification.title
+                                                            }
+                                                        </h2>
 
-                                            <div className="mt-4 flex items-center justify-between">
-                                                <span
-                                                    className={`rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${getNotificationTypeStyle(
-                                                        notification.type
-                                                    )}`}
+                                                        {!notification.is_read && (
+                                                            <span className="h-2 w-2 shrink-0 rounded-full bg-indigo-400" />
+                                                        )}
+                                                    </div>
+
+                                                    <span className="shrink-0 text-xs font-medium text-slate-600">
+                                                        {formatNotificationDate(
+                                                            notification.created_at
+                                                        )}
+                                                    </span>
+                                                </div>
+
+                                                <p
+                                                    className={`mt-2 max-w-3xl text-sm leading-6 ${notification.is_read
+                                                            ? "text-slate-500"
+                                                            : "text-slate-400"
+                                                        }`}
                                                 >
                                                     {
-                                                        notification.type
+                                                        notification.message
                                                     }
-                                                </span>
+                                                </p>
 
-                                                <div className="flex items-center gap-4">
-                                                    {route && (
-                                                        <span className="flex items-center gap-1 text-xs font-medium text-slate-600 transition-all duration-200 group-hover:text-indigo-400">
-                                                            Open
-                                                            <span className="transition-transform duration-200 group-hover:translate-x-1">
-                                                                →
-                                                            </span>
-                                                        </span>
-                                                    )}
-
-                                                    <button
-                                                        type="button"
-                                                        disabled={isDeleting}
-                                                        onClick={(event) => {
-                                                            event.stopPropagation();
-
-                                                            handleDeleteNotification(
-                                                                notification.id
-                                                            );
-                                                        }}
-                                                        className="cursor-pointer text-xs font-medium text-slate-600 transition hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                                    <span
+                                                        className={`w-fit rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${getNotificationTypeStyle(
+                                                            notification.type
+                                                        )}`}
                                                     >
-                                                        {isDeleting
-                                                            ? "Deleting..."
-                                                            : "Delete"}
-                                                    </button>
+                                                        {
+                                                            notification.type
+                                                        }
+                                                    </span>
+
+                                                    <div className="flex items-center gap-4">
+                                                        {route && (
+                                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors group-hover:text-indigo-400">
+                                                                Open
+                                                                <svg
+                                                                    className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth="2"
+                                                                        d="M9 5l7 7-7 7"
+                                                                    />
+                                                                </svg>
+                                                            </span>
+                                                        )}
+
+                                                        <button
+                                                            type="button"
+                                                            disabled={
+                                                                isDeleting
+                                                            }
+                                                            onClick={(
+                                                                event
+                                                            ) => {
+                                                                event.stopPropagation();
+
+                                                                handleDeleteNotification(
+                                                                    notification.id
+                                                                );
+                                                            }}
+                                                            className="cursor-pointer text-xs font-medium text-slate-500 transition hover:text-rose-400 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        >
+                                                            {isDeleting
+                                                                ? "Deleting..."
+                                                                : "Delete"}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+                                );
+                            })}
+                        </div>
+                    )}
+                </section>
             </div>
-        </div>
+        </main>
     );
 }
