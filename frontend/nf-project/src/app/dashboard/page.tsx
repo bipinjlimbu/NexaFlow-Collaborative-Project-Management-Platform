@@ -3,6 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+    ArrowRight,
+    CheckCircle2,
+    ClipboardList,
+    FolderKanban,
+    LayoutDashboard,
+    Plus,
+    Users,
+} from "lucide-react";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
 import { getWorkspaces } from "@/services/workspaceService";
 import { getProjects } from "@/services/projectService";
@@ -236,21 +245,15 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen overflow-x-hidden bg-[#020617] text-[#F8FAFC] selection:bg-indigo-500 selection:text-white">
-            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] px-5 py-6 shadow-2xl shadow-black/10 sm:px-7 sm:py-7 lg:px-8">
-                    <div className="pointer-events-none absolute -right-24 -top-32 h-72 w-72 rounded-full bg-indigo-500/[0.06] blur-3xl" />
+            <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-2xl shadow-black/10">
+                    <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-indigo-500/[0.06] blur-3xl" />
 
-                    <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                    <div className="relative flex flex-col gap-7 p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between lg:p-8">
                         <div className="max-w-2xl">
-                            <div className="mb-4 flex flex-wrap items-center gap-2">
-                                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                                    Dashboard
-                                </span>
-
-                                <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-600">
-                                    NexaFlow
-                                </span>
+                            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-indigo-400">
+                                <LayoutDashboard size={13} />
+                                Dashboard
                             </div>
 
                             <h1 className="text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
@@ -266,33 +269,35 @@ export default function DashboardPage() {
                         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                             <Link
                                 href="/workspaces"
-                                className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/70 px-4 text-sm font-medium text-slate-300 transition-all hover:border-indigo-500/30 hover:bg-slate-900 hover:text-white active:scale-[0.98]"
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-4 text-sm font-medium text-slate-300 transition-all hover:border-indigo-500/30 hover:bg-slate-900 hover:text-white active:scale-[0.98]"
                             >
+                                <Plus size={16} />
                                 New Workspace
                             </Link>
 
                             <Link
                                 href="/projects"
-                                className="inline-flex h-11 items-center justify-center rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all hover:bg-indigo-400 active:scale-[0.98]"
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition-all hover:bg-indigo-400 active:scale-[0.98]"
                             >
+                                <Plus size={16} />
                                 Create Project
                             </Link>
                         </div>
                     </div>
                 </section>
 
-                <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <section className="mt-6 grid gap-4 sm:grid-cols-3">
                     <Link
                         href="/workspaces"
                         className="group rounded-2xl border border-slate-800 bg-[#111827] p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/30 hover:bg-[#151d2d]"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                    Workspace
-                                </span>
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                    <Users size={18} />
+                                </div>
 
-                                <h3 className="mt-1.5 text-base font-semibold text-slate-50">
+                                <h3 className="mt-5 text-base font-semibold text-slate-50">
                                     Workspaces
                                 </h3>
 
@@ -301,9 +306,10 @@ export default function DashboardPage() {
                                 </p>
                             </div>
 
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm text-indigo-400 transition-all group-hover:border-indigo-500/30 group-hover:bg-indigo-500/15">
-                                →
-                            </div>
+                            <ArrowRight
+                                size={17}
+                                className="mt-1 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-indigo-400"
+                            />
                         </div>
 
                         <div className="mt-5 flex items-center justify-between border-t border-slate-800/70 pt-4">
@@ -312,7 +318,7 @@ export default function DashboardPage() {
                             </span>
 
                             <span className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
-                                Open →
+                                Open
                             </span>
                         </div>
                     </Link>
@@ -323,11 +329,11 @@ export default function DashboardPage() {
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                    Projects
-                                </span>
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-400">
+                                    <FolderKanban size={18} />
+                                </div>
 
-                                <h3 className="mt-1.5 text-base font-semibold text-slate-50">
+                                <h3 className="mt-5 text-base font-semibold text-slate-50">
                                     Projects
                                 </h3>
 
@@ -336,9 +342,10 @@ export default function DashboardPage() {
                                 </p>
                             </div>
 
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sm text-sky-400 transition-all group-hover:border-sky-500/30 group-hover:bg-sky-500/15">
-                                →
-                            </div>
+                            <ArrowRight
+                                size={17}
+                                className="mt-1 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-indigo-400"
+                            />
                         </div>
 
                         <div className="mt-5 flex items-center justify-between border-t border-slate-800/70 pt-4">
@@ -347,7 +354,7 @@ export default function DashboardPage() {
                             </span>
 
                             <span className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
-                                Open →
+                                Open
                             </span>
                         </div>
                     </Link>
@@ -358,11 +365,11 @@ export default function DashboardPage() {
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                    Tasks
-                                </span>
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+                                    <ClipboardList size={18} />
+                                </div>
 
-                                <h3 className="mt-1.5 text-base font-semibold text-slate-50">
+                                <h3 className="mt-5 text-base font-semibold text-slate-50">
                                     Tasks
                                 </h3>
 
@@ -371,9 +378,10 @@ export default function DashboardPage() {
                                 </p>
                             </div>
 
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-sm text-emerald-400 transition-all group-hover:border-emerald-500/30 group-hover:bg-emerald-500/15">
-                                →
-                            </div>
+                            <ArrowRight
+                                size={17}
+                                className="mt-1 text-slate-600 transition-all group-hover:translate-x-0.5 group-hover:text-indigo-400"
+                            />
                         </div>
 
                         <div className="mt-5 flex items-center justify-between border-t border-slate-800/70 pt-4">
@@ -382,7 +390,7 @@ export default function DashboardPage() {
                             </span>
 
                             <span className="text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
-                                Open →
+                                Open
                             </span>
                         </div>
                     </Link>
@@ -390,93 +398,100 @@ export default function DashboardPage() {
 
                 <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Workspaces
                             </span>
-
                             <span className="h-2 w-2 rounded-full bg-indigo-400" />
                         </div>
 
-                        <div className="mt-4 flex items-end justify-between">
-                            <span className="text-3xl font-semibold tracking-tight text-slate-50">
-                                {workspaceCount}
-                            </span>
+                        <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-50">
+                            {workspaceCount}
+                        </div>
 
-                            <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-[11px] font-medium text-indigo-400">
-                                Total
-                            </span>
+                        <div className="mt-2 text-xs text-slate-500">
+                            Total workspaces
                         </div>
                     </div>
 
                     <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Projects
                             </span>
-
                             <span className="h-2 w-2 rounded-full bg-emerald-400" />
                         </div>
 
-                        <div className="mt-4 flex items-end justify-between">
+                        <div className="mt-4 flex items-end gap-3">
                             <span className="text-3xl font-semibold tracking-tight text-slate-50">
                                 {projectCount}
                             </span>
 
-                            <span className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-400">
-                                Active {activeProjects.length}
+                            <span className="mb-1 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-400">
+                                {activeProjects.length} Active
                             </span>
+                        </div>
+
+                        <div className="mt-2 text-xs text-slate-500">
+                            Total projects
                         </div>
                     </div>
 
                     <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Pending Tasks
                             </span>
-
                             <span className="h-2 w-2 rounded-full bg-amber-400" />
                         </div>
 
-                        <div className="mt-4 flex items-end justify-between">
-                            <span className="text-3xl font-semibold tracking-tight text-slate-50">
-                                {pendingTasks}
-                            </span>
+                        <div className="mt-4 text-3xl font-semibold tracking-tight text-slate-50">
+                            {pendingTasks}
+                        </div>
 
-                            <span className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-400">
-                                Open
-                            </span>
+                        <div className="mt-2 text-xs text-slate-500">
+                            Tasks still open
                         </div>
                     </div>
 
                     <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5">
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Completion
                             </span>
-
-                            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                            <CheckCircle2
+                                size={15}
+                                className="text-emerald-400"
+                            />
                         </div>
 
-                        <div className="mt-4 flex items-end justify-between">
+                        <div className="mt-4 flex items-end gap-3">
                             <span className="text-3xl font-semibold tracking-tight text-slate-50">
                                 {overallCompletion}%
                             </span>
 
-                            <span className="text-xs font-medium text-emerald-400">
+                            <span className="mb-1 text-xs font-medium text-emerald-400">
                                 {completedTasks} Done
                             </span>
+                        </div>
+
+                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                            <div
+                                className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                                style={{
+                                    width: `${overallCompletion}%`,
+                                }}
+                            />
                         </div>
                     </div>
                 </section>
 
                 <section className="mt-8 grid gap-6 lg:grid-cols-3">
-                    <div className="min-w-0 space-y-5 lg:col-span-2">
-                        <div className="flex items-end justify-between gap-4">
+                    <div className="min-w-0 lg:col-span-2">
+                        <div className="mb-5 flex items-end justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2">
                                     <span className="h-2 w-2 rounded-full bg-indigo-400" />
-
                                     <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                         Active Projects
                                     </h2>
@@ -499,7 +514,7 @@ export default function DashboardPage() {
                             {activeProjects.length === 0 ? (
                                 <div className="rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-8 text-center">
                                     <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500">
-                                        —
+                                        <FolderKanban size={18} />
                                     </div>
 
                                     <p className="mt-4 text-sm font-medium text-slate-300">
@@ -514,7 +529,11 @@ export default function DashboardPage() {
                                         href="/projects"
                                         className="mt-4 inline-flex text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
                                     >
-                                        View Projects →
+                                        View Projects
+                                        <ArrowRight
+                                            size={15}
+                                            className="ml-1 mt-0.5"
+                                        />
                                     </Link>
                                 </div>
                             ) : (
@@ -588,12 +607,11 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    <div className="min-w-0 space-y-5">
-                        <div className="flex items-end justify-between gap-4">
+                    <div className="min-w-0">
+                        <div className="mb-5 flex items-end justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2">
                                     <span className="h-2 w-2 rounded-full bg-sky-400" />
-
                                     <h2 className="text-lg font-semibold tracking-tight text-slate-50">
                                         Recent Tasks
                                     </h2>
@@ -616,7 +634,7 @@ export default function DashboardPage() {
                             {recentTasks.length === 0 ? (
                                 <div className="p-8 text-center">
                                     <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-500">
-                                        —
+                                        <ClipboardList size={18} />
                                     </div>
 
                                     <p className="mt-4 text-sm font-medium text-slate-300">
@@ -629,9 +647,13 @@ export default function DashboardPage() {
 
                                     <Link
                                         href="/tasks"
-                                        className="mt-4 inline-flex text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
+                                        className="mt-4 inline-flex items-center text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
                                     >
-                                        View Tasks →
+                                        View Tasks
+                                        <ArrowRight
+                                            size={15}
+                                            className="ml-1"
+                                        />
                                     </Link>
                                 </div>
                             ) : (
