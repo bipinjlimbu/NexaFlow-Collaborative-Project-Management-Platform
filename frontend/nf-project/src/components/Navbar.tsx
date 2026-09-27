@@ -1,10 +1,13 @@
 "use client";
 
+import Image from "next/image";
+import { Bell, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import NavbarSkeleton from "@/components/NavbarSkeleton";
 import { getNotifications } from "@/services/notificationService";
+import NFLOGO from "@/images/NFLOGO.png";
 
 type User = {
     id: number;
@@ -80,23 +83,34 @@ export default function Navbar() {
 
     return (
         <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#020617]/90 backdrop-blur-xl">
-            <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link
                     href="/"
-                    className="group flex shrink-0 items-center gap-2.5"
+                    className="group flex shrink-0 items-center gap-3"
                 >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 text-base font-bold text-white shadow-lg shadow-indigo-500/20 transition duration-200 group-hover:bg-indigo-400">
-                        N
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] p-2 shadow-lg shadow-black/10 transition group-hover:border-indigo-500/30 group-hover:bg-[#151d2d]">
+                        <Image
+                            src={NFLOGO}
+                            alt="NexaFlow"
+                            width={32}
+                            height={32}
+                            className="h-full w-full object-contain"
+                        />
                     </div>
 
-                    <span className="text-lg font-semibold tracking-tight text-slate-50 sm:text-xl">
-                        NexaFlow
-                    </span>
+                    <div className="hidden sm:block">
+                        <div className="text-[15px] font-semibold tracking-tight text-slate-50">
+                            NexaFlow
+                        </div>
+                        <div className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500">
+                            Work management
+                        </div>
+                    </div>
                 </Link>
 
                 {isAuthenticated ? (
                     <>
-                        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-xl border border-slate-800/80 bg-[#0F172A]/70 p-1 md:flex">
+                        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-xl border border-slate-800/80 bg-[#0F172A]/80 p-1 md:flex">
                             {[
                                 { href: "/dashboard", label: "Dashboard" },
                                 { href: "/workspaces", label: "Workspaces" },
@@ -110,7 +124,7 @@ export default function Navbar() {
                                         key={item.href}
                                         href={item.href}
                                         className={`rounded-lg px-3.5 py-2 text-sm font-medium transition ${active
-                                            ? "bg-slate-800 text-white shadow-sm"
+                                            ? "bg-slate-800 text-slate-50 shadow-sm"
                                             : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
                                             }`}
                                     >
@@ -125,23 +139,14 @@ export default function Navbar() {
                                 href="/notifications"
                                 className={`relative flex h-10 w-10 items-center justify-center rounded-xl border transition ${pathname === "/notifications"
                                     ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-400"
-                                    : "border-slate-800 bg-[#111827] text-slate-400 hover:border-slate-700 hover:text-slate-100"
+                                    : "border-slate-800 bg-[#111827] text-slate-400 hover:border-slate-700 hover:bg-[#151d2d] hover:text-slate-100"
                                     }`}
                                 aria-label="Notifications"
                             >
-                                <svg
-                                    className="h-[18px] w-[18px]"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="1.8"
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                                    />
-                                </svg>
+                                <Bell
+                                    size={18}
+                                    strokeWidth={1.8}
+                                />
 
                                 {hasNotifications && (
                                     <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-indigo-400 ring-2 ring-[#111827]" />
@@ -184,19 +189,11 @@ export default function Navbar() {
                                     </div>
                                 </div>
 
-                                <svg
-                                    className="hidden h-3.5 w-3.5 text-slate-500 sm:block"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
+                                <ChevronDown
+                                    size={14}
+                                    strokeWidth={1.8}
+                                    className="hidden text-slate-500 sm:block"
+                                />
                             </Link>
                         </div>
                     </>
@@ -218,7 +215,7 @@ export default function Navbar() {
                             ))}
                         </nav>
 
-                        <div className="flex items-center gap-2 sm:gap-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <Link
                                 href="/login"
                                 className={`rounded-lg px-3 py-2 text-sm font-medium transition ${pathname === "/login"
