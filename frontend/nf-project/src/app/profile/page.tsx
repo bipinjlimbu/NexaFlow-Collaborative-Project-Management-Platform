@@ -5,11 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSkeleton from "@/components/ProfileSkeleton";
 import LogoutButton from "@/components/LogoutButton";
-import {
-    deleteProfile,
-    updateProfile,
-} from "@/services/profileService";
-import { Pencil, Trash2, X } from "lucide-react";
+import { deleteProfile, updateProfile } from "@/services/profileService";
+import { Bell, Pencil, Trash2, X } from "lucide-react";
 
 interface User {
     username?: string;
@@ -392,43 +389,80 @@ export default function ProfilePage() {
                         </div>
                     </section>
 
-                    <section className="h-fit overflow-hidden rounded-3xl border border-rose-500/20 bg-[#111827]">
-                        <div className="border-b border-rose-500/10 bg-rose-500/[0.03] px-5 py-5 sm:px-6">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400">
-                                    <Trash2 size={18} />
-                                </div>
+                    <div className="flex h-fit flex-col gap-4">
+                        <section className="overflow-hidden rounded-3xl border border-indigo-500/20 bg-[#111827]">
+                            <div className="border-b border-indigo-500/10 bg-indigo-500/[0.03] px-5 py-5 sm:px-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                        <Bell size={18} />
+                                    </div>
 
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-400">
-                                        Danger Zone
-                                    </p>
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-400">
+                                            Workspace
+                                        </p>
 
-                                    <h2 className="mt-1 text-lg font-semibold text-slate-100">
-                                        Delete Account
-                                    </h2>
+                                        <h2 className="mt-1 text-lg font-semibold text-slate-100">
+                                            Invitations
+                                        </h2>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="p-5 sm:p-6">
-                            <p className="text-sm leading-6 text-slate-400">
-                                Permanently delete your account and remove your
-                                personal account data.
-                            </p>
+                            <div className="p-5 sm:p-6">
+                                <p className="text-sm leading-6 text-slate-400">
+                                    View and manage workspace invitations sent to
+                                    your account.
+                                </p>
 
-                            <button
-                                onClick={() => {
-                                    setDeleteError("");
-                                    setShowDeleteConfirm(true);
-                                }}
-                                className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 text-sm font-semibold text-rose-400 transition hover:bg-rose-500/20"
-                            >
-                                <Trash2 size={15} />
-                                Delete account
-                            </button>
-                        </div>
-                    </section>
+                                <Link
+                                    href="/invitations"
+                                    className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                                >
+                                    <Bell size={15} />
+                                    View Invitations
+                                </Link>
+                            </div>
+                        </section>
+
+                        <section className="overflow-hidden rounded-3xl border border-rose-500/20 bg-[#111827]">
+                            <div className="border-b border-rose-500/10 bg-rose-500/[0.03] px-5 py-5 sm:px-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400">
+                                        <Trash2 size={18} />
+                                    </div>
+
+                                    <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-rose-400">
+                                            Danger Zone
+                                        </p>
+
+                                        <h2 className="mt-1 text-lg font-semibold text-slate-100">
+                                            Delete Account
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-5 sm:p-6">
+                                <p className="text-sm leading-6 text-slate-400">
+                                    Permanently delete your account and remove
+                                    your personal account data.
+                                </p>
+
+                                <button
+                                    onClick={() => {
+                                        setDeleteError("");
+                                        setShowDeleteConfirm(true);
+                                    }}
+                                    className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 text-sm font-semibold text-rose-400 transition hover:bg-rose-500/20"
+                                >
+                                    <Trash2 size={15} />
+                                    Delete account
+                                </button>
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </div>
 
@@ -490,8 +524,8 @@ export default function ProfilePage() {
                                             }
                                             disabled={saving}
                                             className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:ring-2 ${editErrors.username
-                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
-                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                    ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
                                                 }`}
                                         />
 
@@ -515,8 +549,8 @@ export default function ProfilePage() {
                                             }
                                             disabled={saving}
                                             className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:ring-2 ${editErrors.email
-                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
-                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                    ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
                                                 }`}
                                         />
 
@@ -540,8 +574,8 @@ export default function ProfilePage() {
                                                 }
                                                 disabled={saving}
                                                 className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:ring-2 ${editErrors.first_name
-                                                    ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
-                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                        ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
                                                     }`}
                                             />
 
@@ -564,8 +598,8 @@ export default function ProfilePage() {
                                                 }
                                                 disabled={saving}
                                                 className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:ring-2 ${editErrors.last_name
-                                                    ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
-                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                        ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                        : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
                                                     }`}
                                             />
 
@@ -590,8 +624,8 @@ export default function ProfilePage() {
                                             }
                                             disabled={saving}
                                             className={`h-11 w-full rounded-xl border bg-[#0F172A] px-4 text-sm text-slate-100 outline-none transition focus:ring-2 ${editErrors.phone_number
-                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
-                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                    ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
                                                 }`}
                                         />
 
@@ -615,8 +649,8 @@ export default function ProfilePage() {
                                             disabled={saving}
                                             rows={4}
                                             className={`w-full resize-none rounded-xl border bg-[#0F172A] px-4 py-3 text-sm leading-6 text-slate-100 outline-none transition focus:ring-2 ${editErrors.address
-                                                ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
-                                                : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                                                    ? "border-rose-500/60 focus:border-rose-500/60 focus:ring-rose-500/10"
+                                                    : "border-slate-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
                                                 }`}
                                         />
 
