@@ -13,6 +13,10 @@ import {
     X,
     Pencil,
     Trash2,
+    UserPlus,
+    UserRound,
+    CircleDot,
+    ShieldCheck,
 } from "lucide-react";
 import {
     getProject,
@@ -420,94 +424,122 @@ export default function ProjectDetailPage() {
 
     return (
         <main className="min-h-screen bg-[#020617] text-slate-50 selection:bg-indigo-500 selection:text-white">
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-                <button
-                    type="button"
-                    onClick={() => router.push("/projects")}
-                    className="group mb-6 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-[#111827] px-4 py-2.5 text-xs font-semibold text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100"
-                >
-                    <ArrowLeft
-                        size={16}
-                        className="transition-transform group-hover:-translate-x-1"
-                    />
-                    Back to Projects
-                </button>
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+                <div className="mb-6 flex items-center justify-between gap-4">
+                    <button
+                        type="button"
+                        onClick={() => router.push("/projects")}
+                        className="group inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-800 bg-[#111827] px-4 py-2.5 text-xs font-semibold text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100"
+                    >
+                        <ArrowLeft
+                            size={16}
+                            className="transition-transform group-hover:-translate-x-1"
+                        />
+                        Back to Projects
+                    </button>
 
-                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] p-6 sm:p-8">
-                    <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
-
-                    <div className="relative flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
-                        <div className="min-w-0 max-w-3xl">
-                            <div className="flex items-start gap-4">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
-                                    <FolderKanban size={22} />
-                                </div>
-
-                                <div className="min-w-0">
-                                    <p className="text-xs font-medium uppercase tracking-wider text-indigo-400">
-                                        Project #{project.id}
-                                    </p>
-
-                                    <h1 className="mt-1 break-words text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
-                                        {project.name}
-                                    </h1>
-                                </div>
-                            </div>
-
-                            <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
-                                {project.description ||
-                                    "No project description provided."}
-                            </p>
-
-                            <div className="mt-5 flex flex-wrap items-center gap-2">
-                                <span
-                                    className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${getStatusClass(
-                                        project.status
-                                    )}`}
-                                >
-                                    {getStatusLabel(project.status)}
-                                </span>
-
-                                <span
-                                    className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium ${getPriorityClass(
-                                        project.priority
-                                    )}`}
-                                >
-                                    {getPriorityLabel(project.priority)}{" "}
-                                    Priority
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row lg:shrink-0">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setShowEditForm(true)
-                                }
-                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 text-sm font-medium text-indigo-300 transition hover:border-indigo-500/50 hover:bg-indigo-500 hover:text-white"
-                            >
-                                <Pencil size={15} />
-                                Edit
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={handleDelete}
-                                disabled={deleting}
-                                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-sm font-medium text-rose-400 transition hover:border-rose-500/50 hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <Trash2 size={15} />
-                                {deleting ? "Deleting..." : "Delete"}
-                            </button>
-                        </div>
+                    <div className="hidden items-center gap-2 text-xs text-slate-600 sm:flex">
+                        <FolderKanban size={13} />
+                        Project #{project.id}
                     </div>
+                </div>
 
-                    {deleteError && (
-                        <div className="relative mt-5 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
-                            {deleteError}
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-xl shadow-black/10">
+                    <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
+                    <div className="absolute bottom-0 left-1/3 h-32 w-32 rounded-full bg-indigo-500/[0.03] blur-3xl" />
+
+                    <div className="relative p-5 sm:p-7 lg:p-8">
+                        <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0 max-w-3xl">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                        <FolderKanban size={22} />
+                                    </div>
+
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                                            Project #{project.id}
+                                        </p>
+
+                                        <h1 className="mt-1 break-words text-2xl font-bold tracking-tight text-slate-50 sm:text-3xl lg:text-4xl">
+                                            {project.name}
+                                        </h1>
+                                    </div>
+                                </div>
+
+                                <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
+                                    {project.description ||
+                                        "No project description provided."}
+                                </p>
+
+                                <div className="mt-5 flex flex-wrap items-center gap-2">
+                                    <span
+                                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${getStatusClass(
+                                            project.status
+                                        )}`}
+                                    >
+                                        <CircleDot size={11} />
+                                        {getStatusLabel(project.status)}
+                                    </span>
+
+                                    <span
+                                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${getPriorityClass(
+                                            project.priority
+                                        )}`}
+                                    >
+                                        <ShieldCheck size={11} />
+                                        {getPriorityLabel(
+                                            project.priority
+                                        )}{" "}
+                                        Priority
+                                    </span>
+
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-[#111827] px-3 py-1.5 text-xs font-medium text-slate-400">
+                                        <FolderKanban size={11} />
+                                        {project.workspace.name}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row lg:shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowEditForm(true)
+                                    }
+                                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 text-sm font-semibold text-indigo-300 transition hover:border-indigo-500/50 hover:bg-indigo-500 hover:text-white"
+                                >
+                                    <Pencil size={15} />
+                                    Edit Project
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                    className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 text-sm font-semibold text-rose-400 transition hover:border-rose-500/50 hover:bg-rose-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <Trash2 size={15} />
+                                    {deleting
+                                        ? "Deleting..."
+                                        : "Delete"}
+                                </button>
+                            </div>
                         </div>
-                    )}
+
+                        {deleteError && (
+                            <div className="relative mt-5 flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3">
+                                <Trash2
+                                    size={16}
+                                    className="mt-0.5 shrink-0 text-rose-400"
+                                />
+
+                                <p className="text-sm leading-5 text-rose-400">
+                                    {deleteError}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </section>
 
                 <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -538,7 +570,7 @@ export default function ProjectDetailPage() {
                         return (
                             <div
                                 key={stat.label}
-                                className="rounded-2xl border border-slate-800 bg-[#111827] p-5"
+                                className="group rounded-2xl border border-slate-800 bg-[#111827] p-5 transition hover:border-slate-700"
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
@@ -546,7 +578,7 @@ export default function ProjectDetailPage() {
                                     </div>
 
                                     <div className="min-w-0">
-                                        <p className="text-xs text-slate-500">
+                                        <p className="text-xs font-medium text-slate-500">
                                             {stat.label}
                                         </p>
 
@@ -564,31 +596,35 @@ export default function ProjectDetailPage() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <div className="flex items-center gap-2">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                    <CheckCircle2 size={17} />
+                                </div>
+
                                 <h2 className="text-lg font-semibold text-slate-100">
                                     Tasks
                                 </h2>
 
-                                <span className="rounded-md bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-400">
+                                <span className="rounded-md bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-400">
                                     {tasks.length}
                                 </span>
                             </div>
 
-                            <p className="mt-1 text-sm text-slate-500">
-                                Manage tasks for this project.
+                            <p className="mt-2 text-sm text-slate-500">
+                                Manage tasks and track work for this project.
                             </p>
                         </div>
 
                         <button
                             type="button"
                             onClick={() => setShowAddTaskForm(true)}
-                            className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                            className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-950/20 transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 sm:w-auto"
                         >
                             <Plus size={17} />
                             Add Task
                         </button>
                     </div>
 
-                    <div className="mt-5">
+                    <div className="mt-6">
                         {tasksLoading ? (
                             <div className="flex items-center justify-center rounded-xl border border-slate-800 bg-[#0F172A] py-12">
                                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
@@ -605,14 +641,25 @@ export default function ProjectDetailPage() {
                                     <CheckCircle2 size={21} />
                                 </div>
 
-                                <p className="mt-4 text-sm font-medium text-slate-300">
+                                <p className="mt-4 text-sm font-semibold text-slate-300">
                                     No tasks yet
                                 </p>
 
                                 <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-slate-500">
-                                    Add your first task to start working on this
-                                    project.
+                                    Add your first task to start working on
+                                    this project.
                                 </p>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowAddTaskForm(true)
+                                    }
+                                    className="mt-5 inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg bg-indigo-500 px-3.5 text-xs font-semibold text-white transition hover:bg-indigo-400"
+                                >
+                                    <Plus size={14} />
+                                    Add First Task
+                                </button>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -634,7 +681,7 @@ export default function ProjectDetailPage() {
                                                     `/tasks/${task.id}`
                                                 )
                                             }
-                                            className="group cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700 hover:bg-slate-800/50 sm:p-5"
+                                            className="group cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-indigo-500/20 hover:bg-slate-800/50 sm:p-5"
                                         >
                                             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                                                 <div className="min-w-0">
@@ -644,7 +691,7 @@ export default function ProjectDetailPage() {
                                                         </h3>
 
                                                         <span
-                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getTaskStatusClass(
+                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getTaskStatusClass(
                                                                 task.status
                                                             )}`}
                                                         >
@@ -654,7 +701,7 @@ export default function ProjectDetailPage() {
                                                         </span>
 
                                                         <span
-                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getTaskPriorityClass(
+                                                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${getTaskPriorityClass(
                                                                 task.priority
                                                             )}`}
                                                         >
@@ -671,11 +718,11 @@ export default function ProjectDetailPage() {
                                                 </div>
 
                                                 <div className="shrink-0 lg:min-w-28 lg:text-right">
-                                                    <p className="text-xs text-slate-600">
+                                                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-600">
                                                         Due date
                                                     </p>
 
-                                                    <p className="mt-1 text-sm font-medium text-slate-300">
+                                                    <p className="mt-1 text-sm font-semibold text-slate-300">
                                                         {formatDate(
                                                             task.due_date
                                                         )}
@@ -683,9 +730,9 @@ export default function ProjectDetailPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 grid grid-cols-1 gap-3 border-t border-slate-800 pt-4 sm:grid-cols-3">
+                                            <div className="mt-4 grid grid-cols-1 gap-4 border-t border-slate-800 pt-4 sm:grid-cols-3">
                                                 <div className="min-w-0">
-                                                    <p className="text-[11px] text-slate-600">
+                                                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-600">
                                                         Assigned to
                                                     </p>
 
@@ -695,7 +742,7 @@ export default function ProjectDetailPage() {
                                                 </div>
 
                                                 <div className="min-w-0">
-                                                    <p className="text-[11px] text-slate-600">
+                                                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-600">
                                                         Created by
                                                     </p>
 
@@ -711,7 +758,7 @@ export default function ProjectDetailPage() {
                                                 </div>
 
                                                 <div>
-                                                    <p className="text-[11px] text-slate-600">
+                                                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-600">
                                                         Created
                                                     </p>
 
@@ -732,47 +779,59 @@ export default function ProjectDetailPage() {
 
                 <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
-                        <h2 className="text-lg font-semibold text-slate-100">
-                            Project Details
-                        </h2>
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                <FolderKanban size={18} />
+                            </div>
 
-                        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
                             <div>
-                                <p className="text-xs text-slate-500">
+                                <h2 className="text-lg font-semibold text-slate-100">
+                                    Project Details
+                                </h2>
+
+                                <p className="mt-0.5 text-xs text-slate-500">
+                                    Project and workspace information
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+                            <div>
+                                <p className="text-xs font-medium text-slate-500">
                                     Workspace
                                 </p>
 
-                                <p className="mt-1 text-sm font-medium text-slate-200">
+                                <p className="mt-1.5 text-sm font-semibold text-slate-200">
                                     {project.workspace.name}
                                 </p>
                             </div>
 
                             <div>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs font-medium text-slate-500">
                                     Workspace ID
                                 </p>
 
-                                <p className="mt-1 text-sm font-medium text-slate-200">
+                                <p className="mt-1.5 text-sm font-semibold text-slate-200">
                                     #{project.workspace.id}
                                 </p>
                             </div>
 
                             <div>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs font-medium text-slate-500">
                                     Members
                                 </p>
 
-                                <p className="mt-1 text-sm font-medium text-slate-200">
+                                <p className="mt-1.5 text-sm font-semibold text-slate-200">
                                     {projectMembers.length}
                                 </p>
                             </div>
 
                             <div>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs font-medium text-slate-500">
                                     Created
                                 </p>
 
-                                <p className="mt-1 text-sm font-medium text-slate-200">
+                                <p className="mt-1.5 text-sm font-semibold text-slate-200">
                                     {formatDateTime(
                                         project.created_at
                                     )}
@@ -780,11 +839,11 @@ export default function ProjectDetailPage() {
                             </div>
 
                             <div>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs font-medium text-slate-500">
                                     Last updated
                                 </p>
 
-                                <p className="mt-1 text-sm font-medium text-slate-200">
+                                <p className="mt-1.5 text-sm font-semibold text-slate-200">
                                     {formatDateTime(
                                         project.updated_at
                                     )}
@@ -792,11 +851,11 @@ export default function ProjectDetailPage() {
                             </div>
 
                             <div>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs font-medium text-slate-500">
                                     Workspace projects
                                 </p>
 
-                                <p className="mt-1 text-sm font-medium text-slate-200">
+                                <p className="mt-1.5 text-sm font-semibold text-slate-200">
                                     {project.workspace.projects_count}
                                 </p>
                             </div>
@@ -804,12 +863,24 @@ export default function ProjectDetailPage() {
                     </div>
 
                     <div className="rounded-2xl border border-slate-800 bg-[#111827] p-5 sm:p-6">
-                        <h2 className="text-lg font-semibold text-slate-100">
-                            Created By
-                        </h2>
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                <UserRound size={18} />
+                            </div>
 
-                        <div className="mt-5 flex items-center gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                            <div>
+                                <h2 className="text-lg font-semibold text-slate-100">
+                                    Created By
+                                </h2>
+
+                                <p className="mt-0.5 text-xs text-slate-500">
+                                    Project owner information
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex items-center gap-4">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-sm font-bold text-indigo-400">
                                 {project.created_by.profile_picture ? (
                                     <img
                                         src={`${MEDIA_URL}${project.created_by.profile_picture}`}
@@ -849,34 +920,38 @@ export default function ProjectDetailPage() {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <div className="flex items-center gap-2">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                    <Users size={17} />
+                                </div>
+
                                 <h2 className="text-lg font-semibold text-slate-100">
                                     Project Members
                                 </h2>
 
-                                <span className="rounded-md bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-400">
+                                <span className="rounded-md bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-400">
                                     {projectMembers.length}
                                 </span>
                             </div>
 
-                            <p className="mt-1 text-sm text-slate-500">
+                            <p className="mt-2 text-sm text-slate-500">
                                 {projectMembers.length} member
                                 {projectMembers.length === 1
                                     ? ""
-                                    : "s"}
+                                    : "s"} assigned to this project.
                             </p>
                         </div>
 
                         <button
                             type="button"
                             onClick={handleAddMember}
-                            className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                            className="inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-950/20 transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 sm:w-auto"
                         >
-                            <Plus size={17} />
+                            <UserPlus size={17} />
                             Add Member
                         </button>
                     </div>
 
-                    <div className="mt-5">
+                    <div className="mt-6">
                         {membersLoading ? (
                             <div className="flex items-center justify-center rounded-xl border border-slate-800 bg-[#0F172A] py-12">
                                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-indigo-500" />
@@ -889,7 +964,11 @@ export default function ProjectDetailPage() {
                             </div>
                         ) : projectMembers.length === 0 ? (
                             <div className="rounded-xl border border-dashed border-slate-800 bg-[#0F172A]/60 p-8 text-center">
-                                <p className="text-sm font-medium text-slate-400">
+                                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] text-slate-500">
+                                    <Users size={18} />
+                                </div>
+
+                                <p className="mt-4 text-sm font-semibold text-slate-400">
                                     No project members yet
                                 </p>
 
@@ -909,9 +988,9 @@ export default function ProjectDetailPage() {
                                     return (
                                         <div
                                             key={member.id}
-                                            className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700"
+                                            className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700 hover:bg-slate-800/40"
                                         >
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-bold text-indigo-400">
                                                 {user.profile_picture ? (
                                                     <img
                                                         src={`${MEDIA_URL}${user.profile_picture}`}
@@ -933,16 +1012,16 @@ export default function ProjectDetailPage() {
                                             </div>
 
                                             <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium text-slate-200">
+                                                <p className="truncate text-sm font-semibold text-slate-200">
                                                     {fullName ||
                                                         user.username}
                                                 </p>
 
-                                                <p className="truncate text-xs text-slate-500">
+                                                <p className="mt-0.5 truncate text-xs text-slate-500">
                                                     @{user.username}
                                                 </p>
 
-                                                <p className="truncate text-xs text-slate-600">
+                                                <p className="mt-0.5 truncate text-xs text-slate-600">
                                                     {user.email}
                                                 </p>
                                             </div>
@@ -957,16 +1036,22 @@ export default function ProjectDetailPage() {
 
             {showMembers && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm sm:px-6">
-                    <div className="flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] shadow-2xl">
+                    <div className="flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#111827] shadow-2xl shadow-black/40">
                         <div className="flex shrink-0 items-center justify-between border-b border-slate-800 p-5 sm:p-6">
-                            <div className="min-w-0">
-                                <h2 className="text-lg font-semibold text-slate-100">
-                                    Workspace Members
-                                </h2>
+                            <div className="flex min-w-0 items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                                    <UserPlus size={18} />
+                                </div>
 
-                                <p className="mt-1 text-sm text-slate-500">
-                                    Select a member to add to this project.
-                                </p>
+                                <div className="min-w-0">
+                                    <h2 className="text-lg font-semibold text-slate-100">
+                                        Add Project Member
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-slate-500">
+                                        Select a member from this workspace.
+                                    </p>
+                                </div>
                             </div>
 
                             <button
@@ -1027,10 +1112,10 @@ export default function ProjectDetailPage() {
                                             return (
                                                 <div
                                                     key={user.id}
-                                                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-4"
+                                                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-[#0F172A] p-4 transition hover:border-slate-700"
                                                 >
                                                     <div className="flex min-w-0 items-center gap-3">
-                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-semibold text-indigo-400">
+                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-indigo-500/10 text-xs font-bold text-indigo-400">
                                                             {user.profile_picture ? (
                                                                 <img
                                                                     src={`${MEDIA_URL}${user.profile_picture}`}
@@ -1055,7 +1140,7 @@ export default function ProjectDetailPage() {
                                                         </div>
 
                                                         <div className="min-w-0">
-                                                            <p className="truncate text-sm font-medium text-slate-200">
+                                                            <p className="truncate text-sm font-semibold text-slate-200">
                                                                 {fullName ||
                                                                     user.username}
                                                             </p>
