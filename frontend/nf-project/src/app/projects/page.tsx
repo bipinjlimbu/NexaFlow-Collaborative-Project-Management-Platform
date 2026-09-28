@@ -10,10 +10,12 @@ import {
     Calendar,
     CheckCircle2,
     Clock,
+    FolderKanban,
     LayoutList,
     MoreHorizontal,
     Plus,
     Search,
+    Users,
 } from "lucide-react";
 import { getProjects } from "@/services/projectService";
 import { getWorkspaces } from "@/services/workspaceService";
@@ -50,7 +52,11 @@ interface Project {
 
 const statusConfig: Record<
     ProjectStatus,
-    { color: string; bg: string; icon: any }
+    {
+        color: string;
+        bg: string;
+        icon: any;
+    }
 > = {
     Active: {
         color: "text-emerald-400",
@@ -243,13 +249,15 @@ export default function ProjectsPage() {
 
     const filteredProjects = useMemo(() => {
         return projects.filter((project) => {
+            const query = searchQuery.toLowerCase();
+
             const matchesSearch =
                 project.name
                     .toLowerCase()
-                    .includes(searchQuery.toLowerCase()) ||
+                    .includes(query) ||
                 project.description
                     .toLowerCase()
-                    .includes(searchQuery.toLowerCase());
+                    .includes(query);
 
             const matchesStatus =
                 statusFilter === "All" ||
@@ -309,31 +317,39 @@ export default function ProjectsPage() {
 
     return (
         <main className="min-h-screen bg-[#020617] text-slate-50 selection:bg-indigo-500 selection:text-white">
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] px-5 py-6 sm:px-7 sm:py-8 lg:px-8">
-                    <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-indigo-500/5 blur-3xl" />
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+                <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-[#0F172A] shadow-xl shadow-black/10">
+                    <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-indigo-500/5 blur-3xl" />
+                    <div className="absolute bottom-0 left-1/3 h-32 w-32 rounded-full bg-indigo-500/[0.03] blur-3xl" />
 
-                    <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                        <div className="max-w-2xl">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-400">
-                                <LayoutList size={13} />
-                                Project workspace
+                    <div className="relative flex flex-col gap-7 p-5 sm:p-7 lg:flex-row lg:items-center lg:justify-between lg:p-8">
+                        <div className="flex items-start gap-4">
+                            <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 sm:flex">
+                                <FolderKanban size={22} />
                             </div>
 
-                            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
-                                Projects
-                            </h1>
+                            <div>
+                                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-400">
+                                    <LayoutList size={13} />
+                                    Project workspace
+                                </div>
 
-                            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400 sm:text-base">
-                                Manage projects, monitor progress,
-                                and keep your workspace work organized.
-                            </p>
+                                <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+                                    Projects
+                                </h1>
+
+                                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
+                                    Manage your projects, track
+                                    progress, and keep your work
+                                    organized.
+                                </p>
+                            </div>
                         </div>
 
                         <button
                             type="button"
                             onClick={openCreatePanel}
-                            className="inline-flex h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-medium text-white transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-950/20 transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 sm:w-auto"
                         >
                             <Plus size={18} />
                             Create Project
@@ -341,9 +357,9 @@ export default function ProjectsPage() {
                     </div>
                 </section>
 
-                <section className="mt-6">
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                        <div className="flex min-h-11 flex-1 items-center rounded-xl border border-slate-800 bg-[#0F172A] px-4 transition focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20">
+                <section className="mt-6 rounded-2xl border border-slate-800 bg-[#0F172A] p-4 sm:p-5">
+                    <div className="flex flex-col gap-3 lg:flex-row">
+                        <div className="flex min-h-11 flex-1 items-center rounded-xl border border-slate-800 bg-[#020617] px-4 transition focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20">
                             <Search
                                 size={18}
                                 className="shrink-0 text-slate-500"
@@ -351,7 +367,7 @@ export default function ProjectsPage() {
 
                             <input
                                 type="text"
-                                placeholder="Search projects..."
+                                placeholder="Search by project name or description..."
                                 value={searchQuery}
                                 onChange={(e) =>
                                     setSearchQuery(
@@ -362,53 +378,70 @@ export default function ProjectsPage() {
                             />
                         </div>
 
-                        <select
-                            value={statusFilter}
-                            onChange={(e) =>
-                                setStatusFilter(e.target.value)
-                            }
-                            className="h-11 cursor-pointer rounded-xl border border-slate-800 bg-[#0F172A] px-4 text-sm text-slate-200 outline-none transition focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20"
-                        >
-                            <option value="All">
-                                All Statuses
-                            </option>
-                            <option value="Active">
-                                Active
-                            </option>
-                            <option value="Planning">
-                                Planning
-                            </option>
-                            <option value="In Review">
-                                In Review
-                            </option>
-                            <option value="Completed">
-                                Completed
-                            </option>
-                        </select>
+                        <div className="relative">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) =>
+                                    setStatusFilter(
+                                        e.target.value
+                                    )
+                                }
+                                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-slate-800 bg-[#020617] px-4 pr-10 text-sm font-medium text-slate-200 outline-none transition hover:border-slate-700 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 sm:w-48"
+                            >
+                                <option value="All">
+                                    All Statuses
+                                </option>
+                                <option value="Active">
+                                    Active
+                                </option>
+                                <option value="Planning">
+                                    Planning
+                                </option>
+                                <option value="In Review">
+                                    In Review
+                                </option>
+                                <option value="Completed">
+                                    Completed
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </section>
 
                 <section className="mt-8">
                     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h2 className="text-lg font-semibold text-slate-100">
-                                Your Projects
-                            </h2>
+                            <div className="flex items-center gap-2">
+                                <FolderKanban
+                                    size={18}
+                                    className="text-indigo-400"
+                                />
 
-                            <p className="mt-1 text-sm text-slate-400">
-                                Projects you are actively involved in.
+                                <h2 className="text-lg font-semibold text-slate-100">
+                                    Your Projects
+                                </h2>
+                            </div>
+
+                            <p className="mt-1 text-sm text-slate-500">
+                                Projects you are actively involved
+                                in.
                             </p>
                         </div>
 
-                        <span className="w-fit rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-slate-400">
-                            {filteredProjects.length} projects
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-1.5 text-xs font-medium text-slate-400">
+                                {filteredProjects.length}{" "}
+                                {filteredProjects.length === 1
+                                    ? "project"
+                                    : "projects"}
+                            </span>
+                        </div>
                     </div>
 
                     {filteredProjects.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/50 px-6 py-16 text-center">
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800 bg-[#111827] text-slate-500">
-                                <Search size={22} />
+                        <div className="rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/60 px-6 py-16 text-center">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-800 bg-[#111827] text-slate-500">
+                                <Search size={24} />
                             </div>
 
                             <h3 className="mt-5 text-base font-semibold text-slate-200">
@@ -416,14 +449,14 @@ export default function ProjectsPage() {
                             </h3>
 
                             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                                Try a different search or status filter,
+                                Try another search or status filter,
                                 or create a new project.
                             </p>
 
                             <button
                                 type="button"
                                 onClick={openCreatePanel}
-                                className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-medium text-white transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                className="mt-6 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 text-sm font-semibold text-white transition hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                             >
                                 <Plus size={16} />
                                 Create Project
@@ -438,18 +471,19 @@ export default function ProjectsPage() {
                                     ].icon;
 
                                 return (
-                                    <div
+                                    <article
                                         key={project.id}
-                                        className="group flex min-h-[320px] flex-col justify-between rounded-2xl border border-slate-800 bg-[#111827] p-5 transition duration-200 hover:border-slate-700 hover:bg-[#151d2d]"
+                                        className="group flex min-h-[345px] flex-col rounded-2xl border border-slate-800 bg-[#111827] p-5 transition duration-200 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-[#151d2d] hover:shadow-xl hover:shadow-black/10"
                                     >
                                         <div>
                                             <div className="flex items-start justify-between gap-4">
-                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-semibold text-indigo-400">
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-sm font-bold tracking-wide text-indigo-400">
                                                     {project.initials}
                                                 </div>
 
                                                 <button
                                                     type="button"
+                                                    aria-label={`More options for ${project.name}`}
                                                     className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-slate-200"
                                                 >
                                                     <MoreHorizontal
@@ -459,15 +493,15 @@ export default function ProjectsPage() {
                                             </div>
 
                                             <div className="mt-5">
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <h3 className="min-w-0 flex-1 truncate text-base font-semibold text-slate-100 group-hover:text-white">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <h3 className="min-w-0 flex-1 truncate text-base font-semibold text-slate-100 transition group-hover:text-white">
                                                         {
                                                             project.name
                                                         }
                                                     </h3>
 
                                                     <span
-                                                        className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium ${statusConfig[project.status].bg} ${statusConfig[project.status].color}`}
+                                                        className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusConfig[project.status].bg} ${statusConfig[project.status].color}`}
                                                     >
                                                         <StatusIcon
                                                             size={10}
@@ -483,10 +517,22 @@ export default function ProjectsPage() {
                                                         project.description
                                                     }
                                                 </p>
+
+                                                <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                                                    <FolderKanban
+                                                        size={13}
+                                                        className="text-slate-600"
+                                                    />
+                                                    <span className="truncate">
+                                                        {
+                                                            project.workspace
+                                                        }
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="mt-6">
+                                        <div className="mt-auto pt-6">
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-3">
                                                     <div className="flex items-center gap-2">
@@ -541,6 +587,34 @@ export default function ProjectsPage() {
                                                 </div>
                                             </div>
 
+                                            <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-800/80 bg-[#0F172A]/60 px-3 py-2.5">
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    <Calendar
+                                                        size={14}
+                                                        className="shrink-0 text-slate-500"
+                                                    />
+
+                                                    <span className="text-xs text-slate-500">
+                                                        Due
+                                                    </span>
+
+                                                    <span className="truncate text-xs font-medium text-slate-300">
+                                                        {
+                                                            project.dueDate
+                                                        }
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex shrink-0 items-center gap-1.5 text-xs text-slate-500">
+                                                    <Users
+                                                        size={13}
+                                                    />
+                                                    {
+                                                        project.members
+                                                    }
+                                                </div>
+                                            </div>
+
                                             <button
                                                 type="button"
                                                 onClick={() =>
@@ -548,7 +622,7 @@ export default function ProjectsPage() {
                                                         `/projects/${project.id}`
                                                     )
                                                 }
-                                                className="mt-4 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-[#0F172A] text-sm font-medium text-slate-300 transition hover:border-indigo-500/40 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                                                className="mt-4 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-800 bg-[#0F172A] text-sm font-semibold text-slate-300 transition hover:border-indigo-500/40 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                                             >
                                                 Open Project
                                                 <ArrowRight
@@ -557,17 +631,17 @@ export default function ProjectsPage() {
                                                 />
                                             </button>
                                         </div>
-                                    </div>
+                                    </article>
                                 );
                             })}
 
                             <button
                                 type="button"
                                 onClick={openCreatePanel}
-                                className="group flex min-h-[320px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/40 p-6 text-center transition duration-200 hover:border-indigo-500/40 hover:bg-[#0F172A]"
+                                className="group flex min-h-[345px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-[#0F172A]/40 p-6 text-center transition duration-200 hover:border-indigo-500/40 hover:bg-[#0F172A]"
                             >
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] text-slate-500 transition group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
-                                    <Plus size={20} />
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-800 bg-[#111827] text-slate-500 transition group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 group-hover:text-indigo-400">
+                                    <Plus size={21} />
                                 </div>
 
                                 <h3 className="mt-4 text-sm font-semibold text-slate-200 group-hover:text-white">
